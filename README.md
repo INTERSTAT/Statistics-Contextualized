@@ -6,4 +6,5 @@ One objective of the [Interstat](https://cef-interstat.eu/) project is to facili
 
 The following pages give more information:
 
-* Chosing a [test case](test-case.md)
+* Choosing a [test case](test-case.md)
+* [Resources and references](references.md)
