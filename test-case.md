@@ -32,7 +32,7 @@ Linking air quality indicators and demographic data could allow decision makers 
 * the resident population living in areas where air pollutants exceed air quality thresholds;
 * the assessment of the effectsof air pollution on vulnerable population groups.
 
-More information on the SEP pilot can be found [here](tes-case-sep.md).
+More information on the SEP pilot can be found [here](test-case-sep.md).
 
 ## Other data
 
