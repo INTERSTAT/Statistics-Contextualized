@@ -12,7 +12,6 @@
 
 * [ETSI page](https://www.etsi.org/committee/1422-cim) on context information management
 * [NGSI-LD specification](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.04.02_60/gs_CIM009v010402p.pdf) (V1.4.2, April 2021)
-The core specification for the Context Broker is NGSI-LD, an ETSI standard which is also the de facto standard for context information (IoT, Smart Cities, etc.). NGSI-LD is mainly an  information model combined with an API. The specification is available from https://www.etsi.org/committee/1422-cim, the latest version (last April) is V1.4.2, directly accessible at  https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.04.02_60/gs_CIM009v010402p.pdf. The information model consists in a simple cross-domain ontology which is based on a core metamodel (actually the "property graph" model) which is itself expressed as RDF/RDFS (see figure aattached). Domain-specific models can be built on these foundations. There is actually a very nice ecosystem for building these domain-specific models: see https://smartdatamodels.org/, https://github.com/smart-data-models and the recording of a recent webinar at https://www.youtube.com/watch?v=26i-DZVBgh8, especially the parts on data models and performance.
 
 ## Smart data models
 
