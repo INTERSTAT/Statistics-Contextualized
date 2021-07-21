@@ -32,6 +32,8 @@ Linking air quality indicators and demographic data could allow decision makers 
 * the resident population living in areas where air pollutants exceed air quality thresholds;
 * the assessment of the effectsof air pollution on vulnerable population groups.
 
+More information on the SEP pilot can be found [here](tes-case-sep.md).
+
 ## Other data
 
 The SEP pilot involves sensor data, a specific kind of data for which interoperability with statistitical data might be interesting. If SEP is not chosen for the main test case, a specific study of the interoperability of NGSI-LD and the [Semantic Sensor Network Ontology](https://www.w3.org/TR/vocab-ssn/) remains useful.
