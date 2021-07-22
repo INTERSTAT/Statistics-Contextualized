@@ -35,6 +35,12 @@ Air quality data is available from the European Environment Agency (EEA) at the 
 
 The code lists used in the data are documented in the [Eionet](https://www.eionet.europa.eu/) [Data Dictionary](https://dd.eionet.europa.eu/). They are available in SKOS form, with additional information. For example the [AQD - Air Quality Pollutants](http://dd.eionet.europa.eu/vocabulary/aq/pollutant/) scheme contains also data on recommended unit or measurement equipment for the pollutant. Most URIs are dereferenceable, at least in a browser.
 
+In DDI-CDI terms, air quality data from the AIDE F flow would be naturally represented as a "Wide" data structure.
 
-In DDI-CDI term, air quality data from the AIDE F flow would be naturally represented as a "Wide" data structure
+### Census data
 
+The SEP pilot plans to combine air quality data with demographic data from the French and Italian censuses. The precise choice of census data has to be agreed upon within the Interstat project, but it is likely that data whose metadata are defined by [European legislation](https://ec.europa.eu/eurostat/fr/web/population-demography/population-housing-censuses/legislation) will be selected in order to minimize interoperability questions and ensure reproductibility at the European level. The [explanatory notes](https://ec.europa.eu/eurostat/en/web/products-manuals-and-guidelines/-/ks-gq-18-010) for the 2021 census round give details on this subject. In particular, they present a new feature of the 2021 round: the dissemination of population data at the 1 km² grid level, for which Eurostat will provide Inspire metadata and which will be particularly interesting to combine with air quality data.
+
+For testing purposes, it is easier to start with simple data, for example the breakdown of population by age range, sex and municipality.
+
+In DDI-CDI terms, census data corresponds to a "Dimensional" (actually "Cube") data structure.
