@@ -1,0 +1,75 @@
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix qb:    <http://purl.org/linked-data/cube#> .
+@prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix isc: <http://id.cef-interstat.eu/sc/> .
+
+
+##################################################################################
+#             Data Structure Definitions for the Interstat SEP pilot             #
+##################################################################################
+
+# This DSD will be used for the DDI-CDI/NGSI-LD interoperability test 
+# It is a simple municipalitiy x sex x age group 3 dimensional cube
+
+isc:dsd1
+    a             qb:DataStructureDefinition ;
+    rdfs:label    "Population by sex, age and local administrative unit"@en , "Population par sexe, âge et unité administrative locale"@fr ;
+    qb:component  [ a                       qb:ComponentSpecification ;
+                    qb:attribute            sdmx-attribute:unitMeasure ;
+                    qb:componentAttachment  qb:DataSet
+                  ] ;
+    qb:component  [ a                       qb:ComponentSpecification ;
+                    qb:attribute            isc:att-nuts3 ;
+                    qb:componentAttachment  qb:Observation
+                  ] ;
+    qb:component  [ a             qb:ComponentSpecification ;
+                    qb:dimension  isc:dim-age
+                  ] ;
+    qb:component  [ a             qb:ComponentSpecification ;
+                    qb:dimension  isc:dim-sex
+                   ] ;
+    qb:component  [ a             qb:ComponentSpecification ;
+                    qb:dimension  isc:dim-lau
+                   ] ;
+    qb:component  [ a             qb:ComponentSpecification ;
+                    qb:measure    sdmx-measure:obsValue
+                   ] .
+
+
+##############
+# Components #
+##############
+
+# Age dimension
+isc:dim-age
+    a             qb:CodedProperty , qb:DimensionProperty ;
+    rdfs:label    "Five-year age group"@en , "Âge quinquennal"@fr ;
+    rdfs:range    isc:age-m ;
+    qb:codeList   isc:cl-age-m ;
+    qb:concept    sdmx-concept:age .
+
+# Sex dimension
+isc:dim-sex
+    a             qb:CodedProperty , qb:DimensionProperty ;
+    rdfs:label    "Sex"@en , "Sexe"@fr ;
+    rdfs:range    isc:sex ;
+    qb:codeList   isc:cl-sex ;
+    qb:concept    sdmx-concept:sex .
+
+# LAU dimension
+isc:dim-lau
+    a             qb:CodedProperty , qb:DimensionProperty ;
+	rdfs:label    "Local Administrative Unit"@en , "Unité Administrative Locale"@fr ;
+	rdfs:range    isc:lau ;
+    qb:codeList   isc:cl-lau ;
+	qb:concept    sdmx-concept:refArea .
+
+# NUTS3 attribute
+isc:att-nuts3
+    a             qb:CodedProperty , qb:AttributeProperty ;
+	rdfs:label   "NUTS 3"@en , "NUTS 3"@fr ;
+	rdfs:range   isc:nuts3 ;
+	qb:codeList  isc:cl-nuts3 ;
+	qb:concept   sdmx-concept:refArea .
