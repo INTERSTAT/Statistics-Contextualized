@@ -14,6 +14,8 @@ The URIs of the ressources will be taken in the `http://id.cef-interstat.eu/sc/`
 
 This data cube will have 3 dimensions: sex, age groups and [LAU](https://ec.europa.eu/eurostat/web/nuts/local-administrative-units) (corresponding to communes in France and comuni in Italy), considered as a geographic dimension.
 
+The construction of the DSD is detailed below; the complete DSD is available as a [Turtle file](sep-dsd-1.ttl).
+
 ### Dimensions
 
 Three components are attached to the DSD to represent the three cube dimensions.
@@ -45,10 +47,10 @@ For the geographic dimension, the relevant code list is GEO.H, which corresponds
 ```
 <http://id.cef-interstat.eu/sc/dim-lau>
     a             qb:CodedProperty , qb:DimensionProperty ;
-	rdfs:label    "Local Administrative Unit"@en , "Unité Administrative Locale"@fr ;
-	rdfs:range    <http://id.cef-interstat.eu/sc/lau> ;
+    rdfs:label    "Local Administrative Unit"@en , "Unité Administrative Locale"@fr ;
+    rdfs:range    <http://id.cef-interstat.eu/sc/lau> ;
     qb:codeList   <http://id.cef-interstat.eu/sc/cl-lau> ;
-	qb:concept    sdmx-concept:refArea .
+    qb:concept    sdmx-concept:refArea .
 ```
 
 ### Attributes and measure
@@ -60,10 +62,10 @@ We can also define attributes to represent geographic levels above the LAU in or
 ```
 <http://id.cef-interstat.eu/sc/att-nuts3>
     a             qb:CodedProperty , qb:AttributeProperty ;
-	rdfs:label   "NUTS 3"@en , "NUTS 3"@fr ;
-	rdfs:range   <http://id.cef-interstat.eu/sc/nuts3> ;
-	qb:codeList  <http://id.cef-interstat.eu/sc/cl-nuts3> ;
-	qb:concept   sdmx-concept:refArea .
+    rdfs:label   "NUTS 3"@en , "NUTS 3"@fr ;
+    rdfs:range   <http://id.cef-interstat.eu/sc/nuts3> ;
+    qb:codeList  <http://id.cef-interstat.eu/sc/cl-nuts3> ;
+    qb:concept   sdmx-concept:refArea .
 ```
 
 Finally, for the measure we can use the base SDMX OBS_VALUE concept.

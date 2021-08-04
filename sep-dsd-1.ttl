@@ -3,6 +3,7 @@
 @prefix qb:    <http://purl.org/linked-data/cube#> .
 @prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
 @prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix sdmx-measure:    <http://purl.org/linked-data/sdmx/2009/measure#> .
 @prefix isc: <http://id.cef-interstat.eu/sc/> .
 
 
@@ -61,15 +62,15 @@ isc:dim-sex
 # LAU dimension
 isc:dim-lau
     a             qb:CodedProperty , qb:DimensionProperty ;
-	rdfs:label    "Local Administrative Unit"@en , "Unité Administrative Locale"@fr ;
-	rdfs:range    isc:lau ;
+    rdfs:label    "Local Administrative Unit"@en , "Unité Administrative Locale"@fr ;
+    rdfs:range    isc:lau ;
     qb:codeList   isc:cl-lau ;
-	qb:concept    sdmx-concept:refArea .
+    qb:concept    sdmx-concept:refArea .
 
 # NUTS3 attribute
 isc:att-nuts3
     a             qb:CodedProperty , qb:AttributeProperty ;
-	rdfs:label   "NUTS 3"@en , "NUTS 3"@fr ;
-	rdfs:range   isc:nuts3 ;
-	qb:codeList  isc:cl-nuts3 ;
-	qb:concept   sdmx-concept:refArea .
+    rdfs:label   "NUTS 3"@en , "NUTS 3"@fr ;
+    rdfs:range   isc:nuts3 ;
+    qb:codeList  isc:cl-nuts3 ;
+    qb:concept   sdmx-concept:refArea .

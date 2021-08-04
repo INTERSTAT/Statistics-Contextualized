@@ -43,4 +43,4 @@ The SEP pilot plans to combine air quality data with demographic data from the F
 
 For testing purposes, it is easier to start with simple data, for example the breakdown of population by age range, sex and municipality.
 
-In DDI-CDI terms, census data corresponds to a "Dimensional" (actually "Cube") data structure.
+In DDI-CDI terms, census data corresponds to a "Dimensional" (actually "Cube") data structure. The definition of this data structure according to the SDMX model is described [here](sep-dsd.md).
