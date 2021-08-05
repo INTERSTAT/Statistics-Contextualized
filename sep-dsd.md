@@ -4,7 +4,7 @@
 
 The DDI-CDI/NGSI-LD [interoperability test](https://github.com/FranckCo/Statistics-Contextualized/blob/main/test-case-sep.md) uses data on air quality and census data. For the census data, we will use simple cubes defined using the SDMX data model and built on the harmonized definitions specified in the European legislation, precisely documented in the EU legislation on the 2021 population and housing censuses [explanatory notes](https://ec.europa.eu/eurostat/documents/3859598/9670557/KS-GQ-18-010-EN-N.pdf/c3df7fcb-f134-4398-94c8-4be0b7ec0494?t=1552653277000).
 
-In order to minimize technical interoperability questions, we will directly express data and metadata as linked data using the W3C [Data Cube](https://www.w3.org/TR/vocab-data-cube/) Recommendation and the [SDMX Content-Oriented Guidelines](https://sdmx.org/?page_id=4345) [components translated in RDF](https://github.com/UKGovLD/publishing-statistical-data/tree/master/specs/src/main/vocab) by the UK Government Linked Data Working Group.
+In order to minimize technical interoperability questions, we will directly express data and metadata as linked data using the W3C [Data Cube](https://www.w3.org/TR/vocab-data-cube/) Recommendation and the [SDMX Content-Oriented Guidelines](https://sdmx.org/?page_id=4345) components [translated in RDF](https://github.com/UKGovLD/publishing-statistical-data/tree/master/specs/src/main/vocab) by the UK Government Linked Data Working Group.
 
 The URIs of the ressources will be taken in the `http://id.cef-interstat.eu/sc/` namespace (where 'sc' stands for 'statistics contextualized').
 
@@ -68,7 +68,7 @@ We can also define attributes to represent geographic levels above the LAU in or
     qb:concept   sdmx-concept:refArea .
 ```
 
-Finally, for the measure we can use the base SDMX OBS_VALUE concept.
+Finally, for the measure, we can use the base SDMX OBS_VALUE concept.
 
 ### Data Structure Definition
 
@@ -98,4 +98,33 @@ Adding the component specifications for the dimensions, attributes and measure t
     qb:component  [ a             qb:ComponentSpecification ;
                     qb:measure  sdmx-measure:obsValue
                    ] .
+```
+
+### Dataset
+
+With the previous specifications, the data set could be expressed as follows (observation values are fictitious):
+
+```
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix qb:    <http://purl.org/linked-data/cube#> .
+@prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix sdmx-measure:    <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix isc: <http://id.cef-interstat.eu/sc/> .
+
+isc:ds1 a qb:DataSet ;
+    qb:structure isc:dsd1 ;
+    rdfs:label "Population 15 and over by sex, age and activity status"@en , "Population de 15 ans ou plus par sexe, âge et type d'activité"@fr ;
+    sdmx-concept:unitMeasure <urn:sdmx:org.sdmx.infomodel.codelist.Code=ESTAT:CL_UNIT(1.2).PS> .
+
+isc:obs-Y15-19-1-01001 a qb:Observation ;
+    qb:dataSet isc:ds1 ;
+    isc:dim-age isc:age-Y15-19;
+    isc:dim-sex isc:sex-1 ;
+    isc:dim-lau isc:lau-01001 ;
+	isc:att-nuts3 isc:nuts3-FRK21 ;
+    sdmx-measure:obsValue "116.3"^^xsd:float .
+
+...
 ```
