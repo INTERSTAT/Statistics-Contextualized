@@ -53,6 +53,8 @@ For the geographic dimension, the relevant code list is GEO.H, which corresponds
     qb:concept    sdmx-concept:refArea .
 ```
 
+The complete list of LAUs is available from the [Eurostat web site](https://ec.europa.eu/eurostat/en/web/nuts/local-administrative-units).
+
 ### Attributes and measure
 
 An attribute, corresponding to the SDMX UNIT_MEASURE concept, can be attached to the Data Structure Definition (DSD) in order to specify that population counts are expressed in number of persons. To express the value of the attribute, we can use the "Persons" value in the [Eurostat SDMX CL_UNIT](https://registry.sdmx.org/ws/public/sdmxapi/rest/codelist/ESTAT/CL_UNIT/1.2) code list, which has `urn:sdmx:org.sdmx.infomodel.codelist.Code=ESTAT:CL_UNIT(1.2).PS` for URI.
