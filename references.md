@@ -29,9 +29,8 @@
 
 ### Contributing new data models
 
-* [Draft a model](https://smartdatamodels.org/index.php/draft-a-data-model/)
+* [Draft a model](https://smartdatamodels.org/index.php/draft-a-data-model/) without knowledge of JSON schema
 * [Presentation for contributors](https://docs.google.com/presentation/d/e/2PACX-1vTs-Ng5dIAwkg91oTTUdt8ua7woBXhPnwavZ0FxgR8BsAI_Ek3C5q97Nd94HS8KhP-r_quD4H0fgyt3/pub?start=false&loop=false&delayms=3000#slide=id.p1) 
 * [Contribution API](https://smartdatamodels.org/index.php/data-models-contribution-api/)
 * [Validate a payload against a schema](https://smartdatamodels.org/index.php/check-a-schema-validates-a-payload/)
-* [Create data model from a spreadsheet](https://smartdatamodels.org/index.php/create-data-model-from-your-google-spreadsheet/) without knowledge of JSON schema
 * [Root for incubated datamodels](https://github.com/smart-data-models/incubated/tree/master)
