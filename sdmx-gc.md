@@ -4,7 +4,7 @@
 
 The [8th SDMX Global Conference](https://en.www.inegi.org.mx/eventos/2021/sdmx/) will be held virtually during September 27–30, 2021, with the theme “Data without Barriers”. The INTERSTAT project submitted an abstract, which was accepted. The text of the submission is reproduced below.
 
-According to the preliminary program communicated by the Organizing Committee, the talk will take place during Session V: “Using SDMX to Modernize Statistical Processes and IT Infrastructure”, in Breakout Room 2, on September 29 from 12:30 to 12:45 CEST (19:30 - 19:45 CEST). Slides must be provided by Friday, August 27, and participants must register for the conference at https://www.cvent.com/d/1jqy10.
+According to the preliminary program communicated by the Organizing Committee, the talk will take place during Session V: “Using SDMX to Modernize Statistical Processes and IT Infrastructure”, in Breakout Room 2, on September 29 from 12:30 to 12:45 Central Time (19:30 - 19:45 CEST). Slides must be provided by Friday, August 27, and participants must register for the conference at https://www.cvent.com/d/1jqy10.
 
 ## Presentation outline
 

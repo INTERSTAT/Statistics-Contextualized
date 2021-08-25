@@ -107,12 +107,12 @@ Adding the component specifications for the dimensions, attributes and measure t
 With the previous specifications, the data set could be expressed as follows (observation values are fictitious):
 
 ```
-@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix qb:    <http://purl.org/linked-data/cube#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
 @prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
-@prefix sdmx-measure:    <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> .
 @prefix isc: <http://id.cef-interstat.eu/sc/> .
 
 isc:ds1 a qb:DataSet ;
