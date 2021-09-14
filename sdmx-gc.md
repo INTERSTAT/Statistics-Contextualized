@@ -35,7 +35,7 @@ The core specification for the Context Broker is NGSI-LD [3], an ETSI standard w
 
 In order to disseminate statistical information through the Context Broker, it is necessary to map statistical business information models to NGSI-LD. The INTERSTAT project is studying how to achieve this objective: in particular mapping the SDMX information model, the VTL data model, other foundational data, or metadata models used in the statistical community, creating a “bridge” with NGSI-LD. The final outcomes of this activity will be, not only cross-standard data models, but also a concrete software tool that implements this bridge capability.
 
-The INTERSTAT project includes three pilots that will allow to experiment and validated the results of this activity.
+The INTERSTAT project includes three pilots that will allow to experiment and validate the results of this activity.
 
 References:
 
