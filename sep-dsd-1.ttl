@@ -240,7 +240,7 @@ isc:age-Y_GE100
 	a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
-    skos:notation      "Y95-99" ;
+    skos:notation      "Y_GE100" ;
     skos:prefLabel     "100 years and over"@en , "100 ans et plus"@fr .
 
 
