@@ -1,0 +1,61 @@
+{
+  "@context":"http://www.w3.org/ns/csvw",
+  "tables":[
+   {
+     "url":"census-sample.csv",
+     "dc:title":"Population 15 and over by sex, age and activity status",
+     "dc:description":"Data from the Census for France and Italy",
+     "dc:creator":"Interstat",
+     "tableSchema":{
+      "columns":[
+        {
+         "titles":"age",
+         "dc:description":"Five-year age group"
+        },
+        {
+         "titles":"sex",
+         "dc:description":"Sex",
+         "datatype":{
+           "base":"string",
+           "format":"1|2"
+         }
+        },
+        {
+         "titles":"lau",
+         "dc:description":"Local Administrative Unit"
+        },
+        {
+         "titles":"nuts3",
+         "dc:description":"NUTS 3"
+        },
+        {
+         "titles":"population",
+         "dc:description":"Population",
+         "datatype":"float"
+        }
+      ],
+      "foreignKeys":[
+        {
+         "columnReference":"age-group",
+         "reference":{
+           "resource":"age-groups.csv",
+           "columnReference":"group"
+         }
+        }
+      ],
+	  "primaryKey": ["age", "sex", "lau"]
+     }
+   },
+   {
+     "url":"age-groups.csv",
+     "tableSchema":{
+      "columns":[
+        {
+         "name":"group",
+         "titles":"group"
+        }
+      ]
+     }
+   }
+  ]
+}
