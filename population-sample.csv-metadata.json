@@ -10,8 +10,12 @@
         {
           "columns": [
             {
-              "titles": "age",
-              "dc:description": "Five-year age group"
+              "titles": "lau",
+              "dc:description": "Local Administrative Unit"
+            },
+            {
+              "titles": "nuts3",
+              "dc:description": "NUTS 3"
             },
             {
               "titles": "sex",
@@ -23,12 +27,8 @@
                 }
             },
             {
-              "titles": "lau",
-              "dc:description": "Local Administrative Unit"
-            },
-            {
-              "titles": "nuts3",
-              "dc:description": "NUTS 3"
+              "titles": "age",
+              "dc:description": "Five-year age group"
             },
             {
               "titles": "population",
@@ -81,6 +81,8 @@
     },
     {
       "url":"nuts3.csv",
+      "dc:title": "NUTS 3",
+      "dc:description": "Nomenclature of Territorial Units for Statistics, level 3",
       "tableSchema":
         {
           "columns": [
