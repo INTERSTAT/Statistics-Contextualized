@@ -17,7 +17,7 @@
               "titles": "sex",
               "dc:description": "Sex",
               "datatype":
-    		    {
+                {
                   "base": "string",
                   "format": "1|2"
                 }
@@ -40,7 +40,7 @@
             {
               "columnReference": "age",
               "reference":
-        	    {
+                {
                   "resource": "age-groups.csv",
                   "columnReference": "group"
                 }
@@ -48,19 +48,19 @@
             {
               "columnReference": "nuts3",
               "reference":
-		        {
+                {
                   "resource": "nuts3.csv",
                   "columnReference": "nuts3"
                 }
             }
           ],
-	      "primaryKey": ["age", "sex", "lau"]
+          "primaryKey": ["age", "sex", "lau"]
         }
     },
     {
       "url": "age-groups.csv",
       "dc:title": "Age groups",
-	  "dc:description": "5-year age groups, as per the second level of CL_AGE/SEX.M",
+      "dc:description": "5-year age groups, as per the second level of CL_AGE/SEX.M",
       "tableSchema":
         {
           "columns": [
