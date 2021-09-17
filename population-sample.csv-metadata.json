@@ -1,61 +1,105 @@
 {
   "@context":"http://www.w3.org/ns/csvw",
-  "tables":[
-   {
-     "url":"census-sample.csv",
-     "dc:title":"Population 15 and over by sex, age and activity status",
-     "dc:description":"Data from the Census for France and Italy",
-     "dc:creator":"Interstat",
-     "tableSchema":{
-      "columns":[
+  "tables": [
+    {
+      "url": "census-sample.csv",
+      "dc:title": "Population by sex, age and activity status",
+      "dc:description": "Data from the Census for France and Italy",
+      "dc:creator": "Interstat",
+      "tableSchema":
         {
-         "titles":"age",
-         "dc:description":"Five-year age group"
-        },
-        {
-         "titles":"sex",
-         "dc:description":"Sex",
-         "datatype":{
-           "base":"string",
-           "format":"1|2"
-         }
-        },
-        {
-         "titles":"lau",
-         "dc:description":"Local Administrative Unit"
-        },
-        {
-         "titles":"nuts3",
-         "dc:description":"NUTS 3"
-        },
-        {
-         "titles":"population",
-         "dc:description":"Population",
-         "datatype":"float"
+          "columns": [
+            {
+              "titles": "lau",
+              "dc:description": "Local Administrative Unit"
+            },
+            {
+              "titles": "nuts3",
+              "dc:description": "NUTS 3"
+            },
+            {
+              "titles": "sex",
+              "dc:description": "Sex",
+              "datatype":
+                {
+                  "base": "string",
+                  "format": "1|2"
+                }
+            },
+            {
+              "titles": "age",
+              "dc:description": "Five-year age group"
+            },
+            {
+              "titles": "population",
+              "dc:description": "Population",
+              "datatype": "float"
+            }
+          ],
+          "foreignKeys": [
+            {
+              "columnReference": "age",
+              "reference":
+                {
+                  "resource": "age-groups.csv",
+                  "columnReference": "group"
+                }
+            },
+            {
+              "columnReference": "nuts3",
+              "reference":
+                {
+                  "resource": "nuts3.csv",
+                  "columnReference": "nuts3"
+                }
+            }
+          ],
+          "primaryKey": ["age", "sex", "lau"]
         }
-      ],
-      "foreignKeys":[
+    },
+    {
+      "url": "age-groups.csv",
+      "dc:title": "Age groups",
+      "dc:description": "5-year age groups, as per the second level of CL_AGE/SEX.M",
+      "tableSchema":
         {
-         "columnReference":"age-group",
-         "reference":{
-           "resource":"age-groups.csv",
-           "columnReference":"group"
-         }
+          "columns": [
+            {
+              "name": "group",
+              "titles": "group"
+            },
+            {
+              "titles": "label_en",
+              "dc:description": "English label"
+            },
+            {
+              "titles": "label_fr",
+              "dc:description":"French label"
+            }
+          ]
         }
-      ],
-	  "primaryKey": ["age", "sex", "lau"]
-     }
-   },
-   {
-     "url":"age-groups.csv",
-     "tableSchema":{
-      "columns":[
+    },
+    {
+      "url":"nuts3.csv",
+      "dc:title": "NUTS 3",
+      "dc:description": "Nomenclature of Territorial Units for Statistics, level 3",
+      "tableSchema":
         {
-         "name":"group",
-         "titles":"group"
+          "columns": [
+            {
+              "name": "departement",
+              "titles": "departement"
+            },
+            {
+              "titles": "nuts3",
+              "dc:description": "nuts3"
+            },
+            {
+              "titles": "label",
+              "dc:description": "label"
+             }
+          ]
         }
-      ]
-     }
-   }
+    }
   ]
 }
