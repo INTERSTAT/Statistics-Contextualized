@@ -8,7 +8,7 @@ resp <- httr::GET(target_url)
 
 writeBin(resp$content, "bpe.zip")
 
-df_bpe <- readr::read_csv2("bpe.zip")
+df_bpe <- readr::read_csv2(unz("bpe.zip", filename = "bpe20_sport_loisir_xy.csv"))
 
 df_bpe_select <- df_bpe %>%
   select(AN, COUVERT, DEPCOM, ECLAIRE, LAMBERT_X, LAMBERT_Y, NBSALLES, QUALITE_XY, TYPEQU)
