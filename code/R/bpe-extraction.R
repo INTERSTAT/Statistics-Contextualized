@@ -10,7 +10,7 @@ library(readr)
 
 # URL of the archive, and name of the data file inside the archive
 target_url <- "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip"
-file_name <- "bpe20_sport_loisir_xy.csv")
+file_name <- "bpe20_sport_loisir_xy.csv"
 
 # Get the archive and save it locally
 resp <- httr::GET(target_url)
