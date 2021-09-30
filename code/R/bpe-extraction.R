@@ -25,3 +25,6 @@ df_bpe_select <- df_bpe %>%
 
 # Write the extract in a local CSV file
 readr::write_csv2(df_bpe_select, "bpe_select.csv")
+
+# TODO Extract from the variable documentation (varmod_bpe20_sport_loisir_xy.csv file in the same archive)
+# the lines corresponding to the selected variables (i.e. starting with the variable name)
