@@ -1,0 +1,51 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
+@prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix isc: <http://id.cef-interstat.eu/sc/> .
+@prefix cdi: <http://my.cdi.namespa.ce/> .
+@prefix : <http://example.org/> .
+@prefix NUTS: <http://data.europa.eu/nuts/scheme/2016/> .
+
+
+
+:cube1 a cdi:CubeDataStructure ;
+cdi:has :age , :lau , :sex , :observation , :NUTS3 , :unit
+.
+
+:age a cdi:DimensionComponent .
+
+:lau a cdi:DimensionComponent .
+
+:sex a cdi:DimensionComponent .
+
+:observation a cdi:MeasureComponent , cdi:QualifiedMeasure .
+
+:NUTS3 a cdi:AttributeComponent .
+
+:NUTS3Scope a cdi:ScopedMeasure ;
+cdi:isDefinedBy :NUTS3 ;
+cdi:restricts :observation ;
+.
+
+:unit a cdi:AttributeComponent .
+
+
+:kvs a cdi:KeyValueStructure ;
+cdi:has (:age  :lau  :sex) .
+
+
+
+:dds1 a cdi:DimensionalDataset ;
+cdi:isStructuredBy :cube1 ;
+.
+
+:unitScope a [] ;
+cdi:isDefinedBy :unit ;
+cdi:restricts :dds1 ;
+.
