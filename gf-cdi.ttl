@@ -1,0 +1,335 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix dc:  <http://purl.org/dc/elements/1.1/#>.
+@prefix cdi: <http://www.cdi_namespace.org/terms/>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix : <http://some.example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+
+
+:A a cdi:Concept ;
+cdi:displayLabel "Facility";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":A"^^xsd:anyURI ;.
+
+:B a cdi:Concept ;
+cdi:displayLabel "Type of Facility";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":B"^^xsd:anyURI ;.
+
+:C a cdi:Concept ;
+cdi:displayLabel "Year";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":C"^^xsd:anyURI ;.
+
+:D a cdi:Concept ;
+cdi:displayLabel "Covered";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":D"^^xsd:anyURI ;.
+
+:E a cdi:Concept ;
+cdi:displayLabel "Lit";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":E"^^xsd:anyURI ;.
+
+:F a cdi:Concept ;
+cdi:displayLabel "Lambert X";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":F"^^xsd:anyURI ;.
+
+:G a cdi:Concept ;
+cdi:displayLabel "Lambert Y";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":G"^^xsd:anyURI ;.
+
+:H a cdi:Concept ;
+cdi:displayLabel "Number of rooms";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":H"^^xsd:anyURI ;.
+
+
+:I a cdi:Concept ;
+cdi:displayLabel "Number of playing fields/courts";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":I"^^xsd:anyURI ;.
+
+:J a cdi:Concept ;
+cdi:displayLabel "Quality";
+cdi:externalDefinition :INSEE_SKOS_def ;
+cdi:identifier ":J"^^xsd:anyURI ;.
+
+
+
+:INSEE_SKOS_def  a skos:Concept;
+skos:prefLabel "Some External Reference";
+.
+
+
+
+:K a cdi:RepresentedVariable ;
+cdi:name "Facility_ID" ;
+cdi:displayLabel "Facility ID"@en , "Identifiant d'Equipement"@fr ;
+cdi:uses :A ;
+cdi:definition "the ID of a variable containing a Facility" ;
+cdi:hasIntendedDatatype xsd:token ;
+.
+
+
+:L a cdi:RepresentedVariable ;
+cdi:name "TypeOfFacility" ;
+cdi:displayLabel "Type of Facility"@en ;
+cdi:uses :B ;
+cdi:definition "the type of Facility" ;
+cdi:takesSubstantiveValueFrom :codelist ;
+.
+
+
+
+:M a cdi:RepresentedVariable ;
+cdi:name "Year" ;
+cdi:displayLabel "Year "@en , "Annee"@fr ;
+cdi:uses :C ;
+cdi:definition "the year" ;
+cdi:hasIntendedDatatype xsd:gYear ;
+.
+
+
+
+:M a cdi:RepresentedVariable ;
+cdi:name "Covered" ;
+cdi:displayLabel "Covered"@en , "Coverte"@fr ;
+cdi:uses :D ;
+cdi:definition "whether the facility is covered" ;
+cdi:takesSubstantiveValueFrom :codelist0 ;
+cdi:takesSentinelValueFrom :sv1 ;
+.
+
+
+:N a cdi:RepresentedVariable ;
+cdi:name "Lit" ;
+cdi:displayLabel "Lit"@en , "illumination"@fr ;
+cdi:uses :E ;
+cdi:definition "whether the facility has lighting" ;
+cdi:takesSubstantiveValueFrom :codelist0 ;
+cdi:takesSentinelValueFrom :sv1 ;
+.
+
+
+
+:O a cdi:RepresentedVariable ;
+cdi:name "Facility_ID" ;
+cdi:displayLabel "Facility ID"@en , "Identifiant d'Equipement"@fr ;
+cdi:uses :F ;
+cdi:definition "the ID of a variable containing a Facility" ;
+cdi:hasIntendedDatatype xsd:token ;
+.
+
+
+:P a cdi:RepresentedVariable ;
+cdi:name "Lambert_X" ;
+cdi:displayLabel "Lambert X "@en , "Lambert X "@fr ;
+cdi:uses :G ;
+cdi:definition "the Lambert X coordinate of the Facility" ;
+cdi:hasIntendedDatatype xsd:float ;
+.
+
+
+:Q a cdi:RepresentedVariable ;
+cdi:name "Lambert_Y" ;
+cdi:displayLabel "Lambert Y"@en , "Lambert Y"@fr ;
+cdi:uses :H ;
+cdi:definition "the Lambert Y coordinate of the Facility" ;
+cdi:hasIntendedDatatype xsd:float ;
+.
+
+
+
+:R a cdi:RepresentedVariable ;
+cdi:name "Number_of_rooms" ;
+cdi:displayLabel "Number of rooms"@en ;
+cdi:uses :I ;
+cdi:definition "the Number of rooms in a Facility" ;
+cdi:hasIntendedDatatype xsd:integer ;
+.
+
+
+
+:S a cdi:RepresentedVariable ;
+cdi:name "Number_of_playing_fields_courts" ;
+cdi:displayLabel "Number of playing fields/courts"@en  ;
+cdi:uses :J ;
+cdi:definition "the ID of a variable containing a Facility" ;
+cdi:hasIntendedDatatype xsd:integer ;
+.
+
+:T a cdi:RepresentedVariable ;
+cdi:name "Quality" ;
+cdi:displayLabel "Quality"@en  ;
+cdi:uses :J ;
+cdi:definition "the quality of the facility" ;
+cdi:hasIntendedDatatype xsd:integer ;
+.
+
+:codelist a cdi:Codelist ;
+cdi:name "codelist" ;
+cdi:has "Cinema", "Playing Field", "School" ; .
+
+:codelist0 a cdi:Codelist ;
+cdi:name "codelist 0" ;
+cdi:has :c1, :c2; .
+
+:codelist1 a cdi:Codelist ;
+cdi:name "codelist 1 for quality" ;
+#cdi:has  ; 
+.
+
+:c1 a cdi:Code ;
+cdi:notation "1";
+cdi:externalDefinition :skos_c1 ;
+.
+
+:skos_c1 a skos:Concept;
+skos:prefLabel "Yes"@en ;
+.
+
+:c2 a cdi:Code ;
+cdi:notation "0";
+cdi:value :skos_c2 ;
+.
+
+:skos_c2 a skos:Concept;
+skos:prefLabel "No";
+.
+
+:c3 a cdi:Code ;
+cdi:notation "NA";
+cdi:value "NA" ;
+.
+
+:sv1 a cdi:Codelist ;
+cdi:name "sentinel value for NA";
+cdi:has :c3 ;
+.
+
+
+:WDS a cdi:WideDataStructure ;
+cdi:identifier ":WDS1" ;
+cdi:has :IC1, :IC2, :IC3, :IC4, :IC5, :IC6, :IC7, :IC8, :IC9, :IC10;
+cdi:has :PRS1 ;
+.
+
+
+:IC1 a cdi:IdentifierComponent ;
+cdi:isDefinedBy :K ;
+.
+
+:IC2 a cdi:MeasureComponent ;
+cdi:isDefinedBy :L ;
+.
+
+:IC3 a cdi:MeasureComponent ;
+cdi:isDefinedBy :M ;
+.
+
+:IC4 a cdi:MeasureComponent ;
+cdi:isDefinedBy :N ;
+.
+
+:IC5 a cdi:MeasureComponent ;
+cdi:isDefinedBy :O ;
+.
+
+:IC6 a cdi:MeasureComponent ;
+cdi:isDefinedBy :P ;
+.
+
+:IC7 a cdi:MeasureComponent ;
+cdi:isDefinedBy :Q ;
+.
+
+:IC8 a cdi:MeasureComponent ;
+cdi:isDefinedBy :R ;
+.
+
+:IC9 a cdi:MeasureComponent ;
+cdi:isDefinedBy :S ;
+.
+
+
+
+:PRS1 a cdi:PhysicalRecordSegmentStructure ;
+cdi:has :dp1, :dp2, :dp3, :dp4, :dp5, :dp6, :dp7, :dp8, :dp9, :dp10 ;
+.
+
+:dp1 a cdi:DataPoint ;
+cdi:identifier "data point 1" ;
+cdi:sequence "1" ;
+cdi:correspondsTo :K ;
+.
+:dp2 a cdi:DataPoint ;
+cdi:identifier "data point 2" ;
+cdi:sequence "2" ;
+cdi:correspondsTo :L ;
+.
+:dp3 a cdi:DataPoint ;
+cdi:identifier "data point 3" ;
+cdi:sequence "3" ;
+cdi:correspondsTo :M ;
+.
+:dp4 a cdi:DataPoint ;
+cdi:identifier "data point 4" ;
+cdi:sequence "4" ;
+cdi:correspondsTo :N ;
+.
+:dp5 a cdi:DataPoint ;
+cdi:identifier "data point 5" ;
+cdi:sequence "5" ;
+cdi:correspondsTo :O ;
+.
+:dp6 a cdi:DataPoint ;
+cdi:identifier "data point 6" ;
+cdi:sequence "6" ;
+cdi:correspondsTo :P ;
+.
+:dp7 a cdi:DataPoint ;
+cdi:identifier "data point 7" ;
+cdi:sequence "7" ;
+cdi:correspondsTo :Q ;
+.
+:dp8 a cdi:DataPoint ;
+cdi:identifier "data point 8" ;
+cdi:sequence "8" ;
+cdi:correspondsTo :R ;
+.
+:dp9 a cdi:DataPoint ;
+cdi:identifier "data point 9" ;
+cdi:sequence "9" ;
+cdi:correspondsTo :S ;
+.
+:dp10 a cdi:DataPoint ;
+cdi:identifier "data point 10" ;
+cdi:sequence "10" ;
+cdi:correspondsTo :T ;
+.
+
+
+#### Linking to DCAT ###
+
+:DS1 a dcat:Dataset ;
+dcat:distribution :distro1 ; .
+
+:Dservice1 a dcat:DataService ;
+dcat:servesDataset :DS1 ;
+.
+
+:distro1 a dcat:Distribution ;
+#dct:conformsTo :WDS ;
+dcat:accessService :Dservice1 ;
+.
+
+:distro1 a dcat:Distribution ;
+#dct:conformsTo :WDS ;
+dcat:accessService :Dservice1 ;
+.
