@@ -59,7 +59,7 @@ The complete list of LAUs is available from [Eurostat's web site](https://ec.eur
 
 An attribute, corresponding to the SDMX UNIT_MEASURE concept, can be attached to the Data Structure Definition (DSD) in order to specify that population counts are expressed in number of persons. To express the value of the attribute, we can use the "Persons" value in the [Eurostat SDMX CL_UNIT](https://registry.sdmx.org/ws/public/sdmxapi/rest/codelist/ESTAT/CL_UNIT/1.2) code list, which has `urn:sdmx:org.sdmx.infomodel.codelist.Code=ESTAT:CL_UNIT(1.2).PS` for URI.
 
-We can also define attributes to represent geographic levels above the LAU in order to be able to aggregate data at NUTS 3 or NUTS 2 level. Such attributes would be attached at the observation level. For example:
+We can also define attributes to represent geographic levels above the LAU in order to be able to aggregate data at NUTS 3 or NUTS 2 level (where NUTS stands for Nomenclature of Territorial Units for Statistics). Such attributes would be attached at the observation level. For example:
 
 ```
 <http://id.cef-interstat.eu/sc/att-nuts3>
@@ -69,6 +69,8 @@ We can also define attributes to represent geographic levels above the LAU in or
     qb:codeList  <http://id.cef-interstat.eu/sc/cl-nuts3> ;
     qb:concept   sdmx-concept:refArea .
 ```
+
+The NUTS are [published as SKOS](https://op.europa.eu/en/web/eu-vocabularies/dataset/-/resource?uri=http://publications.europa.eu/resource/dataset/nuts) by the Publication Office of the EU. The concepts in the `<http://data.europa.eu/nuts/scheme/2016/>` scheme should be used, specifically those that have a `<http://data.europa.eu/nuts/level>` property with value 3.0. Eurostat also published [background information](https://ec.europa.eu/eurostat/web/nuts/background) about the NUTS.
 
 Finally, for the measure, we can use the base SDMX OBS_VALUE concept.
 

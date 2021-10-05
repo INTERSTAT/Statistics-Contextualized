@@ -273,6 +273,51 @@ isc:sex-2
     skos:notation      "2" ;
     skos:prefLabel     "Female"@en , "Femme"@fr .
 
+
+# NUTS3 code list (extract)
+# Extracted from https://op.europa.eu/o/opportal-service/euvoc-download-handler?cellarURI=http%3A%2F%2Fpublications.europa.eu%2Fresource%2Fcellar%2F7180b976-bc48-11ea-811c-01aa75ed71a1.0001.03%2FDOC_1&fileName=nuts-skos-ap-eu.rdf and converted to Turtle
+
+<http://data.europa.eu/nuts/scheme/2016>
+  a skos:ConceptScheme ;
+  skos:prefLabel "NUTS 2016" .
+
+<http://data.europa.eu/nuts/code/FR101>
+  a skos:Concept ;
+  skos:prefLabel "Paris" ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FR101" .
+
+<http://data.europa.eu/nuts/code/FR102>
+  a skos:Concept ;
+  skos:prefLabel "Seine-et-Marne" ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FR102" .
+
+<http://data.europa.eu/nuts/code/FR103>
+  a skos:Concept ;
+  skos:prefLabel "Yvelines" ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FR103" .
+
+<http://data.europa.eu/nuts/code/FRY40>
+  a skos:Concept ;
+  skos:prefLabel "La Réunion" ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FRY40" .
+
+<http://data.europa.eu/nuts/code/FRY50>
+  a skos:Concept ;
+  skos:prefLabel "Mayotte " ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FRY50" .
+
+<http://data.europa.eu/nuts/code/FRZZZ>
+  a skos:Concept ;
+  skos:prefLabel "Extra-Regio NUTS 3" ;
+  skos:inScheme <http://data.europa.eu/nuts/scheme/2016> ;
+  skos:notation "FRZZZ" .
+
+
 # LAU code list (only a few items)
 
 isc:lau
