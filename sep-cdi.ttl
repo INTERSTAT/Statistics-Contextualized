@@ -1,51 +1,36 @@
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix qb: <http://purl.org/linked-data/cube#> .
-@prefix sdmx-concept: <http://purl.org/linked-data/sdmx/2009/concept#> .
-@prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
-@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#> .
-@prefix isc: <http://id.cef-interstat.eu/sc/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix cdi: <http://my.cdi.namespa.ce/> .
-@prefix : <http://example.org/> .
-@prefix NUTS: <http://data.europa.eu/nuts/scheme/2016/> .
+@prefix ex: <http://example.org/> .
 
+################################################################################
+#             DDI-CDI RDF serializtion for the Interstat SEP pilot             #
+################################################################################
 
+ex:cube1 a cdi:CubeDataStructure ;
+cdi:has ex:age , ex:lau , ex:sex , ex:observation , ex:nuts3 , ex:unit .
 
-:cube1 a cdi:CubeDataStructure ;
-cdi:has :age , :lau , :sex , :observation , :NUTS3 , :unit
-.
+ex:age a cdi:DimensionComponent .
 
-:age a cdi:DimensionComponent .
+ex:lau a cdi:DimensionComponent .
 
-:lau a cdi:DimensionComponent .
+ex:sex a cdi:DimensionComponent .
 
-:sex a cdi:DimensionComponent .
+ex:observation a cdi:MeasureComponent , cdi:QualifiedMeasure .
 
-:observation a cdi:MeasureComponent , cdi:QualifiedMeasure .
+ex:nuts3 a cdi:AttributeComponent .
 
-:NUTS3 a cdi:AttributeComponent .
+ex:nuts3Scope a cdi:ScopedMeasure ;
+cdi:isDefinedBy ex:nuts3 ;
+cdi:restricts ex:observation .
 
-:NUTS3Scope a cdi:ScopedMeasure ;
-cdi:isDefinedBy :NUTS3 ;
-cdi:restricts :observation ;
-.
+ex:unit a cdi:AttributeComponent .
 
-:unit a cdi:AttributeComponent .
+ex:kvs a cdi:KeyValueStructure ;
+cdi:has (ex:age ex:lau ex:sex) .
 
+ex:dds1 a cdi:DimensionalDataset ;
+cdi:isStructuredBy ex:cube1 .
 
-:kvs a cdi:KeyValueStructure ;
-cdi:has (:age  :lau  :sex) .
-
-
-
-:dds1 a cdi:DimensionalDataset ;
-cdi:isStructuredBy :cube1 ;
-.
-
-:unitScope a [] ;
-cdi:isDefinedBy :unit ;
-cdi:restricts :dds1 ;
-.
+ex:unitScope a [] ;
+cdi:isDefinedBy ex:unit ;
+cdi:restricts ex:dds1 .
