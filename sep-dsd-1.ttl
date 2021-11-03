@@ -98,147 +98,147 @@ isc:cl-age
     skos:prefLabel      "Five-year age group"@en , "Âge quinquennal"@fr .
 
 isc:age-Y_LT5
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y_LT5" ;
     skos:prefLabel     "under 5 years"@en , "moins de 5 ans"@fr .
 
 isc:age-Y5-9
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y5-9" ;
     skos:prefLabel     "5 to 9 years"@en , "5 à 9 ans"@fr .
 
 isc:age-Y10-14
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y10-14" ;
     skos:prefLabel     "10 to 14 years"@en , "10 à 14 ans"@fr .
 
 isc:age-Y15-19
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y15-19" ;
     skos:prefLabel     "15 to 19 years"@en , "15 à 19 ans"@fr .
 
 isc:age-Y20-24
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y20-24" ;
     skos:prefLabel     "20 to 24 years"@en , "20 à 24 ans"@fr .
 
 isc:age-Y25-29
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y25-29" ;
     skos:prefLabel     "25 to 29 years"@en , "25 à 29 ans"@fr .
 
 isc:age-Y30-34
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y30-34" ;
     skos:prefLabel     "30 to 34 years"@en , "30 à 34 ans"@fr .
 
 isc:age-Y35-39
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y35-39" ;
     skos:prefLabel     "35 to 39 years"@en , "35 à 39 ans"@fr .
 
 isc:age-Y40-44
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y40-44" ;
     skos:prefLabel     "40 to 44 years"@en , "40 à 44 ans"@fr .
 
 isc:age-Y45-49
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y45-49" ;
     skos:prefLabel     "45 to 49 years"@en , "45 à 49 ans"@fr .
 
 isc:age-Y50-54
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y50-54" ;
     skos:prefLabel     "50 to 54 years"@en , "50 à 54 ans"@fr .
 
 isc:age-Y55-59
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y55-59" ;
     skos:prefLabel     "55 to 59 years"@en , "55 à 59 ans"@fr .
 
 isc:age-Y60-64
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y60-64" ;
     skos:prefLabel     "60 to 64 years"@en , "60 à 64 ans"@fr .
 
 isc:age-Y65-69
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y65-69" ;
     skos:prefLabel     "65 to 69 years"@en , "65 à 69 ans"@fr .
 
 isc:age-Y70-74
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y70-74" ;
     skos:prefLabel     "70 to 74 years"@en , "70 à 74 ans"@fr .
 
 isc:age-Y75-79
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y75-79" ;
     skos:prefLabel     "75 to 79 years"@en , "75 à 79 ans"@fr .
 
 isc:age-Y80-84
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y80-84" ;
     skos:prefLabel     "80 to 84 years"@en , "80 à 84 ans"@fr .
 
 isc:age-Y85-89
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y85-89" ;
     skos:prefLabel     "85 to 89 years"@en , "85 à 89 ans"@fr .
 
 isc:age-Y90-94
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y90-94" ;
     skos:prefLabel     "90 to 94 years"@en , "90 à 94 ans"@fr .
 
 isc:age-Y95-99
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y95-99" ;
     skos:prefLabel     "95 to 99 years"@en , "95 à 99 ans"@fr .
 
 isc:age-Y_GE100
-	a                  isc:age ;
+    a                  isc:age ;
     skos:inScheme      isc:cl-age ;
     skos:topConceptOf  isc:cl-age ;
     skos:notation      "Y_GE100" ;
@@ -260,14 +260,14 @@ isc:cl-sex
     skos:prefLabel      "Sex"@en , "Sexe"@fr .
 
 isc:sex-1
-	a                  isc:sex ;
+    a                  isc:sex ;
     skos:inScheme      isc:cl-sex ;
     skos:topConceptOf  isc:cl-sex ;
     skos:notation      "1" ;
     skos:prefLabel     "Male"@en , "Homme"@fr .
 
 isc:sex-2
-	a                  isc:sex ;
+    a                  isc:sex ;
     skos:inScheme      isc:cl-sex ;
     skos:topConceptOf  isc:cl-sex ;
     skos:notation      "2" ;
@@ -333,28 +333,28 @@ isc:cl-lau
     skos:prefLabel      "Local Administrative Unit"@en , "Unité Administrative Locale"@fr .
 
 isc:lau-01001
-	a                  isc:lau ;
+    a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "01001" ;
     skos:prefLabel     "L'Abergement-Clémenciat" .
 
 isc:lau-97617
-	a                  isc:lau ;
+    a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "97617" ;
     skos:prefLabel     "Tsingoni" .
 
 isc:lau-001001
-	a                  isc:lau ;
+    a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "001001" ;
     skos:prefLabel     "Agliè" .
 
 isc:lau-111107
-	a                  isc:lau ;
+    a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "111107" ;
