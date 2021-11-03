@@ -6,7 +6,7 @@ The Python pipeline uses [Prefect](https://www.prefect.io/). A simple way to ins
 
 `conda install -c conda-forge prefect`
 
-Other dependencies:
+Other dependencies come with a standard conda installation:
 
 - requests
 - pandas
