@@ -1,0 +1,813 @@
+@prefix isc: <http://id.cef-interstat.eu/sc/> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdmx_attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix sdmx_measure: <http://purl.org/linked-data/sdmx/2009/measure#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+isc:obs-Y10-14-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y10-14 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.2362869199"^^xsd:float .
+
+isc:obs-Y10-14-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y10-14 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "121.599211279"^^xsd:float .
+
+isc:obs-Y10-14-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y10-14 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "5.0055281979999995"^^xsd:float .
+
+isc:obs-Y10-14-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y10-14 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "3.0886075949999996"^^xsd:float .
+
+isc:obs-Y10-14-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y10-14 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "112.583888826"^^xsd:float .
+
+isc:obs-Y15-19-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y15-19 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "9.2658227849"^^xsd:float .
+
+isc:obs-Y15-19-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y15-19 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "105.68195425100001"^^xsd:float .
+
+isc:obs-Y15-19-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y15-19 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.980932074"^^xsd:float .
+
+isc:obs-Y15-19-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y15-19 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "1.029535865"^^xsd:float .
+
+isc:obs-Y15-19-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y15-19 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "116.618353881"^^xsd:float .
+
+isc:obs-Y20-24-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y20-24 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.17721519"^^xsd:float .
+
+isc:obs-Y20-24-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y20-24 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "75.811995533"^^xsd:float .
+
+isc:obs-Y20-24-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y20-24 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.9503075251"^^xsd:float .
+
+isc:obs-Y20-24-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y20-24 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.1181434599"^^xsd:float .
+
+isc:obs-Y20-24-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y20-24 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "46.9010469803"^^xsd:float .
+
+isc:obs-Y25-29-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y25-29 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.11814346"^^xsd:float .
+
+isc:obs-Y25-29-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y25-29 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "69.8564968812"^^xsd:float .
+
+isc:obs-Y25-29-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y25-29 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.898429811"^^xsd:float .
+
+isc:obs-Y25-29-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y25-29 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.17721519"^^xsd:float .
+
+isc:obs-Y25-29-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y25-29 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "80.815333333"^^xsd:float .
+
+isc:obs-Y30-34-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y30-34 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.11814346"^^xsd:float .
+
+isc:obs-Y30-34-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y30-34 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "76.8138295145"^^xsd:float .
+
+isc:obs-Y30-34-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y30-34 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.946617059000001"^^xsd:float .
+
+isc:obs-Y30-34-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y30-34 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.05907173"^^xsd:float .
+
+isc:obs-Y30-34-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y30-34 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "61.827330022"^^xsd:float .
+
+isc:obs-Y35-39-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y35-39 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.11814346"^^xsd:float .
+
+isc:obs-Y35-39-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y35-39 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "110.7495278"^^xsd:float .
+
+isc:obs-Y35-39-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y35-39 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.9689299846"^^xsd:float .
+
+isc:obs-Y35-39-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y35-39 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "7.2067510549"^^xsd:float .
+
+isc:obs-Y35-39-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y35-39 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "101.720484431"^^xsd:float .
+
+isc:obs-Y40-44-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y40-44 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.05907173"^^xsd:float .
+
+isc:obs-Y40-44-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y40-44 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "103.734707398"^^xsd:float .
+
+isc:obs-Y40-44-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y40-44 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.951003724"^^xsd:float .
+
+isc:obs-Y40-44-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y40-44 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "7.206751054899999"^^xsd:float .
+
+isc:obs-Y40-44-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y40-44 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "125.641586609"^^xsd:float .
+
+isc:obs-Y45-49-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y45-49 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "11.3248945149"^^xsd:float .
+
+isc:obs-Y45-49-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y45-49 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "98.8083635"^^xsd:float .
+
+isc:obs-Y45-49-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y45-49 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.9689137459"^^xsd:float .
+
+isc:obs-Y45-49-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y45-49 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "5.1476793249999995"^^xsd:float .
+
+isc:obs-Y45-49-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y45-49 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "115.763491261"^^xsd:float .
+
+isc:obs-Y5-9-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y5-9 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "10.2953586498"^^xsd:float .
+
+isc:obs-Y5-9-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y5-9 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "134.505403648"^^xsd:float .
+
+isc:obs-Y5-9-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y5-9 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "11.9512050806"^^xsd:float .
+
+isc:obs-Y5-9-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y5-9 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "5.1476793248999995"^^xsd:float .
+
+isc:obs-Y5-9-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y5-9 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "78.6871583632"^^xsd:float .
+
+isc:obs-Y50-54-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y50-54 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "12.354430379899998"^^xsd:float .
+
+isc:obs-Y50-54-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y50-54 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "124.81228007800001"^^xsd:float .
+
+isc:obs-Y50-54-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y50-54 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.9182582347"^^xsd:float .
+
+isc:obs-Y50-54-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y50-54 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "18.5316455697"^^xsd:float .
+
+isc:obs-Y50-54-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y50-54 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "95.87015371300001"^^xsd:float .
+
+isc:obs-Y55-59-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y55-59 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "13.3839662447"^^xsd:float .
+
+isc:obs-Y55-59-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y55-59 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "107.871586914"^^xsd:float .
+
+isc:obs-Y55-59-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y55-59 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.8627712485"^^xsd:float .
+
+isc:obs-Y55-59-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y55-59 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "13.3839662448"^^xsd:float .
+
+isc:obs-Y55-59-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y55-59 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "110.863548086"^^xsd:float .
+
+isc:obs-Y60-64-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y60-64 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.2362869199"^^xsd:float .
+
+isc:obs-Y60-64-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y60-64 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "103.886909257"^^xsd:float .
+
+isc:obs-Y60-64-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y60-64 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.9255261511"^^xsd:float .
+
+isc:obs-Y60-64-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y60-64 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.1772151899"^^xsd:float .
+
+isc:obs-Y60-64-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y60-64 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "124.887397289"^^xsd:float .
+
+isc:obs-Y65-69-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y65-69 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.177215189999999"^^xsd:float .
+
+isc:obs-Y65-69-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y65-69 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "151.839198279"^^xsd:float .
+
+isc:obs-Y65-69-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y65-69 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "7.8985759618"^^xsd:float .
+
+isc:obs-Y65-69-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y65-69 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "10.295358649799999"^^xsd:float .
+
+isc:obs-Y65-69-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y65-69 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "157.85996328"^^xsd:float .
+
+isc:obs-Y70-74-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y70-74 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "9.2658227849"^^xsd:float .
+
+isc:obs-Y70-74-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y70-74 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "89.916527961"^^xsd:float .
+
+isc:obs-Y70-74-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y70-74 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.9569116565"^^xsd:float .
+
+isc:obs-Y70-74-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y70-74 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "9.2658227849"^^xsd:float .
+
+isc:obs-Y70-74-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y70-74 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "119.91819931399999"^^xsd:float .
+
+isc:obs-Y75-79-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y75-79 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "8.2362869199"^^xsd:float .
+
+isc:obs-Y75-79-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y75-79 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "65.9428021131"^^xsd:float .
+
+isc:obs-Y75-79-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y75-79 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "3.9292974846"^^xsd:float .
+
+isc:obs-Y75-79-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y75-79 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "3.088607595"^^xsd:float .
+
+isc:obs-Y75-79-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y75-79 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "86.9446491139"^^xsd:float .
+
+isc:obs-Y80-84-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y80-84 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.1181434599"^^xsd:float .
+
+isc:obs-Y80-84-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y80-84 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "53.9531863331"^^xsd:float .
+
+isc:obs-Y80-84-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y80-84 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.9529217422"^^xsd:float .
+
+isc:obs-Y80-84-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y80-84 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "6.17721519"^^xsd:float .
+
+isc:obs-Y80-84-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y80-84 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "85.95044207929999"^^xsd:float .
+
+isc:obs-Y85-89-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y85-89 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "2.05907173"^^xsd:float .
+
+isc:obs-Y85-89-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y85-89 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "36.9756197565"^^xsd:float .
+
+isc:obs-Y85-89-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y85-89 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "3.0886075949999996"^^xsd:float .
+
+isc:obs-Y85-89-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y85-89 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "68.981594447"^^xsd:float .
+
+isc:obs-Y90-94-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y90-94 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y90-94-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y90-94 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "11.9951817245"^^xsd:float .
+
+isc:obs-Y90-94-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y90-94 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y90-94-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y90-94 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "38.995128154199996"^^xsd:float .
+
+isc:obs-Y95-99-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y95-99 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y95-99-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y95-99 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "4.9995421487"^^xsd:float .
+
+isc:obs-Y95-99-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y95-99 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y95-99-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y95-99 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "11.996501708099998"^^xsd:float .
+
+isc:obs-Y_GE100-1-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_GE100 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y_GE100-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_GE100 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y_GE100-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_GE100 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y_GE100-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_GE100 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "0.0"^^xsd:float .
+
+isc:obs-Y_LT5-1-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_LT5 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "70.7493486714"^^xsd:float .
+
+isc:obs-Y_LT5-1-10004 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_LT5 ;
+    isc:dim-lau isc:lau-10004 ;
+    isc:dim-sex isc:sex-1 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "5.9498296467000005"^^xsd:float .
+
+isc:obs-Y_LT5-2-10002 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_LT5 ;
+    isc:dim-lau isc:lau-10002 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "3.088607595"^^xsd:float .
+
+isc:obs-Y_LT5-2-10003 a qb:Observation ;
+    isc:att-nuts3 isc:nuts3-FRF22 ;
+    isc:dim-age isc:age-Y_LT5 ;
+    isc:dim-lau isc:lau-10003 ;
+    isc:dim-sex isc:sex-2 ;
+    qb:dataSet isc:ds1 ;
+    sdmx_measure:obsValue "83.670076062"^^xsd:float .
+
+isc:ds1 a qb:DataSet ;
+    rdfs:label "Population 15 and over by sex, age and activity status"@en,
+        "Population de 15 ans ou plus par sexe, âge et type d'activité"@fr ;
+    qb:structure isc:dsd1 ;
+    sdmx_attribute:unitMeasure <urn:sdmx:org.sdmx.infomodel.codelist.Code=ESTAT:CL_UNIT(1.2).PS> .
+

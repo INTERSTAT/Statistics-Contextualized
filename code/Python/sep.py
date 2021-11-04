@@ -43,8 +43,6 @@ def raw_french_to_standard(df, age_classes, nuts3):
 
     df_final = df_selected_cols.rename(columns={"CODGEO": "lau", "SEXE": "sex", "AGE_CLASS": "age", "NB": "population"})
 
-    print(df_final)
-
     return(df_final)
 
 def raw_italian_to_standard(df):
@@ -111,42 +109,44 @@ def build_rdf_data(df):
     dimLauURI = URIRef(ISC + "dim-lau")
     attNutsURI = URIRef(ISC + "att-nuts3")
 
+    df_sub = df.loc[1:100]
+
     # Create observations
-    for index, row in df.iterrows():
+    for index, row in df_sub.iterrows():
         sex = row['sex']
-        sexURI = URIRef(ISC + "sex-" + sex)
+        sexURI = URIRef(ISC + "sex-" + str(sex))
         age = row['age']
-        ageURI = URIRef(ISC + "age-" + age)
+        ageURI = URIRef(ISC + "age-" + str(age))
         lau = row['lau']
-        lauURI = URIRef(ISC + "lau-" + lau)
+        lauURI = URIRef(ISC + "lau-" + str(lau))
         nuts3 = row['nuts3']
         nuts3URI = URIRef(ISC + "nuts3-" + nuts3)
         population = Literal(row["population"], datatype = XSD.float)
 
-        obsURI = URIRef(ISC + "obs-" + age + "-" + sex + "-" + lau)
+        obsURI = URIRef(ISC + "obs-" + str(age) + "-" + str(sex) + "-" + str(lau))
 
         g.add((obsURI, RDF.type, QB.Observation))
         g.add((obsURI, QB.dataSet, ISC.ds1))
         g.add((obsURI, dimAgeURI, ageURI))
         g.add((obsURI, dimSexURI, sexURI))
-        # g.add((obsURI, dimLauURI, lauURI))
+        g.add((obsURI, dimLauURI, lauURI))
         g.add((obsURI, attNutsURI, nuts3URI))
-        g.add((obsURI, SDMX_MEASURE.obsValue, Literal("1")))
+        g.add((obsURI, SDMX_MEASURE.obsValue, population))
 
-    print(g.serialize(format='turtle'))
     g.serialize(destination = 'census_rdf.ttl', format='turtle')
 
 with Flow("census_csv_to_rdf") as flow:
-    age_classes = default=get_age_class_data()
+    age_classes = get_age_class_data()
+    nuts3 = get_nuts3()
 
     french_census_data_url = Parameter("fr_url", default="https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip")
-    french_census = extract_french_census(french_census_data_url, age_classes)
+    french_census = extract_french_census(french_census_data_url, age_classes, nuts3)
     
     # italian_census_data_url = Parameter("it_url", default="https://minio.lab.sspcloud.fr/l4tu7k/Census_IT_2018.csv")
-    # italian_census = extract_italian_census(italian_census_data_url)
+    # italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3)
 
-    # french_rdf_census = build_rdf_data(french_census)
-    # italian_rdf_census = build_rdf_data(italian_census)
+    # TODO: join Fr & It df & apply build_rdf_data on result df
+    census_rdf = build_rdf_data(french_census)
      
 
 if __name__ == "__main__":
