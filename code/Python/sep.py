@@ -14,6 +14,9 @@ from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
 import urllib.parse #for parsing strings to URI's
 import numpy as np
 
+# Constants ----
+PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
+
 # Fns ----
 
 def raw_french_to_standard(df, age_classes, nuts3):
@@ -79,8 +82,9 @@ def extract_french_census(url, age_classes, nuts3):
     resp = get(url)
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=';')
-    df['CODGEO'] = df['CODGEO'].astype('string')
+    df = pd.read_csv(zip.open(file_in_zip), sep=';', dtype="string")
+    df["NB"] = df["NB"].astype("float64")
+    df["AGED100"] = df["AGED100"].astype("int")
     standard_df = raw_french_to_standard(df, age_classes, nuts3)
     return standard_df
 
@@ -91,7 +95,7 @@ def extract_italian_census(url, age_classes):
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
     standard_df = raw_italian_to_standard(df, age_classes)
-    return df
+    return standard_df
 
 @task
 def concatDatasets(ds1, ds2):
@@ -162,9 +166,9 @@ with Flow('census_csv_to_rdf') as flow:
     df = concatDatasets(french_census, italian_census)
 
     census_rdf = build_rdf_data(df)
-     
 
 if __name__ == '__main__':
-    flow.register(project_name='sep')
+    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
+        flow.register(project_name='sep')
     flow.run()
 
