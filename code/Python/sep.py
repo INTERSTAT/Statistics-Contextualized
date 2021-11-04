@@ -70,8 +70,8 @@ def extract_french_census(url, age_classes, nuts3):
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=";")
     df["CODGEO"] = df["CODGEO"].astype("string")
-    raw_french_to_standard(df, age_classes, nuts3)
-    return(df)
+    standard_df = raw_french_to_standard(df, age_classes, nuts3)
+    return(standard_df)
 
 @task
 def extract_italian_census(url):
