@@ -16,7 +16,7 @@ import urllib.parse #for parsing strings to URI's
 import numpy as np
 
 # Constants ----
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = True
+PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
 # Fns ----
 
@@ -65,6 +65,12 @@ def raw_italian_to_standard(df, age_classes):
 # Tasks ----
 
 @task
+def import_dsd():
+    g = Graph()
+    g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/sep-dsd-1.ttl", format="turtle")
+    return g.serialize(format="turtle")
+
+@task
 def get_age_class_data():
     resp = get('https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/age-groups.csv')
     data = BytesIO(resp.content)
@@ -95,12 +101,13 @@ def extract_italian_census(url, age_classes):
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
+    print(df)
     standard_df = raw_italian_to_standard(df, age_classes)
     return standard_df
 
 @task
-def concatDatasets(ds1, ds2):
-    return pd.concat([ds1.sample(n=1000), ds2.sample(n=1000)])
+def concat_datasets(ds1, ds2):
+    return pd.concat([ds1, ds2])
 
 @task
 def build_rdf_data(df):
@@ -154,15 +161,18 @@ def build_rdf_data(df):
 
     return g.serialize(format='turtle')
 
-@task
-def push_turtle(ttl):
-    headers = {'Content-Type': 'text/turtle'}
-    url = "https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>"
-
+@task 
+def delete_graph(url):
     res_delete = delete(url)
 
     if res_delete.status_code != 204:
         return Failed(f"Delete graph failed: {str(res_delete.status_code)}")
+    else: 
+        return Success(f"Graph deleted")
+
+@task
+def load_turtle(ttl, url):
+    headers = {'Content-Type': 'text/turtle'}
     
     res_post = post(url, data=ttl, headers=headers)
 
@@ -173,6 +183,14 @@ def push_turtle(ttl):
     
 
 with Flow('census_csv_to_rdf') as flow:
+
+    repo_url = Parameter('repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+
+    delete_graph(repo_url)
+
+    dsd_rdf = import_dsd()
+    load_turtle(dsd_rdf, repo_url)
+
     age_classes = get_age_class_data()
     nuts3 = get_nuts3()
 
@@ -182,13 +200,14 @@ with Flow('census_csv_to_rdf') as flow:
     italian_census_data_url = Parameter('it_url', default='https://minio.lab.sspcloud.fr/l4tu7k/census-it.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes)
 
-    df = concatDatasets(french_census, italian_census)
+    df = concat_datasets(french_census, italian_census)
 
-    census_rdf = build_rdf_data(df)
+    census_rdf = build_rdf_data(french_census)
 
-    flow_status = push_turtle(census_rdf)
+    flow_status = load_turtle(census_rdf, repo_url)
 
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep')
-    flow.run()
+    else:
+        flow.run()
