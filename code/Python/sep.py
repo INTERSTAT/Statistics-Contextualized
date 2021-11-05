@@ -4,7 +4,8 @@ This workflow implements the INTERSTAT Statistics contextualized SEP use case.
 See https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#support-for-environment-policies-sep
 '''
 from prefect import task, Flow, Parameter
-from requests import get
+from prefect.engine.state import Failed, Success
+from requests import get, post, delete
 from zipfile import ZipFile
 from io import BytesIO
 from datetime import timedelta
@@ -15,7 +16,7 @@ import urllib.parse #for parsing strings to URI's
 import numpy as np
 
 # Constants ----
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
+PUSH_TO_PREFECT_CLOUD_DASHBOARD = True
 
 # Fns ----
 
@@ -151,7 +152,25 @@ def build_rdf_data(df):
         g.add((obsURI, attNutsURI, nuts3URI))
         g.add((obsURI, SDMX_MEASURE.obsValue, population))
 
-    return g.serialize('census_rdf.ttl', format='turtle')
+    return g.serialize(format='turtle')
+
+@task
+def push_turtle(ttl):
+    headers = {'Content-Type': 'text/turtle'}
+    url = "https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>"
+
+    res_delete = delete(url)
+
+    if res_delete.status_code != 204:
+        return Failed(f"Delete graph failed: {str(res_delete.status_code)}")
+    
+    res_post = post(url, data=ttl, headers=headers)
+
+    if res_post.status_code != 204:
+        return Failed(f"Post graph failed: {str(res_post.status_code)}")
+    else:
+        return Success(f"Graph loaded")
+    
 
 with Flow('census_csv_to_rdf') as flow:
     age_classes = get_age_class_data()
@@ -167,8 +186,9 @@ with Flow('census_csv_to_rdf') as flow:
 
     census_rdf = build_rdf_data(df)
 
+    flow_status = push_turtle(census_rdf)
+
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep')
     flow.run()
-
