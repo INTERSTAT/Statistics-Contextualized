@@ -93,7 +93,7 @@ def extract_french_census(url, age_classes, nuts3):
     df["NB"] = df["NB"].astype("float64")
     df["AGED100"] = df["AGED100"].astype("int")
     standard_df = raw_french_to_standard(df, age_classes, nuts3)
-    return standard_df
+    return standard_df.sample(n=1000)
 
 @task
 def extract_italian_census(url, age_classes):
@@ -101,9 +101,8 @@ def extract_italian_census(url, age_classes):
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
-    print(df)
     standard_df = raw_italian_to_standard(df, age_classes)
-    return standard_df
+    return standard_df.sample(n=1000)
 
 @task
 def concat_datasets(ds1, ds2):
@@ -197,12 +196,12 @@ with Flow('census_csv_to_rdf') as flow:
     french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
     french_census = extract_french_census(french_census_data_url, age_classes, nuts3)
 
-    italian_census_data_url = Parameter('it_url', default='https://minio.lab.sspcloud.fr/l4tu7k/census-it.zip')
+    italian_census_data_url = Parameter('it_url', default='https://minio.lab.sspcloud.fr/projet-vtl/census-it-2018.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes)
 
     df = concat_datasets(french_census, italian_census)
 
-    census_rdf = build_rdf_data(french_census)
+    census_rdf = build_rdf_data(df)
 
     flow_status = load_turtle(census_rdf, repo_url)
 
