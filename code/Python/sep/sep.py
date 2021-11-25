@@ -1,8 +1,3 @@
-'''
-This workflow implements the INTERSTAT Statistics contextualized SEP use case.
-
-See https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#support-for-environment-policies-sep
-'''
 from prefect import task, Flow, Parameter
 from prefect.engine.state import Failed, Success
 from requests import get, post, delete
@@ -14,9 +9,14 @@ from rdflib import Graph, Literal, RDF, URIRef, Namespace #basic RDF handling
 from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
 import urllib.parse #for parsing strings to URI's
 import numpy as np
+import pysftp
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
+
+FTP_HOST = 'FTP_HOST'
+FTP_USERNAME = 'FTP_USERNAME'
+FTP_PASSWORD = 'FTP_PASSWORD'
 
 # Fns ----
 
@@ -56,10 +56,12 @@ def raw_italian_to_standard(df, age_classes):
     # SEXISTAT1 & ETA1 variables includes subtotal, we only have to keep ventilated data
     df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL')]
 
-    # Age range has to be recoded to be mapped with the reference code list
+    # Age & sex range have to be recoded to be mapped with the reference code list
     df_filtered['ETA1'] = df_filtered.apply(lambda row: row.ETA1 if row.ETA1 == 'Y_UN4' else 'Y_LT5', axis=1)
+    df_filtered['SEXISTAT1'] = df_filtered.apply(lambda row: "1" if row.SEXISTAT1 == 'M' else '2', axis=1)
 
     df_final = df_filtered.rename(columns={'ITTER107': 'lau', 'SEXISTAT1': 'sex', 'ETA1': 'age', 'Value': 'population', 'NUTS3': 'nuts3'})
+
     return df_final
 
 # Tasks ----
@@ -93,7 +95,7 @@ def extract_french_census(url, age_classes, nuts3):
     df["NB"] = df["NB"].astype("float64")
     df["AGED100"] = df["AGED100"].astype("int")
     standard_df = raw_french_to_standard(df, age_classes, nuts3)
-    return standard_df.sample(n=1000)
+    return standard_df
 
 @task
 def extract_italian_census(url, age_classes):
@@ -102,7 +104,7 @@ def extract_italian_census(url, age_classes):
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
     standard_df = raw_italian_to_standard(df, age_classes)
-    return standard_df.sample(n=1000)
+    return standard_df
 
 @task
 def concat_datasets(ds1, ds2):
@@ -111,6 +113,7 @@ def concat_datasets(ds1, ds2):
 @task
 def build_rdf_data(df):
     g = Graph()
+    files = []
     SDMX_CONCEPT = Namespace('http://purl.org/linked-data/sdmx/2009/concept#')
     SDMX_ATTRIBUTE = Namespace('http://purl.org/linked-data/sdmx/2009/attribute#')
     SDMX_MEASURE = Namespace('http://purl.org/linked-data/sdmx/2009/measure#')
@@ -158,7 +161,11 @@ def build_rdf_data(df):
         g.add((obsURI, attNutsURI, nuts3URI))
         g.add((obsURI, SDMX_MEASURE.obsValue, population))
 
-    return g.serialize(format='turtle')
+        if index % 200000 == 0 or index == len(df):
+            file = g.serialize(format='turtle')
+            files.append(file)
+            g = Graph()
+    return files
 
 @task 
 def delete_graph(url):
@@ -179,16 +186,36 @@ def load_turtle(ttl, url):
         return Failed(f"Post graph failed: {str(res_post.status_code)}")
     else:
         return Success(f"Graph loaded")
+
+@task
+def load_turtles(ttl_list, url):
+    headers = {'Content-Type': 'text/turtle'}
+
+    for f in ttl_list:
+        res_post = post(url, data=f, headers=headers)
+
+
+@task 
+def write_csv_on_ftp(df):
+    cnopts = pysftp.CnOpts()
+    cnopts.hostkeys = None  
+
+    # TODO: Use tempfile
+    csv = df.to_csv (r'census_fr_it.csv', index = False, header=True)
+
+    with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
+        with sftp.cd('files/sep/output/'):
+            sftp.put('census_fr_it.csv')
     
 
 with Flow('census_csv_to_rdf') as flow:
 
-    repo_url = Parameter('repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+    rdf_repo_url = Parameter('rdf_repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
 
-    delete_graph(repo_url)
+    delete_graph(rdf_repo_url)
 
     dsd_rdf = import_dsd()
-    load_turtle(dsd_rdf, repo_url)
+    load_turtle(dsd_rdf, rdf_repo_url)
 
     age_classes = get_age_class_data()
     nuts3 = get_nuts3()
@@ -196,14 +223,16 @@ with Flow('census_csv_to_rdf') as flow:
     french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
     french_census = extract_french_census(french_census_data_url, age_classes, nuts3)
 
-    italian_census_data_url = Parameter('it_url', default='https://minio.lab.sspcloud.fr/projet-vtl/census-it-2018.zip')
+    italian_census_data_url = Parameter('it_url', default='https://interstat.opsi-lab.it/files/sep/input/census-it-2018.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes)
 
-    df = concat_datasets(french_census, italian_census)
+    df_fr_it = concat_datasets(french_census, italian_census)
 
-    census_rdf = build_rdf_data(df)
+    write_csv_on_ftp(df_fr_it)
 
-    flow_status = load_turtle(census_rdf, repo_url)
+    # graph_files = build_rdf_data(df)
+
+    # load_turtles(graph_files, rdf_repo_url)
 
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
