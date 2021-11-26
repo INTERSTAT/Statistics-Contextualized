@@ -70,7 +70,7 @@ def raw_italian_to_standard(df, age_classes):
 def import_dsd():
     g = Graph()
     g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/sep-dsd-1.ttl", format="turtle")
-    return g.serialize(format="turtle")
+    return g.serialize(format="turtle", encoding='utf-8')
 
 @task
 def get_age_class_data():
@@ -162,7 +162,7 @@ def build_rdf_data(df):
         g.add((obsURI, SDMX_MEASURE.obsValue, population))
 
         if index % 200000 == 0 or index == len(df):
-            file = g.serialize(format='turtle')
+            file = g.serialize(format='turtle', encoding='utf-8')
             files.append(file)
             g = Graph()
     return files
@@ -230,9 +230,9 @@ with Flow('census_csv_to_rdf') as flow:
 
     write_csv_on_ftp(df_fr_it)
 
-    # graph_files = build_rdf_data(df)
+    graph_files = build_rdf_data(df_fr_it)
 
-    # load_turtles(graph_files, rdf_repo_url)
+    load_turtles(graph_files, rdf_repo_url)
 
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
