@@ -1,0 +1,114 @@
+department;label;NUTS3
+1;Torino;ITC11
+2;Vercelli;ITC12
+3;Novara;ITC15
+4;Cuneo;ITC16
+5;Asti;ITC17
+6;Alessandria;ITC18
+96;Biella;ITC13
+103;Verbano-Cusio-Ossola;ITC14
+7;Valle d'Aosta/Vallée d'Aoste;ITC20
+12;Varese;ITC41
+13;Como;ITC42
+14;Sondrio;ITC44
+15;Milano;ITC4C
+16;Bergamo;ITC46
+17;Brescia;ITC47
+18;Pavia;ITC48
+19;Cremona;ITC4A
+20;Mantova;ITC4B
+97;Lecco;ITC43
+98;Lodi;ITC49
+108;Monza e della Brianza;ITC4D
+21;Bolzano/Bozen;ITH10
+22;Trento;ITH20
+23;Verona;ITH31
+24;Vicenza;ITH32
+25;Belluno;ITH33
+26;Treviso;ITH34
+27;Venezia;ITH35
+28;Padova;ITH36
+29;Rovigo;ITH37
+30;Udine;ITH42
+31;Gorizia;ITH43
+32;Trieste;ITH44
+93;Pordenone;ITH41
+8;Imperia;ITC31
+9;Savona;ITC32
+10;Genova;ITC33
+11;La Spezia;ITC34
+33;Piacenza;ITH51
+34;Parma;ITH52
+35;Reggio nell'Emilia;ITH53
+36;Modena;ITH54
+37;Bologna;ITH55
+38;Ferrara;ITH56
+39;Ravenna;ITH57
+40;Forlì-Cesena;ITH58
+99;Rimini;ITH59
+45;Massa-Carrara;ITI11
+46;Lucca;ITI12
+47;Pistoia;ITI13
+48;Firenze;ITI14
+49;Livorno;ITI16
+50;Pisa;ITI17
+51;Arezzo;ITI18
+52;Siena;ITI19
+53;Grosseto;ITI1A
+100;Prato;ITI15
+54;Perugia;ITI21
+55;Terni;ITI22
+41;Pesaro e Urbino;ITI31
+42;Ancona;ITI32
+43;Macerata;ITI33
+44;Ascoli Piceno;ITI34
+109;Fermo;ITI35
+56;Viterbo;ITI41
+57;Rieti;ITI42
+58;Roma;ITI43
+59;Latina;ITI44
+60;Frosinone;ITI45
+66;L'Aquila;ITF11
+67;Teramo;ITF12
+68;Pescara;ITF13
+69;Chieti;ITF14
+70;Campobasso;ITF22
+94;Isernia;ITF21
+61;Caserta;ITF31
+62;Benevento;ITF32
+63;Napoli;ITF33
+64;Avellino;ITF34
+65;Salerno;ITF35
+71;Foggia;ITF46
+72;Bari;ITF47
+73;Taranto;ITF43
+74;Brindisi;ITF44
+75;Lecce;ITF45
+110;Barletta-Andria-Trani;ITF48
+76;Potenza;ITF51
+77;Matera;ITF52
+78;Cosenza;ITF61
+79;Catanzaro;ITF63
+80;Reggio Calabria;ITF65
+101;Crotone;ITF62
+102;Vibo Valentia;ITF64
+81;Trapani;ITG11
+82;Palermo;ITG12
+83;Messina;ITG13
+84;Agrigento;ITG14
+85;Caltanissetta;ITG15
+86;Enna;ITG16
+87;Catania;ITG17
+88;Ragusa;ITG18
+89;Siracusa;ITG19
+90;Sassari;ITG29
+90;Sassari;ITG25
+91;Nuoro;ITG26
+91;Nuoro;ITG2A
+92;Cagliari;ITG27
+95;Oristano;ITG28
+111;Sud Sardegna;ITG2B
+111;Sud Sardegna;ITG27
+111;Sud Sardegna;ITG2C
+111;Sud Sardegna;ITG28
+111;Sud Sardegna;ITG2A
