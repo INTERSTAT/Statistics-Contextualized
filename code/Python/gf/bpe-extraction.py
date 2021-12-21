@@ -4,8 +4,11 @@ from prefect import task, Flow, Parameter
 from zipfile import ZipFile
 from io import BytesIO
 
+# Constants
+PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 # List and intended types of selected variables
 types = {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float, "NBSALLES": int, "QUALITE_XY": str, "TYPEQU": str}
+
 
 @task
 def extract_french_all(url):
@@ -19,13 +22,24 @@ def extract_french_all(url):
 
     return bpeFrame
 
+# Build flow
+def build_flow():
+    with Flow("GF-EF") as flow:
+        bpe_zip_url = Parameter(name="bpe_zip_url", required=True)
+        french_data = extract_french_all(bpe_zip_url)
+    return flow
 
-with Flow("GF-EF") as flow:
+# Run flow
+if __name__ == "__main__":
+    flow = build_flow()
+    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
+        flow.register(project_name="sample")
+    else:
+        flow.run(parameters={
+            "bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip"})
+    flow.visualize()
 
-    bpeZipURL = Parameter("bpeZipURL")
 
-    french_data = extract_french_all(bpeZipURL)
-   
-    flow.run(bpeZipURL = "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip")
 
-flow.visualize()
+
+
