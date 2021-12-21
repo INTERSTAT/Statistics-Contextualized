@@ -14,10 +14,8 @@ def extract_french_data(url, types={}): # types = List and intended types of sel
     # if types is not specified, take all variables
     if not types:
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";") # 'dtype = types' not used here because of 'NA' values
-        print(bpe_data)
     else:
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";", usecols=types.keys()) # 'dtype = types' not used here because of 'NA' values
-        print(bpe_data)
     return bpe_data
 
 # Build flow
