@@ -12,7 +12,7 @@ FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
 @task
-def extract_french_data(url, types={}, facilities_filter={}): # types = List and intended types of selected variables. facilities_filter = list of type of facilities selected
+def extract_french_data(url, types={}, facilities_filter=()): # types = List and intended types of selected variables. facilities_filter = list of type of facilities selected
     archive = ZipFile(BytesIO(requests.get(url).content))
     data_zip = [name for name in archive.namelist() if not name.startswith("varmod")][0]
     # if types is not specified, take all variables
@@ -22,7 +22,8 @@ def extract_french_data(url, types={}, facilities_filter={}): # types = List and
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";", usecols=types.keys())
     # if facilities _filter is not empty, select only type of facilities starting with list of facility types 
     if facilities_filter:
-        bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(tuple(facilities_filter)))]
+        bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(facilities_filter))]
+        print("BPE FILTERED", bpe_data_filtered)
         return bpe_data_filtered
     return bpe_data
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         # run without facilities_filter
         flow.run(parameters={"bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
              "types": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float, "NBSALLES": int, "QUALITE_XY": str, "TYPEQU": str}})
-    # flow.visualize()
+    flow.visualize()
 
 
 
