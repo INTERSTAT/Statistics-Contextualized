@@ -8,10 +8,16 @@ from io import BytesIO
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
 @task
-def extract_french_data(url, types): # types = List and intended types of selected variables
+def extract_french_data(url, types={}): # types = List and intended types of selected variables
     archive = ZipFile(BytesIO(requests.get(url).content))
     data_zip = [name for name in archive.namelist() if not name.startswith("varmod")][0]
-    bpe_data = pd.read_csv(archive.open(data_zip), sep=";", usecols=types.keys()) # 'dtype = types' not used here because of 'NA' values
+    # if types is not specified, take all variables
+    if not types:
+        bpe_data = pd.read_csv(archive.open(data_zip), sep=";") # 'dtype = types' not used here because of 'NA' values
+        print(bpe_data)
+    else:
+        bpe_data = pd.read_csv(archive.open(data_zip), sep=";", usecols=types.keys()) # 'dtype = types' not used here because of 'NA' values
+        print(bpe_data)
     return bpe_data
 
 # Build flow
@@ -28,9 +34,9 @@ if __name__ == "__main__":
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name="sample")
     else:
-        flow.run(parameters={
-            "bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip", "types": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float, "NBSALLES": int, "QUALITE_XY": str, "TYPEQU": str}})
-    # flow.visualize()
+        flow.run(parameters={"bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+             "types": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float, "NBSALLES": int, "QUALITE_XY": str, "TYPEQU": str}})
+    flow.visualize()
 
 
 
