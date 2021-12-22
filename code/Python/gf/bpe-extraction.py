@@ -10,6 +10,8 @@ PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 FTP_HOST = 'FTP_HOST'
 FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
+					
+types_var_mod = {"COD_VAR": str, "LIB_VAR": str, "COD_MOD": str, "LIB_MOD": str, "TYPE_VAR": str, "LONG_VAR": int}
 
 @task
 def extract_french_data(url, types={}, facilities_filter=()): # types = List and intended types of selected variables. facilities_filter = list of type of facilities selected
@@ -23,9 +25,26 @@ def extract_french_data(url, types={}, facilities_filter=()): # types = List and
     # if facilities _filter is not empty, select only type of facilities starting with list of facility types 
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(facilities_filter))]
-        print("BPE FILTERED", bpe_data_filtered)
         return bpe_data_filtered
     return bpe_data
+
+
+@task
+def extract_french_metadata(url, types={}):
+    archive = ZipFile(BytesIO(requests.get(url).content))
+    metadata_zip = [name for name in archive.namelist() if name.startswith("varmod")][0]
+    bpe_metadata = pd.read_csv(archive.open(metadata_zip), sep=";", usecols=types_var_mod.keys())
+    if types:
+            bpe_metadata_filtered = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
+            return bpe_metadata_filtered
+    return bpe_metadata
+
+
+@task
+def get_typ_equ(bpe_metadata):
+    typ_equ = bpe_metadata.loc[(bpe_metadata["COD_VAR"] == "TYPEQU"), ["COD_MOD", "LIB_MOD"]]
+    return typ_equ
+
 
 @task 
 def write_csv_on_ftp(df):
@@ -38,6 +57,7 @@ def write_csv_on_ftp(df):
         # with sftp.cd('files/gf/output/'):
              # sftp.put('gf_data_fr.csv')
 
+
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
@@ -46,8 +66,11 @@ def build_flow():
         facilities_filter = Parameter(name="facilities_filter", required=False)
         french_data = extract_french_data(bpe_zip_url, types, facilities_filter)
         write_csv_on_ftp(french_data)
+        french_metadata = extract_french_metadata(bpe_zip_url, types)
+        typ_equ = get_typ_equ(french_metadata)
     return flow
 
+ 
 # Run flow
 if __name__ == "__main__":
     flow = build_flow()
