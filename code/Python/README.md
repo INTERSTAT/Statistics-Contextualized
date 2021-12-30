@@ -17,11 +17,14 @@
 ### Install packages
 
  - Install [Prefect](https://docs.prefect.io/core/getting_started/install.html): `conda install -c conda-forge prefect`
+ - Install [flow visualization tools](https://docs.prefect.io/core/advanced_tutorials/visualization.html): `pip install "prefect[viz]"`
  - Install [pandas](https://pandas.pydata.org/docs/getting_started/install.html): `conda install -c conda-forge pandas`
  - Install [pysftp](https://pypi.org/project/pysftp/): `conda install -c conda-forge pysftp`
  - Install [RDFLib](https://rdflib.readthedocs.io/en/stable/): `pip install rdflib`
 
-Note: installing RDFLib with conda fails because RDFLib requires Python version to be strictly below 3.10, which is the version installed when conda installs Prefect.
+Notes:
+ - the flow visualization tools rely on [Graphviz](https://graphviz.org/)
+ - installing RDFLib with conda fails because RDFLib requires Python version to be strictly below 3.10, which is the version installed when conda installs Prefect.
 
 ### Connect IDE to virtual environment
 
@@ -31,4 +34,8 @@ The [Spyder IDE](https://www.spyder-ide.org/) comes with Anaconda and can be use
 
 #### IntelliJ IDEA
 
-IntelliJ can be used to edit the Python scripts with the “Python Community Edition” plugin. In the project settings (F4 in the Project tool window), click on “Add SDK / Python SDK” in the “SDK:” drop-down list, then “Conda Environment / Existing environment” and chose the `interstat` Python interpreter
+IntelliJ can be used to edit the Python scripts with the “Python Community Edition” plugin. In the project settings (F4 in the Project tool window), click on “Add SDK / Python SDK” in the “SDK:” drop-down list, then “Conda Environment / Existing environment” and chose the `interstat` Python interpreter.
+
+### Visual Studio Code
+
+The [VSCode documentation](https://code.visualstudio.com/docs/python/environments) details how to select a Python interpreter in the Command Palette (Ctrl+Shift+P). 
