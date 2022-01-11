@@ -38,10 +38,9 @@ def extract_french_data(url, types={}, facilities_filter=()):
     data_zip = [name for name in archive.namelist() if not name.startswith("varmod")][0]
     # if types is not specified, take all the variables
     if not types:
-        # 'dtype=types' is not used here because of 'NA' values
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";")
     else:
-        bpe_data = pd.read_csv(archive.open(data_zip), sep=";", usecols=types.keys())
+        bpe_data = pd.read_csv(archive.open(data_zip), sep=";", dtype=types, usecols=types.keys())
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(facilities_filter))]
@@ -112,9 +111,9 @@ if __name__ == "__main__":
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name="sample")
     else:
-        # run without facilities_filter
         flow.run(parameters={
             "bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
             "types": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
-                      "NBSALLES": int, "QUALITE_XY": str, "TYPEQU": str}})
+                      "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
+            "facilities_filter": ("F309")})
     flow.visualize()
