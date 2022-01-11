@@ -1,11 +1,11 @@
 {
   "@context":"http://www.w3.org/ns/csvw",
+  "dc:title": "Population by sex, age and activity status",
+  "dc:description": "Data from the Census for France and Italy",
+  "dc:creator": "Interstat",
   "tables": [
     {
       "url": "census-sample.csv",
-      "dc:title": "Population by sex, age and activity status",
-      "dc:description": "Data from the Census for France and Italy",
-      "dc:creator": "Interstat",
       "tableSchema":
         {
           "columns": [
@@ -14,6 +14,7 @@
               "dc:description": "Local Administrative Unit"
             },
             {
+              "name": "nuts3",
               "titles": "nuts3",
               "dc:description": "NUTS 3"
             },
@@ -26,7 +27,7 @@
                   "format": "1|2"
                 }
             },
-            {
+            { "name": "group",
               "titles": "age",
               "dc:description": "Five-year age group"
             },
@@ -38,7 +39,7 @@
           ],
           "foreignKeys": [
             {
-              "columnReference": "age",
+              "columnReference": "group",
               "reference":
                 {
                   "resource": "age-groups.csv",
@@ -50,7 +51,7 @@
               "reference":
                 {
                   "resource": "nuts3.csv",
-                  "columnReference": "nuts3"
+                  "columnReference": "departement"
                 }
             }
           ],
