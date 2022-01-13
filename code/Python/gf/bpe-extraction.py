@@ -41,10 +41,10 @@ def extract_french_data(url, types={}, facilities_filter=()):
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";")
     else:
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";", dtype=types, usecols=types.keys())
-    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map({"Acceptable":"0",
-                                                         "Bonne":"1",
-                                                         "Mauvaise":"2",
-                                                         "Non géolocalisé":"3"},
+    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map({"Acceptable": "0",
+                                                         "Bonne": "1",
+                                                         "Mauvaise": "2",
+                                                         "Non géolocalisé": "3"},
                                                         na_action="ignore")
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
@@ -114,8 +114,9 @@ def build_flow():
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
         write_csv_on_ftp(french_data)
-        french_metadata = extract_french_metadata(bpe_zip_url1, types1)
-        typ_equ = get_typ_equ(french_metadata)
+        french_metadata1 = extract_french_metadata(bpe_zip_url1, types1)
+        french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
+        french_metadata = concat_datasets(french_metadata1, french_metadata2)
     return flow
 
 
@@ -134,4 +135,4 @@ if __name__ == "__main__":
             "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
                        "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
         })
-    # flow.visualize()
+    flow.visualize()
