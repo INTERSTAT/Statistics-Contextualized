@@ -81,6 +81,11 @@ def get_typ_equ(bpe_metadata):
 
 
 @task
+def concat_datasets(ds1, ds2):
+    return pd.concat([ds1, ds2])
+
+
+@task
 def write_csv_on_ftp(df):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
@@ -95,12 +100,16 @@ def write_csv_on_ftp(df):
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
-        bpe_zip_url = Parameter(name="bpe_zip_url", required=True)
-        types = Parameter(name="types", required=False)
+        bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
+        types1 = Parameter(name="types1", required=False)
         facilities_filter = Parameter(name="facilities_filter", required=False)
-        french_data = extract_french_data(bpe_zip_url, types, facilities_filter)
+        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
+        bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
+        types2 = Parameter(name="types2", required=False)
+        french_data2 = extract_french_data(bpe_zip_url2, types2)
+        french_data = concat_datasets(french_data1, french_data2)
         write_csv_on_ftp(french_data)
-        french_metadata = extract_french_metadata(bpe_zip_url, types)
+        french_metadata = extract_french_metadata(bpe_zip_url1, types1)
         typ_equ = get_typ_equ(french_metadata)
     return flow
 
@@ -112,8 +121,12 @@ if __name__ == "__main__":
         flow.register(project_name="sample")
     else:
         flow.run(parameters={
-            "bpe_zip_url": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-            "types": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
-                      "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
-            "facilities_filter": ("F309")})
-    flow.visualize()
+            "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+            "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
+                       "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
+            "facilities_filter": ("F309"),
+            "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+            "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
+                       "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
+        })
+    # flow.visualize()
