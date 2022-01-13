@@ -41,6 +41,11 @@ def extract_french_data(url, types={}, facilities_filter=()):
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";")
     else:
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";", dtype=types, usecols=types.keys())
+    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map({"Acceptable":"0",
+                                                         "Bonne":"1",
+                                                         "Mauvaise":"2",
+                                                         "Non géolocalisé":"3"},
+                                                        na_action="ignore")
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(facilities_filter))]
