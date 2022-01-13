@@ -6,6 +6,7 @@ from prefect import task, Flow, Parameter
 from zipfile import ZipFile
 from io import BytesIO
 import pysftp
+import json
 
 # Constants
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -161,16 +162,29 @@ def transform_metadata_to_csvw(bpe_metadata):
     return csvw
 
 
-@task
-def write_csv_on_ftp(df):
+def write_file_on_ftp(file_source, target_directory):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
-    # TODO: Use tempfile
-    csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
     # Commented lines while waiting for details on the FTP connection
     # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
-    # with sftp.cd('files/gf/output/'):
-    # sftp.put('gf_data_fr.csv')
+    # with sftp.cd(target_directory):
+    # sftp.put(file_source)
+
+
+@task
+def write_csv_on_ftp(df):
+    # TODO: Use temporary file
+    csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
+    write_file_on_ftp(DATA_FILE_NAME, 'files/gf/output/')
+
+
+@task
+def write_json_on_ftp(csvw):
+    # TODO: Use temporary file
+    json_file_name = DATA_FILE_NAME + "-metadata.json"
+    with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
+        json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
+    write_file_on_ftp(json_file_name, "files/gf/output")
 
 
 # Build flow
@@ -188,7 +202,8 @@ def build_flow():
         french_metadata1 = extract_french_metadata(bpe_zip_url1, types1)
         french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
-        transform_metadata_to_csvw(french_metadata)
+        csvw = transform_metadata_to_csvw(french_metadata)
+        write_json_on_ftp(csvw)
     return flow
 
 
