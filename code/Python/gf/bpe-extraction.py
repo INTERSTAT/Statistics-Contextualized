@@ -1,5 +1,3 @@
-from typing import Dict, List, Any
-
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
@@ -15,8 +13,9 @@ FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
 types_var_mod = {"COD_VAR": str, "LIB_VAR": str, "COD_MOD": str, "LIB_MOD": str, "TYPE_VAR": str, "LONG_VAR": int}
-CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Geolocalized Facilities in 2020 : sport & leisure",
-              "dc:description": "Data from the French permanent database of facilities (BPE in French)",
+CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Équipements géolocalisés en 2020 : lieux "
+                                                                   "d’exposition et patrimoine & enseignement",
+              "dc:description": "Données de la base permanente des équipements (BPE)",
               "dc:creator": "Interstat", "tables": list()}
 DATA_FILE_NAME = "gf_data_fr.csv"
 
@@ -61,7 +60,7 @@ def extract_french_data(url, types={}, facilities_filter=()):
 
 
 @task
-def extract_french_metadata(url, types={}):
+def extract_french_metadata(url, types={}, facilities_filter=()):
     """
     Extracts the French metadata about geolocalized facilities.
 
@@ -71,6 +70,8 @@ def extract_french_metadata(url, types={}):
         URL of the metadata file
     types : dict
         List of names and intended data types of the variables to select
+    facilities_filter : tuple
+        List of types of facilities selected
 
     Returns
     -------
@@ -81,8 +82,10 @@ def extract_french_metadata(url, types={}):
     metadata_zip = [name for name in archive.namelist() if name.startswith("varmod")][0]
     bpe_metadata = pd.read_csv(archive.open(metadata_zip), sep=";", usecols=types_var_mod.keys())
     if types:
-        bpe_metadata_filtered = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
-        return bpe_metadata_filtered
+        bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
+    if facilities_filter:
+        indexes = bpe_metadata[(bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
+        bpe_metadata = bpe_metadata.drop(indexes)
     return bpe_metadata
 
 
@@ -94,7 +97,7 @@ def get_typ_equ(bpe_metadata):
 
 @task
 def concat_datasets(ds1, ds2):
-    return pd.concat([ds1, ds2])
+    return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
 
 
 def get_json_datatype(var_type):
@@ -199,7 +202,7 @@ def build_flow():
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
         write_csv_on_ftp(french_data)
-        french_metadata1 = extract_french_metadata(bpe_zip_url1, types1)
+        french_metadata1 = extract_french_metadata(bpe_zip_url1, types1, facilities_filter)
         french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
@@ -217,7 +220,7 @@ if __name__ == "__main__":
             "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
             "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
                        "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
-            "facilities_filter": ("F309"),
+            "facilities_filter": ("F309",),
             "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
             "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
                        "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
