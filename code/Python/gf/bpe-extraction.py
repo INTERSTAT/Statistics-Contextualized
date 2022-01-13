@@ -1,3 +1,5 @@
+from typing import Dict, List, Any
+
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
@@ -12,6 +14,10 @@ FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
 types_var_mod = {"COD_VAR": str, "LIB_VAR": str, "COD_MOD": str, "LIB_MOD": str, "TYPE_VAR": str, "LONG_VAR": int}
+CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Geolocalized Facilities in 2020 : sport & leisure",
+              "dc:description": "Data from the French permanent database of facilities (BPE in French)",
+              "dc:creator": "Interstat", "tables": list()}
+DATA_FILE_NAME = "gf_data_fr.csv"
 
 
 @task
@@ -90,12 +96,77 @@ def concat_datasets(ds1, ds2):
     return pd.concat([ds1, ds2])
 
 
+def get_json_datatype(var_type):
+    json_datatype = ""
+    if var_type == "DECIMAL":
+        json_datatype = "float"
+    elif var_type == "ENTIER":
+        json_datatype = "integer"
+    elif var_type == "ANNEE":
+        json_datatype = "gYear"
+    return json_datatype
+
+
+@task
+def transform_metadata_to_csvw(bpe_metadata):
+    """
+    Transforms the French metadata to CSVW description.
+
+    Parameters
+    ----------
+    bpe_metadata : Dataframe
+        The metadata extracted
+
+    Returns
+    -------
+    Dictionary
+        Dictionary representing CSVW description
+    """
+    # Filter for selecting unique variables
+    columns = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(
+        subset=["COD_VAR", "LIB_VAR", "TYPE_VAR"], ignore_index=True)
+    csvw = CSVW_INTRO
+    # Create dictionary for describing data file structure
+    table_data = {"url": DATA_FILE_NAME, "tableSchema": {}}
+    table_data["tableSchema"]["columns"] = []
+    table_data["tableSchema"]["foreignKeys"] = []
+    # Browse all variables
+    for i in columns.index:
+        cod_var = columns["COD_VAR"][i]
+        lib_var = columns["LIB_VAR"][i]
+        typ_var = columns["TYPE_VAR"][i]
+        json_datatype = get_json_datatype(typ_var)
+        column = {"titles": cod_var,
+                  "dc:description": lib_var}
+        if json_datatype:
+            column["datatype"] = json_datatype
+        # Variable type == "CHAR" means an external table (csv file) contains valid code lists
+        if typ_var == "CHAR":
+            column["name"] = cod_var + "_CODE"
+            foreign_key = {"columReference": cod_var + "_CODE",
+                           "reference": {"resource": cod_var,
+                                         "columnReference": cod_var + "_CODE"}}
+            table_data["tableSchema"]["foreignKeys"].append(foreign_key)
+            # Describe external table containing valid code lists
+            table_metadata = {"url": cod_var + ".csv", "tableSchema": {"columns": [
+                {"name": cod_var + "_CODE", "titles": cod_var,
+                 "dc:description": lib_var + " (code)"},
+                {"titles": cod_var + "_LABEL", "dc:description": lib_var + " (label)"}]}}
+            # Add external table description to CSVW
+            csvw["tables"].append(table_metadata)
+        # Add column description to table data description
+        table_data["tableSchema"]["columns"].append(column)
+    # Add table data description to CSVW description after loop
+    csvw["tables"][0].update(table_data)
+    return csvw
+
+
 @task
 def write_csv_on_ftp(df):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     # TODO: Use tempfile
-    csv = df.to_csv(r'gf_data_fr.csv', index=False, header=True)
+    csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
     # Commented lines while waiting for details on the FTP connection
     # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
     # with sftp.cd('files/gf/output/'):
@@ -117,6 +188,7 @@ def build_flow():
         french_metadata1 = extract_french_metadata(bpe_zip_url1, types1)
         french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
+        transform_metadata_to_csvw(french_metadata)
     return flow
 
 
