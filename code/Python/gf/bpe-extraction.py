@@ -78,13 +78,12 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
     DataFrame
         The metadata extracted
     """
-    archive = ZipFile(BytesIO(requests.get(url).content))
-    metadata_zip = [name for name in archive.namelist() if name.startswith("varmod")][0]
-    bpe_metadata = pd.read_csv(archive.open(metadata_zip), sep=";", usecols=types_var_mod.keys())
+    bpe_metadata = pd.read_csv(url, sep=",", usecols=types_var_mod.keys())
     if types:
         bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
     if facilities_filter:
-        indexes = bpe_metadata[(bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
+        indexes = bpe_metadata[
+            (bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
         bpe_metadata = bpe_metadata.drop(indexes)
     return bpe_metadata
 
@@ -165,7 +164,7 @@ def transform_metadata_to_csvw(bpe_metadata):
     return csvw
 
 
-def write_file_on_ftp(file_source, target_directory):
+def write_file_on_ftp(source_file, target_directory):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     # Commented lines while waiting for details on the FTP connection
@@ -175,7 +174,7 @@ def write_file_on_ftp(file_source, target_directory):
 
 
 @task
-def write_csv_on_ftp(df):
+def write_csv_on_ftp(df, source_file):
     # TODO: Use temporary file
     csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
     write_file_on_ftp(DATA_FILE_NAME, 'files/gf/output/')
@@ -190,22 +189,39 @@ def write_json_on_ftp(csvw):
     write_file_on_ftp(json_file_name, "files/gf/output")
 
 
+@task
+def write_code_lists_on_ftp(bpe_metadata):
+    bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
+    for i in bpe_metadata_variables.index:
+        if bpe_metadata_variables["TYPE_VAR"][i] == "CHAR":
+            code_list = bpe_metadata.loc[
+                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i], ["COD_MOD", "LIB_MOD"]]
+            code_list.dropna(inplace=True)
+            file_name = bpe_metadata_variables["COD_VAR"][i] + ".csv"
+            code_list.to_csv(file_name, index=False, header=True)
+            write_file_on_ftp(file_name, "files/gf/output")
+    return
+
+
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
+        bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
         facilities_filter = Parameter(name="facilities_filter", required=False)
         french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
+        bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-        write_csv_on_ftp(french_data)
-        french_metadata1 = extract_french_metadata(bpe_zip_url1, types1, facilities_filter)
-        french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
+        write_csv_on_ftp(french_data, DATA_FILE_NAME)
+        french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
+        french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
+        write_code_lists_on_ftp(french_metadata)
         write_json_on_ftp(csvw)
     return flow
 
@@ -218,10 +234,13 @@ if __name__ == "__main__":
     else:
         flow.run(parameters={
             "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+            "bpe_metadata_url1": "https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/bpe"
+                                 "-cultural-places-variables.csv",
             "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
                        "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
             "facilities_filter": ("F309",),
             "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+            "bpe_metadata_url2": "https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/bpe-education-variables.csv",
             "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
                        "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
         })
