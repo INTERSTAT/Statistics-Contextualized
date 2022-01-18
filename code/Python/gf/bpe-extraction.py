@@ -78,13 +78,12 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
     DataFrame
         The metadata extracted
     """
-    archive = ZipFile(BytesIO(requests.get(url).content))
-    metadata_zip = [name for name in archive.namelist() if name.startswith("varmod")][0]
-    bpe_metadata = pd.read_csv(archive.open(metadata_zip), sep=";", usecols=types_var_mod.keys())
+    bpe_metadata = pd.read_csv(url, sep=",", usecols=types_var_mod.keys())
     if types:
         bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
     if facilities_filter:
-        indexes = bpe_metadata[(bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
+        indexes = bpe_metadata[
+            (bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
         bpe_metadata = bpe_metadata.drop(indexes)
     return bpe_metadata
 
@@ -126,7 +125,7 @@ def transform_metadata_to_csvw(bpe_metadata):
     Dictionary
         Dictionary representing CSVW description
     """
-    # Filter for selecting unique variables
+    # Filter for selecting unique variables (= columns)
     columns = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(
         subset=["COD_VAR", "LIB_VAR", "TYPE_VAR"], ignore_index=True)
     csvw = CSVW_INTRO
@@ -139,6 +138,7 @@ def transform_metadata_to_csvw(bpe_metadata):
         cod_var = columns["COD_VAR"][i]
         lib_var = columns["LIB_VAR"][i]
         typ_var = columns["TYPE_VAR"][i]
+        metadata_table_name = cod_var.lower() + ".csv"
         json_datatype = get_json_datatype(typ_var)
         column = {"titles": cod_var,
                   "dc:description": lib_var}
@@ -146,39 +146,39 @@ def transform_metadata_to_csvw(bpe_metadata):
             column["datatype"] = json_datatype
         # Variable type == "CHAR" means an external table (csv file) contains valid code lists
         if typ_var == "CHAR":
-            column["name"] = cod_var + "_CODE"
-            foreign_key = {"columReference": cod_var + "_CODE",
-                           "reference": {"resource": cod_var,
+            column["name"] = cod_var
+            foreign_key = {"columReference": cod_var,
+                           "reference": {"resource": metadata_table_name,
                                          "columnReference": cod_var + "_CODE"}}
             table_data["tableSchema"]["foreignKeys"].append(foreign_key)
             # Describe external table containing valid code lists
-            table_metadata = {"url": cod_var + ".csv", "tableSchema": {"columns": [
-                {"name": cod_var + "_CODE", "titles": cod_var,
+            table_metadata = {"url": metadata_table_name, "tableSchema": {"columns": [
+                {"name": cod_var + "_CODE", "titles": cod_var + "_CODE",
                  "dc:description": lib_var + " (code)"},
                 {"titles": cod_var + "_LABEL", "dc:description": lib_var + " (label)"}]}}
             # Add external table description to CSVW
             csvw["tables"].append(table_metadata)
         # Add column description to table data description
         table_data["tableSchema"]["columns"].append(column)
-    # Add table data description to CSVW description after loop
-    csvw["tables"][0].update(table_data)
+    # Insert description of data table data to CSVW description
+    csvw["tables"].insert(0, table_data)
     return csvw
 
 
-def write_file_on_ftp(file_source, target_directory):
+def write_file_on_ftp(source_file):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     # Commented lines while waiting for details on the FTP connection
     # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
-    # with sftp.cd(target_directory):
+    # with sftp.cd("files/gf/output"):
     # sftp.put(file_source)
 
 
 @task
-def write_csv_on_ftp(df):
+def write_csv_on_ftp(df, source_file):
     # TODO: Use temporary file
     csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
-    write_file_on_ftp(DATA_FILE_NAME, 'files/gf/output/')
+    write_file_on_ftp(DATA_FILE_NAME)
 
 
 @task
@@ -187,25 +187,45 @@ def write_json_on_ftp(csvw):
     json_file_name = DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
-    write_file_on_ftp(json_file_name, "files/gf/output")
+    write_file_on_ftp(json_file_name)
+
+
+@task
+def write_code_lists_on_ftp(bpe_metadata):
+    bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
+    for i in bpe_metadata_variables.index:
+        cod_var = bpe_metadata_variables["COD_VAR"][i]
+        cod_var_code = cod_var + "_CODE"
+        cod_var_lib = cod_var + "_LABEL"
+        if bpe_metadata_variables["TYPE_VAR"][i] == "CHAR":
+            code_list = bpe_metadata.loc[
+                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i], ["COD_MOD", "LIB_MOD"]]
+            code_list = code_list.rename(columns={"COD_MOD": cod_var_code, "LIB_MOD": cod_var_lib})
+            code_list.dropna(inplace=True)
+            file_name = bpe_metadata_variables["COD_VAR"][i].lower() + ".csv"
+            code_list.to_csv(file_name, index=False, header=True)
+            write_file_on_ftp(file_name)
 
 
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
+        bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
         facilities_filter = Parameter(name="facilities_filter", required=False)
         french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
+        bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-        write_csv_on_ftp(french_data)
-        french_metadata1 = extract_french_metadata(bpe_zip_url1, types1, facilities_filter)
-        french_metadata2 = extract_french_metadata(bpe_zip_url2, types2)
+        write_csv_on_ftp(french_data, DATA_FILE_NAME)
+        french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
+        french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
+        write_code_lists_on_ftp(french_metadata)
         write_json_on_ftp(csvw)
     return flow
 
@@ -218,10 +238,13 @@ if __name__ == "__main__":
     else:
         flow.run(parameters={
             "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+            "bpe_metadata_url1": "../../../bpe"
+                                 "-cultural-places-variables.csv",
             "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
                        "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
             "facilities_filter": ("F309",),
             "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+            "bpe_metadata_url2": "../../../bpe-education-variables.csv",
             "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
                        "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
         })
