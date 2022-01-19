@@ -26,6 +26,10 @@ Notes:
  - the flow visualization tools rely on [Graphviz](https://graphviz.org/)
  - installing RDFLib with conda fails because RDFLib requires Python version to be strictly below 3.10, which is the version installed when conda installs Prefect.
 
+### Configure credentials
+
+*TODO*, see https://stackoverflow.com/questions/12042724/securely-storing-passwords-for-use-in-python-script
+
 ### Connect IDE to virtual environment
 
 #### Spyder
@@ -36,6 +40,6 @@ The [Spyder IDE](https://www.spyder-ide.org/) comes with Anaconda and can be use
 
 IntelliJ can be used to edit the Python scripts with the “Python Community Edition” plugin. In the project settings (F4 in the Project tool window), click on “Add SDK / Python SDK” in the “SDK:” drop-down list, then “Conda Environment / Existing environment” and chose the `interstat` Python interpreter.
 
-### Visual Studio Code
+#### Visual Studio Code
 
 The [VSCode documentation](https://code.visualstudio.com/docs/python/environments) details how to select a Python interpreter in the Command Palette (Ctrl+Shift+P). 

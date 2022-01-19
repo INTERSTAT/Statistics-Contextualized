@@ -1,0 +1,9 @@
+# Ignore CSV files
+/*.csv
+
+# Ignore IDE files
+.classpath
+.project
+.settings/
+.idea
+*.iml

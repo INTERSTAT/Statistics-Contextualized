@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The DDI-CDI/NGSI-LD [interoperability test](https://github.com/FranckCo/Statistics-Contextualized/blob/main/test-case-sep.md) uses data on air quality and census data. For the census data, we will use simple cubes defined using the SDMX data model and built on the harmonized definitions specified in the European legislation, precisely documented in the EU legislation on the 2021 population and housing censuses [explanatory notes](https://ec.europa.eu/eurostat/documents/3859598/9670557/KS-GQ-18-010-EN-N.pdf/c3df7fcb-f134-4398-94c8-4be0b7ec0494?t=1552653277000).
+The DDI-CDI/NGSI-LD [interoperability test](test-case-sep.md) uses data on air quality and census data. For the census data, we will use simple cubes defined using the SDMX data model and built on the harmonized definitions specified in the European legislation, precisely documented in the EU legislation on the 2021 population and housing censuses [explanatory notes](https://ec.europa.eu/eurostat/documents/3859598/9670557/KS-GQ-18-010-EN-N.pdf/c3df7fcb-f134-4398-94c8-4be0b7ec0494?t=1552653277000).
 
 In order to minimize technical interoperability questions, we will directly express data and metadata as linked data using the W3C [Data Cube](https://www.w3.org/TR/vocab-data-cube/) Recommendation and the [SDMX Content-Oriented Guidelines](https://sdmx.org/?page_id=4345) components [translated in RDF](https://github.com/UKGovLD/publishing-statistical-data/tree/master/specs/src/main/vocab) by the UK Government Linked Data Working Group.
 
