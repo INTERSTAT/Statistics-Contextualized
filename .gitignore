@@ -1,5 +1,5 @@
 # Ignore CSV files
-*.csv
+/*.csv
 
 # Ignore IDE files
 .classpath
