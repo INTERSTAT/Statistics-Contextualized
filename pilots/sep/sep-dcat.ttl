@@ -11,7 +11,7 @@ isd:pop1b
     dcterms:description "Detailed tables of the population census for the municipalities of France excluding Mayotte"@en , "Tableaux détaillés du recensement de la population pour les communes de France hors Mayotte."@fr ;
     dcat:keyword "census"@en, "recensement"@fr ;
     dcat:theme <http://publications.europa.eu/resource/authority/eurovoc/2908> , <http://id.insee.fr/concepts/definition/c1973> ;
-	dcterms:publisher <http://www.insee.fr> ;
+    dcterms:publisher <http://www.insee.fr> ;
     dcterms:spatial <http://id.insee.fr/geo/pays/france> ;
     dcterms:temporal <http://id.cef-interstat.eu/sc/time/2018> ;
     dcat:contactPoint <mailto:contact@insee.fr> ;
@@ -38,6 +38,7 @@ isd:pop1b-excel
     dcatap:availability <http://data.europa.eu/r5r/availability/stable> ;
     dcterms:license <https://www.insee.fr/fr/information/2381863> .
 
+# We could also use https://reference.data.gov.uk/id/year/2017
 <http://id.cef-interstat.eu/sc/time/2018>
     a dcterms:PeriodOfTime ;
     dcat:startDate "2018-01-01"^^xsd:date ;
