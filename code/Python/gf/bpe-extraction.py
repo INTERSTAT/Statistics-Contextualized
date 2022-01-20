@@ -5,6 +5,7 @@ from zipfile import ZipFile
 from io import BytesIO
 import pysftp
 import json
+import csv
 
 # Constants
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -89,14 +90,13 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
 
 
 @task
-def get_typ_equ(bpe_metadata):
-    typ_equ = bpe_metadata.loc[(bpe_metadata["COD_VAR"] == "TYPEQU"), ["COD_MOD", "LIB_MOD"]]
-    return typ_equ
+def concat_datasets(ds1, ds2):
+    return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
 
 
 @task
-def concat_datasets(ds1, ds2):
-    return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
+def transform_data_to_csv(df):
+    return df.to_csv(DATA_FILE_NAME, index=False, header=True)
 
 
 def get_json_datatype(var_type):
@@ -122,8 +122,8 @@ def transform_metadata_to_csvw(bpe_metadata):
 
     Returns
     -------
-    Dictionary
-        Dictionary representing CSVW description
+    File
+        json file representing CSVW description
     """
     # Filter for selecting unique variables (= columns)
     columns = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(
@@ -162,12 +162,60 @@ def transform_metadata_to_csvw(bpe_metadata):
         table_data["tableSchema"]["columns"].append(column)
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
-    return csvw
+    json_file_name = DATA_FILE_NAME + "-metadata.json"
+    with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
+        json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
+    return csvw_file
 
 
-def write_file_on_ftp(source_file):
+@task
+def transform_metadata_to_code_lists(bpe_metadata):
+    """
+    Transforms the French metadata to code list csv files.
+
+    Parameters
+    ----------
+    bpe_metadata : Dataframe
+        The metadata extracted
+
+    Returns
+    -------
+    List
+        List of files. Each item is a CSV file representing one code list
+    """
+    bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
+    dict_var_code_lists = {"variables": []}
+    for i in bpe_metadata_variables.index:
+        cod_var = bpe_metadata_variables["COD_VAR"][i]
+        typ_var = bpe_metadata_variables["TYPE_VAR"][i]
+        mod = []
+        if typ_var == "CHAR":
+            code_list = bpe_metadata.loc[
+                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i], ["COD_MOD", "LIB_MOD"]]
+            code_list.dropna(inplace=True)
+            for j in code_list.index:
+                cod_mod = code_list["COD_MOD"][j]
+                lib_mod = code_list["LIB_MOD"][j]
+                mod.append({"codMod": cod_mod, "libMod": lib_mod})
+            dict_var_code_lists["variables"].append({"codVar": cod_var, "mod": mod})
+    files = []
+    for x in dict_var_code_lists.get("variables"):
+        cod_var = x["codVar"]
+        file_name = x["codVar"].lower() + ".csv"
+        header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
+        with open(file_name, 'w', newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
+            writer.writerow(header_list)
+            for y in x["mod"]:
+                writer.writerow(y)
+        files.append(file)
+    return files
+
+
+def load_one_file_to_ftp(filename):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
+    print(filename)
     # Commented lines while waiting for details on the FTP connection
     # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
     # with sftp.cd("files/gf/output"):
@@ -175,36 +223,19 @@ def write_file_on_ftp(source_file):
 
 
 @task
-def write_csv_on_ftp(df, source_file):
-    # TODO: Use temporary file
-    csv = df.to_csv(DATA_FILE_NAME, index=False, header=True)
-    write_file_on_ftp(DATA_FILE_NAME)
+def load_data_to_ftp():
+    load_one_file_to_ftp(DATA_FILE_NAME)
 
 
 @task
-def write_json_on_ftp(csvw):
-    # TODO: Use temporary file
-    json_file_name = DATA_FILE_NAME + "-metadata.json"
-    with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
-        json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
-    write_file_on_ftp(json_file_name)
+def load_csvw_to_ftp(file):
+    load_one_file_to_ftp(file.name)
 
 
 @task
-def write_code_lists_on_ftp(bpe_metadata):
-    bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
-    for i in bpe_metadata_variables.index:
-        cod_var = bpe_metadata_variables["COD_VAR"][i]
-        cod_var_code = cod_var + "_CODE"
-        cod_var_lib = cod_var + "_LABEL"
-        if bpe_metadata_variables["TYPE_VAR"][i] == "CHAR":
-            code_list = bpe_metadata.loc[
-                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i], ["COD_MOD", "LIB_MOD"]]
-            code_list = code_list.rename(columns={"COD_MOD": cod_var_code, "LIB_MOD": cod_var_lib})
-            code_list.dropna(inplace=True)
-            file_name = bpe_metadata_variables["COD_VAR"][i].lower() + ".csv"
-            code_list.to_csv(file_name, index=False, header=True)
-            write_file_on_ftp(file_name)
+def load_code_lists_to_ftp(files):
+    for f in files:
+        load_one_file_to_ftp(f.name)
 
 
 # Build flow
@@ -220,13 +251,15 @@ def build_flow():
         types2 = Parameter(name="types2", required=False)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-        write_csv_on_ftp(french_data, DATA_FILE_NAME)
+       # transform_data_to_csv(french_data)
+        load_data_to_ftp(upstream_tasks=[transform_data_to_csv(french_data)])
         french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
-        csvw = transform_metadata_to_csvw(french_metadata)
-        write_code_lists_on_ftp(french_metadata)
-        write_json_on_ftp(csvw)
+        csvw_file = transform_metadata_to_csvw(french_metadata)
+        load_csvw_to_ftp(csvw_file)
+        code_lists = transform_metadata_to_code_lists(french_metadata)
+        load_code_lists_to_ftp(code_lists)
     return flow
 
 
