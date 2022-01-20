@@ -215,7 +215,6 @@ def transform_metadata_to_code_lists(bpe_metadata):
 def load_one_file_to_ftp(filename):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
-    print(filename)
     # Commented lines while waiting for details on the FTP connection
     # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
     # with sftp.cd("files/gf/output"):
@@ -251,7 +250,6 @@ def build_flow():
         types2 = Parameter(name="types2", required=False)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-       # transform_data_to_csv(french_data)
         load_data_to_ftp(upstream_tasks=[transform_data_to_csv(french_data)])
         french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
