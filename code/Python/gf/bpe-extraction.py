@@ -9,9 +9,9 @@ import csv
 
 # Constants
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
-FTP_HOST = 'FTP_HOST'
-FTP_USERNAME = 'FTP_USERNAME'
-FTP_PASSWORD = 'FTP_PASSWORD'
+FTP_URL = None
+FTP_USER = None
+FTP_PASSWORD = None
 
 types_var_mod = {"COD_VAR": str, "LIB_VAR": str, "COD_MOD": str, "LIB_MOD": str, "TYPE_VAR": str, "LONG_VAR": int}
 CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Équipements géolocalisés en 2020 : lieux "
@@ -181,7 +181,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
     Returns
     -------
     List
-        List of files. Each item is a CSV file representing one code list
+        List of files created. Each item is a CSV file representing one code list
     """
     bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
     dict_var_code_lists = {"variables": []}
@@ -212,29 +212,21 @@ def transform_metadata_to_code_lists(bpe_metadata):
     return files
 
 
-def load_one_file_to_ftp(filename):
+@task
+def load_files_to_ftp(csvw, code_lists):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
-    # Commented lines while waiting for details on the FTP connection
-    # with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
-    # with sftp.cd("files/gf/output"):
-    # sftp.put(file_source)
-
-
-@task
-def load_data_to_ftp():
-    load_one_file_to_ftp(DATA_FILE_NAME)
-
-
-@task
-def load_csvw_to_ftp(file):
-    load_one_file_to_ftp(file.name)
-
-
-@task
-def load_code_lists_to_ftp(files):
-    for f in files:
-        load_one_file_to_ftp(f.name)
+    with open("../secrets.json") as sf:
+        secrets = json.load(sf)
+        FTP_URL = secrets["ftp"]["url"]
+        FTP_USER = secrets["ftp"]["user"]
+        FTP_PASSWORD = secrets["ftp"]["password"]
+    with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
+        with sftp.cd("files/gf/output"):
+            sftp.put(DATA_FILE_NAME)
+            sftp.put(csvw.name)
+            for f in code_lists:
+                sftp.put(f.name)
 
 
 # Build flow
@@ -250,14 +242,12 @@ def build_flow():
         types2 = Parameter(name="types2", required=False)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-        load_data_to_ftp(upstream_tasks=[transform_data_to_csv(french_data)])
         french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
-        csvw_file = transform_metadata_to_csvw(french_metadata)
-        load_csvw_to_ftp(csvw_file)
+        csvw = transform_metadata_to_csvw(french_metadata)
         code_lists = transform_metadata_to_code_lists(french_metadata)
-        load_code_lists_to_ftp(code_lists)
+        load_files_to_ftp(csvw, code_lists, upstream_tasks=[transform_data_to_csv(french_data)])
     return flow
 
 
