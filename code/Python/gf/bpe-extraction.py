@@ -214,6 +214,17 @@ def transform_metadata_to_code_lists(bpe_metadata):
 
 @task
 def load_files_to_ftp(csvw, code_lists):
+    """
+    Loads all files created to FTP
+
+    Parameters
+    ----------
+    csvw : File
+        csvw description file (json)
+    code_lists : List
+        code list files (csv)
+
+    """
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     with open("../secrets.json") as sf:
