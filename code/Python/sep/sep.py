@@ -49,18 +49,20 @@ def raw_french_to_standard(df, age_classes, nuts3):
 
     return df_final
 
-def raw_italian_to_standard(df, age_classes):
+def raw_italian_to_standard(df, age_classes, nuts3):
     # Hold the variables of interest
     df_reduced = df[['ITTER107', 'SEXISTAT1', 'ETA1', 'Value', 'NUTS3']]
 
     # SEXISTAT1 & ETA1 variables includes subtotal, we only have to keep ventilated data
-    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL')]
+    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | df_reduced['ITTER107'].startswith('IT')]
 
     # Age & sex range have to be recoded to be mapped with the reference code list
     df_filtered['ETA1'] = df_filtered.apply(lambda row: row.ETA1 if row.ETA1 == 'Y_UN4' else 'Y_LT5', axis=1)
     df_filtered['SEXISTAT1'] = df_filtered.apply(lambda row: "1" if row.SEXISTAT1 == 'M' else '2', axis=1)
 
-    df_final = df_filtered.rename(columns={'ITTER107': 'lau', 'SEXISTAT1': 'sex', 'ETA1': 'age', 'Value': 'population', 'NUTS3': 'nuts3'})
+    df_final = df_filtered.rename(columns={'ITTER107': 'lau', 'SEXISTAT1': 'sex', 'ETA1': 'age', 'Value': 'population'})
+
+    df_with_nuts = df_final.merge(nuts3, left_on='lau', right_on='lau')
 
     return df_final
 
@@ -80,8 +82,8 @@ def get_age_class_data():
     return(list(df['group']))
 
 @task
-def get_nuts3():
-    resp = get('https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/nuts3.csv')
+def get_nuts3_fr(nuts3_fr_url):
+    resp = get(nuts3_fr_url)
     data = BytesIO(resp.content)
     df = pd.read_csv(data)
     return(df)
@@ -98,12 +100,20 @@ def extract_french_census(url, age_classes, nuts3):
     return standard_df
 
 @task
-def extract_italian_census(url, age_classes):
+def get_nuts3_it(nuts3_it_url):
     resp = get(url)
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
     df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
-    standard_df = raw_italian_to_standard(df, age_classes)
+    return(df)
+
+@task
+def extract_italian_census(url, age_classes, nuts3):
+    resp = get(url)
+    zip = ZipFile(BytesIO(resp.content))
+    file_in_zip = zip.namelist().pop()
+    df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
+    standard_df = raw_italian_to_standard(df, age_classes, nuts3)
     return standard_df
 
 @task
@@ -223,13 +233,16 @@ with Flow('census_csv_to_rdf') as flow:
     load_turtle(dsd_rdf, rdf_repo_url)
 
     age_classes = get_age_class_data()
-    nuts3 = get_nuts3()
-
+    
+    nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3-fr.csv')
+    nuts3_fr = get_nuts3_fr(nuts3_fr_url)
     french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
-    french_census = extract_french_census(french_census_data_url, age_classes, nuts3)
+    french_census = extract_french_census(french_census_data_url, age_classes, nuts3_fr)
 
+    nuts3_it_url = Parameter('nuts3_it_url', default='../../pilots/resources/nuts3_it.zip')
+    nuts3_it = get_nuts3_it(nuts3_it_url)
     italian_census_data_url = Parameter('it_url', default='https://interstat.opsi-lab.it/files/sep/input/census-it-2018.zip')
-    italian_census = extract_italian_census(italian_census_data_url, age_classes)
+    italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3_it)
 
     df_fr_it = concat_datasets(french_census, italian_census)
 
