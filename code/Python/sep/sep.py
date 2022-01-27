@@ -14,7 +14,7 @@ import pysftp
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
-FTP_HOST = 'FTP_HOST'
+FTP_URL = 'FTP_URL'
 FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
@@ -203,6 +203,11 @@ def write_csv_on_ftp(df):
     # TODO: Use tempfile
     csv = df.to_csv (r'census_fr_it.csv', index = False, header=True)
 
+    with open("../secrets.json") as sf:
+        secrets = json.load(sf)
+        FTP_URL = secrets["ftp"]["url"]
+        FTP_USER = secrets["ftp"]["user"]
+        FTP_PASSWORD = secrets["ftp"]["password"]
     with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
         with sftp.cd('files/sep/output/'):
             sftp.put('census_fr_it.csv')
