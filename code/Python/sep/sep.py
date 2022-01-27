@@ -3,7 +3,6 @@ from prefect.engine.state import Failed, Success
 from requests import get, post, delete
 from zipfile import ZipFile
 from io import BytesIO
-from datetime import timedelta
 import pandas as pd
 from rdflib import Graph, Literal, RDF, URIRef, Namespace #basic RDF handling
 from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
@@ -71,19 +70,19 @@ def raw_italian_to_standard(df, age_classes, nuts3):
 @task
 def import_dsd():
     g = Graph()
-    g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/sep-dsd-1.ttl", format="turtle")
+    g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/sep/sep-dsd-1.ttl", format="turtle")
     return g.serialize(format="turtle", encoding='utf-8')
 
 @task
-def get_age_class_data():
-    resp = get('https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/age-groups.csv')
+def get_age_class_data(url):
+    resp = get(url)
     data = BytesIO(resp.content)
     df = pd.read_csv(data)
     return(list(df['group']))
 
 @task
-def get_nuts3_fr(nuts3_fr_url):
-    resp = get(nuts3_fr_url)
+def get_nuts3_fr(url):
+    resp = get(url)
     data = BytesIO(resp.content)
     df = pd.read_csv(data)
     return(df)
@@ -100,7 +99,7 @@ def extract_french_census(url, age_classes, nuts3):
     return standard_df
 
 @task
-def get_nuts3_it(nuts3_it_url):
+def get_nuts3_it(url):
     resp = get(url)
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
@@ -232,14 +231,15 @@ with Flow('census_csv_to_rdf') as flow:
     dsd_rdf = import_dsd()
     load_turtle(dsd_rdf, rdf_repo_url)
 
-    age_classes = get_age_class_data()
+    age_class_url = Parameter('age_class_url', default="https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/age-groups.csv")
+    age_classes = get_age_class_data(age_class_url)
     
-    nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3-fr.csv')
+    nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_dep-fr.csv')
     nuts3_fr = get_nuts3_fr(nuts3_fr_url)
     french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
     french_census = extract_french_census(french_census_data_url, age_classes, nuts3_fr)
 
-    nuts3_it_url = Parameter('nuts3_it_url', default='../../pilots/resources/nuts3_it.zip')
+    nuts3_it_url = Parameter('nuts3_it_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_lau-it.zip')
     nuts3_it = get_nuts3_it(nuts3_it_url)
     italian_census_data_url = Parameter('it_url', default='https://interstat.opsi-lab.it/files/sep/input/census-it-2018.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3_it)
