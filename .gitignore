@@ -7,3 +7,6 @@
 .settings/
 .idea
 *.iml
+
+# Ignore work directory
+work/

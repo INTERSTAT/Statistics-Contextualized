@@ -1,4 +1,2 @@
 # Ignore secrets file
 secrets.json
-# Ignore work directory
-work/
