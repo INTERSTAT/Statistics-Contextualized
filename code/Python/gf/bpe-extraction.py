@@ -19,6 +19,7 @@ CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Équipements
               "dc:description": "Données de la base permanente des équipements (BPE)",
               "dc:creator": "Interstat", "tables": list()}
 DATA_FILE_NAME = "gf_data_fr.csv"
+WORK_DIRECTORY = "../../../work/"
 
 
 @task
@@ -201,7 +202,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
     files = []
     for x in dict_var_code_lists.get("variables"):
         cod_var = x["codVar"]
-        file_name = x["codVar"].lower() + ".csv"
+        file_name = WORK_DIRECTORY + x["codVar"].lower() + ".csv"
         header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
         with open(file_name, 'w', newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
@@ -270,13 +271,12 @@ if __name__ == "__main__":
     else:
         flow.run(parameters={
             "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-            "bpe_metadata_url1": "../../../bpe"
-                                 "-cultural-places-variables.csv",
+            "bpe_metadata_url1": WORK_DIRECTORY + "bpe-cultural-places-variables.csv",
             "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
                        "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
             "facilities_filter": ("F309",),
             "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-            "bpe_metadata_url2": "../../../bpe-education-variables.csv",
+            "bpe_metadata_url2": WORK_DIRECTORY + "bpe-education-variables.csv",
             "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
                        "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
         })
