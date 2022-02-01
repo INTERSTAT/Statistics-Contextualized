@@ -9,6 +9,7 @@ from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
 import urllib.parse #for parsing strings to URI's
 import numpy as np
 import pysftp
+import json
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -16,6 +17,8 @@ PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 FTP_URL = 'FTP_URL'
 FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
+
+GRAPHDB_URL = 'GRAPHDB_URL'
 
 # Fns ----
 
@@ -113,9 +116,8 @@ def extract_italian_census(url, age_classes, nuts3):
     resp = get(url)
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string", nrows=100)
+    df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
     standard_df = raw_italian_to_standard(df, age_classes, nuts3)
-    print(standard_df)
     return standard_df
 
 @task
@@ -215,19 +217,23 @@ def write_csv_on_ftp(df):
     # TODO: Use tempfile
     csv = df.to_csv (r'census_fr_it.csv', index = False, header=True)
 
-    with open("../secrets.json") as sf:
+    with open("/home/coder/work/Statistics-Contextualized/code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
         FTP_PASSWORD = secrets["ftp"]["password"]
-    with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
+    with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
         with sftp.cd('files/sep/output/'):
             sftp.put('census_fr_it.csv')
     
 
 with Flow('census_csv_to_rdf') as flow:
 
-    rdf_repo_url = Parameter('rdf_repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+    with open("/home/coder/work/Statistics-Contextualized/code/Python/secrets.json") as sf:
+        secrets = json.load(sf)
+        GRAPHDB_URL = secrets["graphdb"]["url"]
+
+    rdf_repo_url = Parameter('rdf_repo_url', default= GRAPHDB_URL + "repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
 
     delete_graph(rdf_repo_url)
 
