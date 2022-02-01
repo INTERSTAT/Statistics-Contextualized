@@ -217,7 +217,7 @@ def write_csv_on_ftp(df):
     # TODO: Use tempfile
     csv = df.to_csv (r'census_fr_it.csv', index = False, header=True)
 
-    with open("/home/coder/work/Statistics-Contextualized/code/Python/secrets.json") as sf:
+    with open("../secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
