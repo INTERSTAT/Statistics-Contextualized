@@ -53,7 +53,7 @@ def raw_italian_to_standard(df, age_classes, nuts3):
     df_reduced = df[['ITTER107', 'SEXISTAT1', 'ETA1', 'Value']]
 
     # SEXISTAT1 & ETA1 variables includes subtotal, we only have to keep ventilated data
-    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | df_reduced['ITTER107'].str.startswith('IT')]
+    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | (df_reduced['ITTER107'].str.strip().str[0:1] != 'IT')]
 
     # Age & sex range have to be recoded to be mapped with the reference code list
     df_filtered['ETA1'] = df_filtered.apply(lambda row: row.ETA1 if row.ETA1 == 'Y_UN4' else 'Y_LT5', axis=1)
@@ -63,7 +63,7 @@ def raw_italian_to_standard(df, age_classes, nuts3):
 
     df_with_nuts = df_final.merge(nuts3, left_on='lau', right_on='lau')
 
-    return df_final
+    return df_with_nuts
 
 # Tasks ----
 
@@ -229,31 +229,31 @@ with Flow('census_csv_to_rdf') as flow:
 
     rdf_repo_url = Parameter('rdf_repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
 
-    # delete_graph(rdf_repo_url)
+    delete_graph(rdf_repo_url)
 
-    # dsd_rdf = import_dsd()
-    # load_turtle(dsd_rdf, rdf_repo_url)
+    dsd_rdf = import_dsd()
+    load_turtle(dsd_rdf, rdf_repo_url)
 
     age_class_url = Parameter('age_class_url', default="https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/age-groups.csv")
     age_classes = get_age_class_data(age_class_url)
     
-    # nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_dep-fr.csv')
-    # nuts3_fr = get_nuts3_fr(nuts3_fr_url)
-    # french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
-    # french_census = extract_french_census(french_census_data_url, age_classes, nuts3_fr)
+    nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_dep-fr.csv')
+    nuts3_fr = get_nuts3_fr(nuts3_fr_url)
+    french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
+    french_census = extract_french_census(french_census_data_url, age_classes, nuts3_fr)
 
     nuts3_it_url = Parameter('nuts3_it_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_lau-it.zip')
     nuts3_it = get_nuts3_it(nuts3_it_url)
     italian_census_data_url = Parameter('it_url', default='https://interstat.opsi-lab.it/files/sep/input/census-it-2018.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3_it)
     
-    # df_fr_it = concat_datasets(french_census, italian_census)
+    df_fr_it = concat_datasets(french_census, italian_census)
 
-    # write_csv_on_ftp(df_fr_it)
+    write_csv_on_ftp(df_fr_it)
 
-    # graph_files = build_rdf_data(df_fr_it)
+    graph_files = build_rdf_data(df_fr_it)
 
-    # load_turtles(graph_files, rdf_repo_url)
+    load_turtles(graph_files, rdf_repo_url)
 
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
