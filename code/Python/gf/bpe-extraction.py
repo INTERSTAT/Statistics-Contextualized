@@ -97,7 +97,7 @@ def concat_datasets(ds1, ds2):
 
 @task
 def transform_data_to_csv(df):
-    return df.to_csv(DATA_FILE_NAME, index=False, header=True)
+    return df.to_csv(WORK_DIRECTORY + DATA_FILE_NAME, index=False, header=True)
 
 
 def get_json_datatype(var_type):
@@ -163,7 +163,7 @@ def transform_metadata_to_csvw(bpe_metadata):
         table_data["tableSchema"]["columns"].append(column)
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
-    json_file_name = DATA_FILE_NAME + "-metadata.json"
+    json_file_name = WORK_DIRECTORY + DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
     return csvw_file
@@ -235,7 +235,7 @@ def load_files_to_ftp(csvw, code_lists):
         FTP_PASSWORD = secrets["ftp"]["password"]
     with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
         with sftp.cd("files/gf/output"):
-            sftp.put(DATA_FILE_NAME)
+            sftp.put(WORK_DIRECTORY + DATA_FILE_NAME)
             sftp.put(csvw.name)
             for f in code_lists:
                 sftp.put(f.name)
