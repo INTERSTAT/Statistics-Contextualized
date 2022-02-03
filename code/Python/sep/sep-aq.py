@@ -10,9 +10,28 @@ FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
 WORK_DIRECTORY = "../../../work/"
+USE_LOCAL_FILES = True
 VISUALIZE_FLOW = False
 
 # Tasks ----
+
+
+@task(name='Extract French air quality data')
+def extract_french_aq(url):
+    """Extracts the French data on air quality.
+    Placeholder for now.
+
+    Args:
+        url (str): URL of the file containing the data.
+    Returns:
+        DataFrame: Table containing the measures of air quality.
+    """
+    logging.info(f'Reading French air quality data from {url}')
+    new_cols = {'POLLUTANT': 'PM10', 'AGGREGATION_TYPE': 'Annual mean', 'REPORTING_YEAR': '2019'}
+    aq_fr_raw = pd.read_csv(url, header=1, usecols=[3, 5, 6, 18],
+                            names=['StationID', 'Latitude', 'Longitude', 'AQValue']).assign(**new_cols)
+
+    return aq_fr_raw
 
 
 @task(name='Get Italian geography')
@@ -71,10 +90,16 @@ def extract_italian_aq(url, geo_it):
 
 with Flow('aq_csv_to_rdf') as flow:
 
-    # italian_aq_data_url = Parameter('it_url', default='https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/TABELLA%201_PM10_2019_rev.xlsx')
-    # italian_geo_url = Parameter('it_geo_url', 'default=https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv')
-    italian_aq_data_url = Parameter('it_url', default=WORK_DIRECTORY + 'TABELLA 1_PM10_2019_rev.xlsx')
-    italian_geo_url = Parameter('it_geo_url', default=WORK_DIRECTORY + 'Elenco-comuni-italiani.csv')
+    prefix_aq_fr = prefix_aq_it = prefix_geo_it = WORK_DIRECTORY
+    if not USE_LOCAL_FILES:
+        prefix_aq_it = 'https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/'
+        prefix_geo_it = 'https://www.istat.it/storage/codici-unita-amministrative/'
+
+    french_aq_data_url = Parameter('fr_url', default=prefix_aq_fr + 'sep-aq_fr.csv')
+    french_aq = extract_french_aq(french_aq_data_url)
+
+    italian_aq_data_url = Parameter('it_url', default=prefix_aq_it + 'TABELLA 1_PM10_2019_rev.xlsx')
+    italian_geo_url = Parameter('it_geo_url', default=prefix_geo_it + 'Elenco-comuni-italiani.csv')
     italian_aq = extract_italian_aq(italian_aq_data_url, get_lau_nuts_it(italian_geo_url))
 
 
