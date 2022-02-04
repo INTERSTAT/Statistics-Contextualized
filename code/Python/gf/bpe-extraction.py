@@ -228,13 +228,15 @@ def load_files_to_ftp(csvw, code_lists):
     """
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
+    remote_path = "files/gf/output/"
     with open("../secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
         FTP_PASSWORD = secrets["ftp"]["password"]
     with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
-        with sftp.cd("files/gf/output"):
+        sftp.makedirs(remote_path)  # Create remote path if needed
+        with sftp.cd(remote_path):
             sftp.put(WORK_DIRECTORY + DATA_FILE_NAME)
             sftp.put(csvw.name)
             for f in code_lists:
