@@ -9,6 +9,8 @@ This pilot uses a combination of:
 
 ### Air quality data
 
+The reference model for the air quality data is the [domain ontolgy](aqmodel.owl) (use [Protégé](https://protege.stanford.edu/) to edit).
+
 Air quality data is available from the European Environment Agency (EEA) at the [Air Quality e-Reporting](https://www.eea.europa.eu/data-and-maps/data/aqereporting-8) web page. More precisely, the "AIDE F" data flow seems in first approach to be the most relevant for the SEP pilot. The data corresponding to this flow can be General information about the Air Quality e-Reporting products is available in [this document](https://ftp.eea.europa.eu/www/aqereporting-3/AQeReporting_products_2018_v1.pdf). In particular, the description of variables for AIDE F is reproduced below.
 
 | Field name | Description | Data type |
