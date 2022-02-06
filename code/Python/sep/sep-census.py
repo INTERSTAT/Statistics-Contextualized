@@ -9,13 +9,16 @@ from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
 import urllib.parse #for parsing strings to URI's
 import numpy as np
 import pysftp
+import json
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
 FTP_URL = 'FTP_URL'
-FTP_USERNAME = 'FTP_USERNAME'
+FTP_USER = 'FTP_USER'
 FTP_PASSWORD = 'FTP_PASSWORD'
+
+GRAPHDB_URL = 'GRAPHDB_URL'
 
 # Fns ----
 
@@ -50,10 +53,10 @@ def raw_french_to_standard(df, age_classes, nuts3):
 
 def raw_italian_to_standard(df, age_classes, nuts3):
     # Hold the variables of interest
-    df_reduced = df[['ITTER107', 'SEXISTAT1', 'ETA1', 'Value', 'NUTS3']]
+    df_reduced = df[['ITTER107', 'SEXISTAT1', 'ETA1', 'Value']]
 
     # SEXISTAT1 & ETA1 variables includes subtotal, we only have to keep ventilated data
-    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | df_reduced['ITTER107'].startswith('IT')]
+    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | (df_reduced['ITTER107'].str.strip().str[0:1] != 'IT')]
 
     # Age & sex range have to be recoded to be mapped with the reference code list
     df_filtered['ETA1'] = df_filtered.apply(lambda row: row.ETA1 if row.ETA1 == 'Y_UN4' else 'Y_LT5', axis=1)
@@ -63,7 +66,7 @@ def raw_italian_to_standard(df, age_classes, nuts3):
 
     df_with_nuts = df_final.merge(nuts3, left_on='lau', right_on='lau')
 
-    return df_final
+    return df_with_nuts
 
 # Tasks ----
 
@@ -103,8 +106,10 @@ def get_nuts3_it(url):
     resp = get(url)
     zip = ZipFile(BytesIO(resp.content))
     file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
-    return(df)
+    df = pd.read_csv(zip.open(file_in_zip), sep=';', dtype="string")
+    df_selected_cols = df[['LAU', 'NUTS3']]
+    df_renamed = df_selected_cols.rename(columns={'LAU': 'lau', 'NUTS3': 'nuts3'})
+    return(df_renamed)
 
 @task
 def extract_italian_census(url, age_classes, nuts3):
@@ -217,14 +222,18 @@ def write_csv_on_ftp(df):
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
         FTP_PASSWORD = secrets["ftp"]["password"]
-    with pysftp.Connection(FTP_HOST, username=FTP_USERNAME, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
+    with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
         with sftp.cd('files/sep/output/'):
             sftp.put('census_fr_it.csv')
     
 
 with Flow('census_csv_to_rdf') as flow:
 
-    rdf_repo_url = Parameter('rdf_repo_url', default="https://interstat.opsi-lab.it/graphdb/repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+    with open("/home/coder/work/Statistics-Contextualized/code/Python/secrets.json") as sf:
+        secrets = json.load(sf)
+        GRAPHDB_URL = secrets["graphdb"]["url"]
+
+    rdf_repo_url = Parameter('rdf_repo_url', default= GRAPHDB_URL + "repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
 
     delete_graph(rdf_repo_url)
 
@@ -243,7 +252,7 @@ with Flow('census_csv_to_rdf') as flow:
     nuts3_it = get_nuts3_it(nuts3_it_url)
     italian_census_data_url = Parameter('it_url', default='https://interstat.opsi-lab.it/files/sep/input/census-it-2018.zip')
     italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3_it)
-
+    
     df_fr_it = concat_datasets(french_census, italian_census)
 
     write_csv_on_ftp(df_fr_it)
