@@ -278,7 +278,7 @@ isc:sex-2
 
 <http://data.europa.eu/nuts/scheme/2016>
     a skos:ConceptScheme ;
-    skos:prefLabel "NUTS niveau 3, 2016"@fr .
+    skos:prefLabel "NUTS niveau 3, 2016"@fr ;
     skos:hasTopConcept  <http://data.europa.eu/nuts/code/FR101> , <http://data.europa.eu/nuts/code/FR102> , <http://data.europa.eu/nuts/code/FR103> , <http://data.europa.eu/nuts/code/FRY40> , <http://data.europa.eu/nuts/code/FRY50> , <http://data.europa.eu/nuts/code/FRZZZ> ;
 
 <http://data.europa.eu/nuts/code/FR101>
