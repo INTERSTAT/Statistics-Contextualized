@@ -1,3 +1,4 @@
+from unicodedata import name
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
@@ -6,14 +7,12 @@ from io import BytesIO
 import pysftp
 import json
 import csv
+import pathlib
+import os
 
 # Constants ----
 
-# Flags
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
-PREFECT_VIZ = False
-
-
+# FTP config placeholders
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
@@ -37,6 +36,15 @@ CSVW_INTRO = {
 DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
+def get_conf():
+    """
+    Grab this pipeline conf, handling various operating systems.
+    """
+    project_path = pathlib.Path(__file__).cwd()
+    sep = "\\" if os.name == "nt" else "/"
+    conf_path = sep.join([str(project_path), "code", "Python", "gf", "gf.conf.json"])
+    with open(conf_path) as conf:
+        return(json.load(conf))
 
 @task
 def extract_french_data(url, types={}, facilities_filter=()):
@@ -295,6 +303,7 @@ def load_files_to_ftp(csvw, code_lists):
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
+        # FIXME Move those up in the constants section ?
         # Flow parameters
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
@@ -303,6 +312,8 @@ def build_flow():
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
+
+        it_education_data_url = Parameter(name="id_education_data_url", required=True)
 
         # Flow tasks
         french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
@@ -315,6 +326,9 @@ def build_flow():
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
         code_lists = transform_metadata_to_code_lists(french_metadata)
+
+        it_education_data = extract_italian_educational_data(it_education_data_url)        
+
         load_files_to_ftp(
             csvw, code_lists, upstream_tasks=[transform_data_to_csv(french_data)]
         )
@@ -324,8 +338,12 @@ def build_flow():
 
 # Run flow
 if __name__ == "__main__":
+
+    conf = get_conf()
+
     flow = build_flow()
-    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
+
+    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
     else:
         flow.run(
@@ -359,8 +377,9 @@ if __name__ == "__main__":
                     "SECT": str,
                     "TYPEQU": str,
                 },
+                "id_education_data_url" : "https://interstat.eng.it/files/gf/input/it/MIUR%20Schools%20with%20coordinates.csv"
             }
         )
 
-    if PREFECT_VIZ:
+    if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
