@@ -343,25 +343,25 @@ isc:lau-01001
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "01001" ;
-    skos:prefLabel     "L'Abergement-Clémenciat" .
+    skos:prefLabel     "L'Abergement-Clémenciat"@fr .
 
 isc:lau-97617
     a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "97617" ;
-    skos:prefLabel     "Tsingoni" .
+    skos:prefLabel     "Tsingoni"@fr .
 
 isc:lau-001001
     a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "001001" ;
-    skos:prefLabel     "Agliè" .
+    skos:prefLabel     "Agliè"@it .
 
 isc:lau-111107
     a                  isc:lau ;
     skos:inScheme      isc:cl-lau ;
     skos:topConceptOf  isc:cl-lau ;
     skos:notation      "111107" ;
-    skos:prefLabel     "Villaspeciosa" .
+    skos:prefLabel     "Villaspeciosa"@it .
