@@ -17,3 +17,6 @@ To create a new diagram:
 * Start drawing
 
 The procedure is similar for the modification of existing diagrams.
+
+*Notes:*
+* A diagrams.net library of templates for OWL ontologies is available [here](https://chowlk.linkeddata.es/notation.html)
