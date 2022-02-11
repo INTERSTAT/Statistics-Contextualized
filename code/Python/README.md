@@ -43,3 +43,12 @@ IntelliJ can be used to edit the Python scripts with the “Python Community Edi
 #### Visual Studio Code
 
 The [VSCode documentation](https://code.visualstudio.com/docs/python/environments) details how to select a Python interpreter in the Command Palette (Ctrl+Shift+P). 
+
+### Code style
+
+Use [black](https://github.com/psf/black) for formatting either:
+
+ - using as a command line: `black file-to-format.py`
+ - integrated in VS Code (with "format on save" if possible)
+
+Install globally with `pip install black` or `conda install black`.
