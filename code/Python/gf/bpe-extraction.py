@@ -7,17 +7,33 @@ import pysftp
 import json
 import csv
 
-# Constants
+# Constants ----
+
+# Flags
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
+PREFECT_VIZ = False
+
+
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
 
-types_var_mod = {"COD_VAR": str, "LIB_VAR": str, "COD_MOD": str, "LIB_MOD": str, "TYPE_VAR": str, "LONG_VAR": int}
-CSVW_INTRO = {"@context": "http://www.w3.org/ns/csvw", "dc:title": "Équipements géolocalisés en 2020 : lieux "
-                                                                   "d’exposition et patrimoine & enseignement",
-              "dc:description": "Données de la base permanente des équipements (BPE)",
-              "dc:creator": "Interstat", "tables": list()}
+types_var_mod = {
+    "COD_VAR": str,
+    "LIB_VAR": str,
+    "COD_MOD": str,
+    "LIB_MOD": str,
+    "TYPE_VAR": str,
+    "LONG_VAR": int,
+}
+CSVW_INTRO = {
+    "@context": "http://www.w3.org/ns/csvw",
+    "dc:title": "Équipements géolocalisés en 2020 : lieux "
+    "d’exposition et patrimoine & enseignement",
+    "dc:description": "Données de la base permanente des équipements (BPE)",
+    "dc:creator": "Interstat",
+    "tables": list(),
+}
 DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
@@ -48,15 +64,18 @@ def extract_french_data(url, types={}, facilities_filter=()):
     if not types:
         bpe_data = pd.read_csv(archive.open(data_zip), sep=";")
     else:
-        bpe_data = pd.read_csv(archive.open(data_zip), sep=";", dtype=types, usecols=types.keys())
-    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map({"Acceptable": "0",
-                                                         "Bonne": "1",
-                                                         "Mauvaise": "2",
-                                                         "Non géolocalisé": "3"},
-                                                        na_action="ignore")
+        bpe_data = pd.read_csv(
+            archive.open(data_zip), sep=";", dtype=types, usecols=types.keys()
+        )
+    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map(
+        {"Acceptable": "0", "Bonne": "1", "Mauvaise": "2", "Non géolocalisé": "3"},
+        na_action="ignore",
+    )
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
-        bpe_data_filtered = bpe_data.loc[(bpe_data["TYPEQU"].str.startswith(facilities_filter))]
+        bpe_data_filtered = bpe_data.loc[
+            (bpe_data["TYPEQU"].str.startswith(facilities_filter))
+        ]
         return bpe_data_filtered
     return bpe_data
 
@@ -85,9 +104,17 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
         bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
     if facilities_filter:
         indexes = bpe_metadata[
-            (bpe_metadata["COD_VAR"] == "TYPEQU") & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))].index
+            (bpe_metadata["COD_VAR"] == "TYPEQU")
+            & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))
+        ].index
         bpe_metadata = bpe_metadata.drop(indexes)
     return bpe_metadata
+
+
+@task
+def extract_italian_educational_data(url: str) -> pd.DataFrame:
+    italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
+    return italian_educ_data
 
 
 @task
@@ -128,7 +155,8 @@ def transform_metadata_to_csvw(bpe_metadata):
     """
     # Filter for selecting unique variables (= columns)
     columns = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(
-        subset=["COD_VAR", "LIB_VAR", "TYPE_VAR"], ignore_index=True)
+        subset=["COD_VAR", "LIB_VAR", "TYPE_VAR"], ignore_index=True
+    )
     csvw = CSVW_INTRO
     # Create dictionary for describing data file structure
     table_data = {"url": DATA_FILE_NAME, "tableSchema": {}}
@@ -141,22 +169,37 @@ def transform_metadata_to_csvw(bpe_metadata):
         typ_var = columns["TYPE_VAR"][i]
         metadata_table_name = cod_var.lower() + ".csv"
         json_datatype = get_json_datatype(typ_var)
-        column = {"titles": cod_var,
-                  "dc:description": lib_var}
+        column = {"titles": cod_var, "dc:description": lib_var}
         if json_datatype:
             column["datatype"] = json_datatype
         # Variable type == "CHAR" means an external table (csv file) contains valid code lists
         if typ_var == "CHAR":
             column["name"] = cod_var
-            foreign_key = {"columReference": cod_var,
-                           "reference": {"resource": metadata_table_name,
-                                         "columnReference": cod_var + "_CODE"}}
+            foreign_key = {
+                "columReference": cod_var,
+                "reference": {
+                    "resource": metadata_table_name,
+                    "columnReference": cod_var + "_CODE",
+                },
+            }
             table_data["tableSchema"]["foreignKeys"].append(foreign_key)
             # Describe external table containing valid code lists
-            table_metadata = {"url": metadata_table_name, "tableSchema": {"columns": [
-                {"name": cod_var + "_CODE", "titles": cod_var + "_CODE",
-                 "dc:description": lib_var + " (code)"},
-                {"titles": cod_var + "_LABEL", "dc:description": lib_var + " (label)"}]}}
+            table_metadata = {
+                "url": metadata_table_name,
+                "tableSchema": {
+                    "columns": [
+                        {
+                            "name": cod_var + "_CODE",
+                            "titles": cod_var + "_CODE",
+                            "dc:description": lib_var + " (code)",
+                        },
+                        {
+                            "titles": cod_var + "_LABEL",
+                            "dc:description": lib_var + " (label)",
+                        },
+                    ]
+                },
+            }
             # Add external table description to CSVW
             csvw["tables"].append(table_metadata)
         # Add column description to table data description
@@ -164,7 +207,7 @@ def transform_metadata_to_csvw(bpe_metadata):
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
     json_file_name = WORK_DIRECTORY + DATA_FILE_NAME + "-metadata.json"
-    with open(json_file_name, 'w', encoding="utf-8") as csvw_file:
+    with open(json_file_name, "w", encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
     return csvw_file
 
@@ -184,7 +227,9 @@ def transform_metadata_to_code_lists(bpe_metadata):
     List
         List of files created. Each item is a CSV file representing one code list
     """
-    bpe_metadata_variables = bpe_metadata.loc[:, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]].drop_duplicates(ignore_index=True)
+    bpe_metadata_variables = bpe_metadata.loc[
+        :, ["COD_VAR", "LIB_VAR", "TYPE_VAR"]
+    ].drop_duplicates(ignore_index=True)
     dict_var_code_lists = {"variables": []}
     for i in bpe_metadata_variables.index:
         cod_var = bpe_metadata_variables["COD_VAR"][i]
@@ -192,7 +237,9 @@ def transform_metadata_to_code_lists(bpe_metadata):
         mod = []
         if typ_var == "CHAR":
             code_list = bpe_metadata.loc[
-                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i], ["COD_MOD", "LIB_MOD"]]
+                bpe_metadata["COD_VAR"] == bpe_metadata_variables["COD_VAR"][i],
+                ["COD_MOD", "LIB_MOD"],
+            ]
             code_list.dropna(inplace=True)
             for j in code_list.index:
                 cod_mod = code_list["COD_MOD"][j]
@@ -204,7 +251,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
         cod_var = x["codVar"]
         file_name = WORK_DIRECTORY + x["codVar"].lower() + ".csv"
         header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
-        with open(file_name, 'w', newline="", encoding="utf-8") as file:
+        with open(file_name, "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
             writer.writerow(header_list)
             for y in x["mod"]:
@@ -234,7 +281,9 @@ def load_files_to_ftp(csvw, code_lists):
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
         FTP_PASSWORD = secrets["ftp"]["password"]
-    with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
+    with pysftp.Connection(
+        FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts
+    ) as sftp:
         sftp.makedirs(remote_path)  # Create remote path if needed
         with sftp.cd(remote_path):
             sftp.put(WORK_DIRECTORY + DATA_FILE_NAME)
@@ -246,22 +295,30 @@ def load_files_to_ftp(csvw, code_lists):
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
+        # Flow parameters
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
         facilities_filter = Parameter(name="facilities_filter", required=False)
-        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
+
+        # Flow tasks
+        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
         french_data = concat_datasets(french_data1, french_data2)
-        french_metadata1 = extract_french_metadata(bpe_metadata_url1, types1, facilities_filter)
+        french_metadata1 = extract_french_metadata(
+            bpe_metadata_url1, types1, facilities_filter
+        )
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
         code_lists = transform_metadata_to_code_lists(french_metadata)
-        load_files_to_ftp(csvw, code_lists, upstream_tasks=[transform_data_to_csv(french_data)])
+        load_files_to_ftp(
+            csvw, code_lists, upstream_tasks=[transform_data_to_csv(french_data)]
+        )
+
     return flow
 
 
@@ -271,15 +328,39 @@ if __name__ == "__main__":
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name="sample")
     else:
-        flow.run(parameters={
-            "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-            "bpe_metadata_url1": WORK_DIRECTORY + "bpe-cultural-places-variables.csv",
-            "types1": {"AN": str, "COUVERT": str, "DEPCOM": str, "ECLAIRE": str, "LAMBERT_X": float, "LAMBERT_Y": float,
-                       "NBSALLES": "Int64", "QUALITE_XY": str, "TYPEQU": str},
-            "facilities_filter": ("F309",),
-            "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-            "bpe_metadata_url2": WORK_DIRECTORY + "bpe-education-variables.csv",
-            "types2": {"AN": str, "CL_PELEM": str, "CL_PGE": str, "DEPCOM": str, "EP": str, "LAMBERT_X": float,
-                       "LAMBERT_Y": float, "QUALITE_XY": str, "SECT": str, "TYPEQU": str}
-        })
-    flow.visualize()
+        flow.run(
+            parameters={
+                "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+                "bpe_metadata_url1": WORK_DIRECTORY
+                + "bpe-cultural-places-variables.csv",
+                "types1": {
+                    "AN": str,
+                    "COUVERT": str,
+                    "DEPCOM": str,
+                    "ECLAIRE": str,
+                    "LAMBERT_X": float,
+                    "LAMBERT_Y": float,
+                    "NBSALLES": "Int64",
+                    "QUALITE_XY": str,
+                    "TYPEQU": str,
+                },
+                "facilities_filter": ("F309",),
+                "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+                "bpe_metadata_url2": WORK_DIRECTORY + "bpe-education-variables.csv",
+                "types2": {
+                    "AN": str,
+                    "CL_PELEM": str,
+                    "CL_PGE": str,
+                    "DEPCOM": str,
+                    "EP": str,
+                    "LAMBERT_X": float,
+                    "LAMBERT_Y": float,
+                    "QUALITE_XY": str,
+                    "SECT": str,
+                    "TYPEQU": str,
+                },
+            }
+        )
+
+    if PREFECT_VIZ:
+        flow.visualize()
