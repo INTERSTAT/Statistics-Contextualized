@@ -1,0 +1,11 @@
+{
+    "flags": {
+        "prefect": {
+            "pushToCloudDashboard": false,
+            "displayGraphviz": false
+        }
+    },
+    "env": {
+        "workDir": ""
+    }
+}
