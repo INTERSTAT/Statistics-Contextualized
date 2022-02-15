@@ -36,6 +36,7 @@ CSVW_INTRO = {
 DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
+
 def get_conf():
     """
     Grab this pipeline conf, handling various operating systems.
@@ -44,7 +45,32 @@ def get_conf():
     sep = "\\" if os.name == "nt" else "/"
     conf_path = sep.join([str(project_path), "code", "Python", "gf", "gf.conf.json"])
     with open(conf_path) as conf:
-        return(json.load(conf))
+        return json.load(conf)
+
+
+def get_working_directory(conf=None):
+    """
+    If there is a working dir in the conf file, returns it, else returns a default one.
+    """
+    if conf is None or conf["env"]["workingDirectory"] == "":
+        project_path = pathlib.Path(__file__).cwd()
+        wd = str(project_path) + "/work/"
+        os.makedirs(wd, exist_ok=True)
+        return wd
+    else:
+        return conf["env"]["workingDirectory"]
+
+
+def get_json_datatype(var_type):
+    json_datatype = ""
+    if var_type == "DECIMAL":
+        json_datatype = "float"
+    elif var_type == "ENTIER":
+        json_datatype = "integer"
+    elif var_type == "ANNEE":
+        json_datatype = "gYear"
+    return json_datatype
+
 
 @task
 def extract_french_data(url, types={}, facilities_filter=()):
@@ -131,23 +157,12 @@ def concat_datasets(ds1, ds2):
 
 
 @task
-def transform_data_to_csv(df):
-    return df.to_csv(WORK_DIRECTORY + DATA_FILE_NAME, index=False, header=True)
-
-
-def get_json_datatype(var_type):
-    json_datatype = ""
-    if var_type == "DECIMAL":
-        json_datatype = "float"
-    elif var_type == "ENTIER":
-        json_datatype = "integer"
-    elif var_type == "ANNEE":
-        json_datatype = "gYear"
-    return json_datatype
+def transform_data_to_csv(df, working_dir):
+    return df.to_csv(working_dir + DATA_FILE_NAME, index=False, header=True)
 
 
 @task
-def transform_metadata_to_csvw(bpe_metadata):
+def transform_metadata_to_csvw(bpe_metadata, working_dir):
     """
     Transforms the French metadata to CSVW description.
 
@@ -214,14 +229,14 @@ def transform_metadata_to_csvw(bpe_metadata):
         table_data["tableSchema"]["columns"].append(column)
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
-    json_file_name = WORK_DIRECTORY + DATA_FILE_NAME + "-metadata.json"
+    json_file_name = working_dir + DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, "w", encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
     return csvw_file
 
 
 @task
-def transform_metadata_to_code_lists(bpe_metadata):
+def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     """
     Transforms the French metadata to code list csv files.
 
@@ -257,7 +272,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
     files = []
     for x in dict_var_code_lists.get("variables"):
         cod_var = x["codVar"]
-        file_name = WORK_DIRECTORY + x["codVar"].lower() + ".csv"
+        file_name = working_dir + x["codVar"].lower() + ".csv"
         header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
         with open(file_name, "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
@@ -269,7 +284,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
 
 
 @task
-def load_files_to_ftp(csvw, code_lists):
+def load_files_to_ftp(csvw, code_lists, working_dir):
     """
     Loads all files created to FTP
 
@@ -294,17 +309,19 @@ def load_files_to_ftp(csvw, code_lists):
     ) as sftp:
         sftp.makedirs(remote_path)  # Create remote path if needed
         with sftp.cd(remote_path):
-            sftp.put(WORK_DIRECTORY + DATA_FILE_NAME)
+            sftp.put(working_dir + DATA_FILE_NAME)
             sftp.put(csvw.name)
             for f in code_lists:
                 sftp.put(f.name)
 
 
 # Build flow
-def build_flow():
+def build_flow(conf):
     with Flow("GF-EF") as flow:
-        # FIXME Move those up in the constants section ?
         # Flow parameters
+        working_dir = Parameter(
+            name="working_dir", default=get_working_directory(conf), required=True
+        )
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
@@ -312,8 +329,6 @@ def build_flow():
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
-
-        it_education_data_url = Parameter(name="id_education_data_url", required=True)
 
         # Flow tasks
         french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
@@ -324,13 +339,14 @@ def build_flow():
         )
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
         french_metadata = concat_datasets(french_metadata1, french_metadata2)
-        csvw = transform_metadata_to_csvw(french_metadata)
-        code_lists = transform_metadata_to_code_lists(french_metadata)
-
-        it_education_data = extract_italian_educational_data(it_education_data_url)        
+        csvw = transform_metadata_to_csvw(french_metadata, working_dir)
+        code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
         load_files_to_ftp(
-            csvw, code_lists, upstream_tasks=[transform_data_to_csv(french_data)]
+            csvw,
+            code_lists,
+            working_dir,
+            upstream_tasks=[transform_data_to_csv(french_data, working_dir)],
         )
 
     return flow
@@ -341,15 +357,18 @@ if __name__ == "__main__":
 
     conf = get_conf()
 
-    flow = build_flow()
+    print(get_working_directory(conf))
+
+    flow = build_flow(conf)
 
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
     else:
         flow.run(
             parameters={
+                "working_dir": get_working_directory(conf),
                 "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-                "bpe_metadata_url1": WORK_DIRECTORY
+                "bpe_metadata_url1": get_working_directory(conf)
                 + "bpe-cultural-places-variables.csv",
                 "types1": {
                     "AN": str,
@@ -364,7 +383,8 @@ if __name__ == "__main__":
                 },
                 "facilities_filter": ("F309",),
                 "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-                "bpe_metadata_url2": WORK_DIRECTORY + "bpe-education-variables.csv",
+                "bpe_metadata_url2": get_working_directory(conf)
+                + "bpe-education-variables.csv",
                 "types2": {
                     "AN": str,
                     "CL_PELEM": str,
@@ -377,7 +397,6 @@ if __name__ == "__main__":
                     "SECT": str,
                     "TYPEQU": str,
                 },
-                "id_education_data_url" : "https://interstat.eng.it/files/gf/input/it/MIUR%20Schools%20with%20coordinates.csv"
             }
         )
 

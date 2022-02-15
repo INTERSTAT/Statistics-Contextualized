@@ -6,6 +6,6 @@
         }
     },
     "env": {
-        "workDir": ""
+        "workingDirectory": ""
     }
 }
