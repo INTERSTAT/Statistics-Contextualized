@@ -4,8 +4,8 @@ import unittest
 import pandas as pd
 
 script_dir = os.path.dirname(__file__)
-mymodule_dir = os.path.join(script_dir, '..', 'common')
-sys.path.append(mymodule_dir)
+common_dir = os.path.join(script_dir, '..', 'common')
+sys.path.append(common_dir)
 import geo_base
 
 

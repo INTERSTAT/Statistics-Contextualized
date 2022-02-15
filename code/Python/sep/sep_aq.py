@@ -1,4 +1,7 @@
+from io import BytesIO, StringIO
+
 from prefect import task, Flow, Parameter
+from requests import get
 import pandas as pd
 import logging
 
@@ -13,7 +16,33 @@ WORK_DIRECTORY = "../../../work/"
 USE_LOCAL_FILES = True
 VISUALIZE_FLOW = False
 
+REF_YEAR = '2019'
+
 # Tasks ----
+
+
+@task(name='Get air quality data from API')
+def extract_aq_api(pollutant):
+    """Extracts data on air quality from the EEA API.
+
+    Args:
+        pollutant (str): name of the pollutant for which the data is fetched.
+    Returns:
+        DataFrame: Table containing the measures of air quality for the pollutant.
+    """
+    logging.info(f'Reading air quality data for pollutant: {pollutant}')
+    country = 'France'  # Should also be in fist column
+    with open('aq-query.txt', 'r') as file:
+        query_url = file.read().format(country=country, year=REF_YEAR, pollutant=pollutant)
+
+    logging.info(f'About to GET: {query_url}')
+    # The following query dies horribly if 'dtype' is omitted, whereas it works on a local copy of the data
+    aq_api = pd.read_csv(query_url, header=1, usecols=[3, 5, 6, 18], dtype=str,
+                         names=['StationID', 'Latitude', 'Longitude', 'AQValue'])
+    logging.info('Data retrieved:')
+    logging.info(aq_api.head(3))
+
+    return aq_api
 
 
 @task(name='Extract French air quality data')
@@ -31,6 +60,7 @@ def extract_french_aq(url):
     aq_fr_raw = pd.read_csv(url, header=1, usecols=[3, 5, 6, 18],
                             names=['StationID', 'Latitude', 'Longitude', 'AQValue']).assign(**new_cols)
 
+    print(aq_fr_raw)
     return aq_fr_raw
 
 
@@ -96,11 +126,14 @@ with Flow('aq_csv_to_rdf') as flow:
         prefix_geo_it = 'https://www.istat.it/storage/codici-unita-amministrative/'
 
     french_aq_data_url = Parameter('fr_url', default=prefix_aq_fr + 'sep-aq_fr.csv')
-    french_aq = extract_french_aq(french_aq_data_url)
+    # french_aq = extract_french_aq(french_aq_data_url)
+    # french_aq = extract_aq_api(pollutant='Particulate+matter+%3C+10+%C2%B5m+(aerosol)')
+    french_aq = extract_aq_api(pollutant='Nitrogen%20dioxide%20(air)')
 
-    italian_aq_data_url = Parameter('it_url', default=prefix_aq_it + 'TABELLA 1_PM10_2019_rev.xlsx')
-    italian_geo_url = Parameter('it_geo_url', default=prefix_geo_it + 'Elenco-comuni-italiani.csv')
-    italian_aq = extract_italian_aq(italian_aq_data_url, get_lau_nuts_it(italian_geo_url))
+    # italian_aq_data_url = Parameter('it_url', default=prefix_aq_it + 'TABELLA 1_PM10_2019_rev.xlsx')
+    # italian_geo_url = Parameter('it_geo_url', default=prefix_geo_it + 'Elenco-comuni-italiani.csv')
+    # italian_aq = extract_italian_aq(italian_aq_data_url, get_lau_nuts_it(italian_geo_url))
+    # extract_aq_api(french_aq_data_url)
 
 
 if __name__ == '__main__':
