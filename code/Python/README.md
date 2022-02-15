@@ -21,6 +21,7 @@
  - Install [pandas](https://pandas.pydata.org/docs/getting_started/install.html): `conda install -c conda-forge pandas`
  - Install [pysftp](https://pypi.org/project/pysftp/): `conda install -c conda-forge pysftp`
  - Install [RDFLib](https://rdflib.readthedocs.io/en/stable/): `pip install rdflib`
+ - Install [pyproj](https://github.com/pyproj4/pyproj): `conda install -c conda-forge pyproj`
 
 Notes:
  - the flow visualization tools rely on [Graphviz](https://graphviz.org/)
@@ -28,7 +29,7 @@ Notes:
 
 ### Configure credentials
 
-*TODO*, see https://stackoverflow.com/questions/12042724/securely-storing-passwords-for-use-in-python-script
+Copy the `secrets.json` file in the `code\Python` folder.
 
 ### Connect IDE to virtual environment
 

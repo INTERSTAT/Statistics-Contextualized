@@ -5,6 +5,7 @@ import logging
 import pandas as pd
 import requests
 from prefect import Flow, Parameter, task
+from pyproj import Proj, transform, Transformer
 
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
@@ -23,6 +24,27 @@ REF_YEAR = '2019'
 GEO_FILE_NAMES = '../../../pilots/resources/geo_files.json'
 BASE_URL = 'https://ec.europa.eu/eurostat/documents/345175/501971/'
 LOCAL_CSV = WORK_DIRECTORY + f'lau-nuts3-{REF_YEAR}.csv'
+
+
+@task(name='Convert coordinates')
+def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
+    """
+    See https://spatialreference.org/
+    :param crs_from:
+    :param crs_to:
+    :param lon_column:
+    :param lat_column:
+    :type frame: DataFrame
+    """
+    transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    frame["xy"] = frame[[lat_column, lon_column]].apply(tuple, axis=1)
+    frame["coord"] = frame["xy"].apply(lambda s: transformer.transform(s[0], s[1]))
+    # TODO See possibility to apply directly on two columns, something like the following (which does not work)
+    # frame[[lat_column + '_r', lon_column + '_r']] =\
+    #     frame[[lat_column, lon_column]].apply(lambda x, y: transformer.transform(x, y), axis=1, result_type='expand')
+    # TODO See possibility to passe couples (source and target column names, coordinate systems)
+
+    return frame
 
 
 # Tasks ----
