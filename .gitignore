@@ -10,3 +10,6 @@
 
 # Ignore work directory
 work/
+
+# Ignore Python cache files
+__pycache__/
