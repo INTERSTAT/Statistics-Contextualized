@@ -1,3 +1,4 @@
+import re
 from unicodedata import name
 import requests
 import pandas as pd
@@ -33,9 +34,47 @@ CSVW_INTRO = {
     "dc:creator": "Interstat",
     "tables": list(),
 }
+
 DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
+def flow_parameters(conf):
+    wd = get_working_directory(conf),
+    return {                
+                "working_dir": wd,
+                "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+                "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
+                "types1": {
+                    "AN": str,
+                    "COUVERT": str,
+                    "DEPCOM": str,
+                    "ECLAIRE": str,
+                    "LAMBERT_X": float,
+                    "LAMBERT_Y": float,
+                    "NBSALLES": "Int64",
+                    "QUALITE_XY": str,
+                    "TYPEQU": str,
+                },
+                "facilities_filter": ("F309",),
+                "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+                "bpe_metadata_url2": wd + "bpe-education-variables.csv",
+                "types2": {
+                    "AN": str,
+                    "CL_PELEM": str,
+                    "CL_PGE": str,
+                    "DEPCOM": str,
+                    "EP": str,
+                    "LAMBERT_X": float,
+                    "LAMBERT_Y": float,
+                    "QUALITE_XY": str,
+                    "SECT": str,
+                    "TYPEQU": str,
+                },                
+                "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR%20Schools%20with%20coordinates.csv"
+            }
+
+def test_flow_parameters():
+    return {"italian_educational_data_url": "C:/Users/ARKN1Q/Documents/code/Statistics-Contextualized/work/MIUR Schools with coordinates.csv"}
 
 def get_conf():
     """
@@ -330,6 +369,8 @@ def build_flow(conf):
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
 
+        italian_educational_data_url = Parameter(name="italian_educational_data_url", required=True)
+
         # Flow tasks
         french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
         french_data2 = extract_french_data(bpe_zip_url2, types2)
@@ -342,6 +383,8 @@ def build_flow(conf):
         csvw = transform_metadata_to_csvw(french_metadata, working_dir)
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
+        extract_italian_educational_data(italian_educational_data_url)
+
         load_files_to_ftp(
             csvw,
             code_lists,
@@ -351,53 +394,31 @@ def build_flow(conf):
 
     return flow
 
+def build_test_flow():
+    with Flow("gf-test") as flow:
+        italian_educational_data_url = Parameter(name="italian_educational_data_url", required=True)
+        extract_italian_educational_data(italian_educational_data_url)
+    return flow
+
 
 # Run flow
 if __name__ == "__main__":
 
-    conf = get_conf()
+    conf = get_conf()    
 
-    print(get_working_directory(conf))
-
-    flow = build_flow(conf)
+    if conf["flags"]["flow"]["testing"]:
+        flow = build_test_flow()
+        params = test_flow_parameters()
+    else:
+        flow = build_flow(conf)
+        params = flow_parameters(conf)
+    
 
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
-    else:
-        flow.run(
-            parameters={
-                "working_dir": get_working_directory(conf),
-                "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-                "bpe_metadata_url1": get_working_directory(conf)
-                + "bpe-cultural-places-variables.csv",
-                "types1": {
-                    "AN": str,
-                    "COUVERT": str,
-                    "DEPCOM": str,
-                    "ECLAIRE": str,
-                    "LAMBERT_X": float,
-                    "LAMBERT_Y": float,
-                    "NBSALLES": "Int64",
-                    "QUALITE_XY": str,
-                    "TYPEQU": str,
-                },
-                "facilities_filter": ("F309",),
-                "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-                "bpe_metadata_url2": get_working_directory(conf)
-                + "bpe-education-variables.csv",
-                "types2": {
-                    "AN": str,
-                    "CL_PELEM": str,
-                    "CL_PGE": str,
-                    "DEPCOM": str,
-                    "EP": str,
-                    "LAMBERT_X": float,
-                    "LAMBERT_Y": float,
-                    "QUALITE_XY": str,
-                    "SECT": str,
-                    "TYPEQU": str,
-                },
-            }
+    else:        
+        flow.run(            
+            parameters=params
         )
 
     if conf["flags"]["prefect"]["displayGraphviz"]:

@@ -3,6 +3,9 @@
         "prefect": {
             "pushToCloudDashboard": false,
             "displayGraphviz": false
+        },
+        "flow": {
+            "testing": true
         }
     },
     "env": {
