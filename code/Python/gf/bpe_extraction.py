@@ -187,6 +187,11 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
 @task
 def extract_italian_educational_data(url: str) -> pd.DataFrame:
     italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
+    import re
+    # Extract the 2019 from 201819
+    # see https://regex101.com/r/3S04We/1
+    start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")        
+    italian_educ_data["YEAR"] = ["".join(start_end.match(str(year)).group(1,2)) for year in italian_educ_data["AnnoScolastico"]]    
     return italian_educ_data
 
 
