@@ -1,3 +1,4 @@
+import json
 from io import BytesIO, StringIO
 
 from prefect import task, Flow, Parameter
@@ -18,50 +19,60 @@ VISUALIZE_FLOW = False
 
 REF_YEAR = '2019'
 
+with open('../sep/sep.conf.json') as conf_str:
+    conf = json.load(conf_str)
+
+logging.basicConfig(filename=WORK_DIRECTORY + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
+
 # Tasks ----
 
 
-@task(name='Get air quality data from API')
-def extract_aq_api(pollutant):
+@task(name='Get air quality data from EEA')
+def extract_aq_eea(pollutant, country, local):
     """Extracts data on air quality from the EEA API.
 
     Args:
-        pollutant (str): name of the pollutant for which the data is fetched.
+        pollutant (dict): pollutant for which the data is fetched.
+        country (str): country for which the data is fetched.
+        local (boolean): indicates if locally cached API results are used.
     Returns:
-        DataFrame: Table containing the measures of air quality for the pollutant.
+        DataFrame: Table containing the measures of air quality for the given pollutant and country.
     """
-    logging.info(f'Reading air quality data for pollutant: {pollutant}')
-    country = 'France'  # Should also be in fist column
-    with open('aq-query.txt', 'r') as file:
-        query_url = file.read().format(country=country, year=REF_YEAR, pollutant=pollutant)
+    logging.info(f'Fetching air quality data for pollutant {pollutant["name"]} and country {country}')
+    if local:
+        url = WORK_DIRECTORY + pollutant["cache"]
+    else:
+        with open('aq-query.txt', 'r') as file:
+            url = file.read().format(country=country, year=REF_YEAR, pollutant=pollutant["query-name"])
 
-    logging.info(f'About to GET: {query_url}')
-    # The following query dies horribly if 'dtype' is omitted, whereas it works on a local copy of the data
-    aq_api = pd.read_csv(query_url, header=1, usecols=[3, 5, 6, 18], dtype=str,
-                         names=['StationID', 'Latitude', 'Longitude', 'AQValue'])
+    logging.info(f'About to read data from: {url}')
+    # The following query dies horribly for API if 'dtype' is omitted, whereas it works on a local copy of the data
+    aq_eea = pd.read_csv(url, header=1, usecols=[0, 3, 5, 6, 8, 18], dtype=str,
+                         names=['Country', 'StationID', 'Latitude', 'Longitude', 'AGType', 'AQValue'])
     logging.info('Data retrieved:')
-    logging.info(aq_api.head(3))
+    logging.info(aq_eea.head(3))
 
-    return aq_api
+    return aq_eea
 
 
 @task(name='Extract French air quality data')
-def extract_french_aq(url):
+def extract_french_aq(local=True):
     """Extracts the French data on air quality.
-    Placeholder for now.
+    For France, air quality data is obtained through the EEA API (or local cache of the results).
 
     Args:
-        url (str): URL of the file containing the data.
+        local (boolean): indicates if locally cached API results are used.
     Returns:
         DataFrame: Table containing the measures of air quality.
     """
-    logging.info(f'Reading French air quality data from {url}')
-    new_cols = {'POLLUTANT': 'PM10', 'AGGREGATION_TYPE': 'Annual mean', 'REPORTING_YEAR': '2019'}
-    aq_fr_raw = pd.read_csv(url, header=1, usecols=[3, 5, 6, 18],
-                            names=['StationID', 'Latitude', 'Longitude', 'AQValue']).assign(**new_cols)
+    logging.info('Reading EEA data for French air quality from ' + 'local cache' if local else 'API')
+    frames = []
+    for pollutant in conf["pollutants"]:
+        logging.info(f'Reading French air quality data for pollutant {pollutant}')
+        new_cols = {'Pollutant': pollutant['id'], 'ReportingYear': REF_YEAR}
+        frames.append(extract_aq_eea(pollutant=pollutant, country='France', local=local).assign(**new_cols))
 
-    print(aq_fr_raw)
-    return aq_fr_raw
+    return pd.concat(frames)
 
 
 @task(name='Get Italian geography')
@@ -128,7 +139,7 @@ with Flow('aq_csv_to_rdf') as flow:
     french_aq_data_url = Parameter('fr_url', default=prefix_aq_fr + 'sep-aq_fr.csv')
     # french_aq = extract_french_aq(french_aq_data_url)
     # french_aq = extract_aq_api(pollutant='Particulate+matter+%3C+10+%C2%B5m+(aerosol)')
-    french_aq = extract_aq_api(pollutant='Nitrogen%20dioxide%20(air)')
+    # french_aq = extract_aq_api(pollutant='Nitrogen%20dioxide%20(air)', country='France')
 
     # italian_aq_data_url = Parameter('it_url', default=prefix_aq_it + 'TABELLA 1_PM10_2019_rev.xlsx')
     # italian_geo_url = Parameter('it_geo_url', default=prefix_geo_it + 'Elenco-comuni-italiani.csv')
@@ -137,7 +148,7 @@ with Flow('aq_csv_to_rdf') as flow:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename=WORK_DIRECTORY + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
+
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep-aq')
     else:
