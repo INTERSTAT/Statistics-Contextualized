@@ -39,7 +39,7 @@ DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
 def flow_parameters(conf):
-    wd = get_working_directory(conf),
+    wd = get_working_directory(conf)
     return {                
                 "working_dir": wd,
                 "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
@@ -70,11 +70,11 @@ def flow_parameters(conf):
                     "SECT": str,
                     "TYPEQU": str,
                 },                
-                "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR%20Schools%20with%20coordinates.csv"
+                "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv"
             }
 
 def test_flow_parameters():
-    return {"italian_educational_data_url": "C:/Users/ARKN1Q/Documents/code/Statistics-Contextualized/work/MIUR Schools with coordinates.csv"}
+    return {"italian_educational_data_url": "C:/Users/ARKN1Q/Documents/code/Statistics-Contextualized/work/MIUR Schools with coordinates_new.csv"}
 
 def get_conf():
     """
@@ -91,9 +91,9 @@ def get_working_directory(conf=None):
     """
     If there is a working dir in the conf file, returns it, else returns a default one.
     """
-    if conf is None or conf["env"]["workingDirectory"] == "":
-        project_path = pathlib.Path(__file__).cwd()
-        wd = str(project_path) + "/work/"
+    if conf is None or conf["env"]["workingDirectory"] == "":        
+        project_path = pathlib.Path(__file__).cwd()          
+        wd = str(project_path) + "/work/"        
         os.makedirs(wd, exist_ok=True)
         return wd
     else:
