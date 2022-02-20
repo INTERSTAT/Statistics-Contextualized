@@ -5,7 +5,7 @@
             "displayGraphviz": false
         },
         "flow": {
-            "testing": true
+            "testing": false
         }
     },
     "env": {
