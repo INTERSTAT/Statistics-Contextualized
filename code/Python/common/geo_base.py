@@ -42,7 +42,7 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     # TODO See possibility to apply directly on two columns, something like the following (which does not work)
     # frame[[lat_column + '_r', lon_column + '_r']] =\
     #     frame[[lat_column, lon_column]].apply(lambda x, y: transformer.transform(x, y), axis=1, result_type='expand')
-    # TODO See possibility to passe couples (source and target column names, coordinate systems)
+    # TODO See possibility to pass couples (source and target column names, coordinate systems)
 
     return frame
 
@@ -89,6 +89,34 @@ def get_lau_nuts(geo_file_name):
     logging.info(f'LAU-NUTS3 correspondence saved to {LOCAL_CSV}')
 
     return geo_df
+
+
+@task(name='Get Italian geography')
+def get_lau_nuts_it(url):
+    """Creates the LAU-NUTS correspondence for Italy.
+    (storing that function in common module but probably useless now)
+
+    Args:
+        url (str): URL of the file containing geographic reference data for Italy.
+    Returns:
+        DataFrame: Table indexed by LAU with 'NUTS3 2010' and 'NUTS3 2021' columns.
+    Raises:
+        AssertionError: If duplicate values of LAU are found in the source.
+    """
+    logging.info(f'Reading LAU-NUTS3 correspondence from {url}')
+    # LAU expected in column 5, NUTS3 201O in column 23 and NUTS3 2021 in column 26
+    geo_it = pd.read_csv(url, encoding='ANSI', sep=';', dtype=str, usecols=[4, 22, 25])
+    # Rename columns
+    rename_dict = {geo_it.columns[0]: 'LAU', geo_it.columns[1]: 'NUTS3-2010', geo_it.columns[2]: 'NUTS3-2021'}
+    # geo_it.rename(columns=rename_dict, inplace=True)
+    geo_it.columns = ['LAU', 'NUTS3 2010', 'NUTS3 2021']
+
+    # Check uniqueness of LAU values and index the data frame
+    assert geo_it['LAU'].is_unique, 'There are duplicate values for the LAU'
+    geo_it.set_index('LAU', inplace=True)
+    logging.info(f'LAU-NUTS3 correspondence created, {geo_it.shape[0]} LAU found')
+
+    return geo_it
 
 
 with Flow('get_geo') as flow:

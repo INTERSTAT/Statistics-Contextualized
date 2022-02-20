@@ -27,7 +27,7 @@
             "query-name": "Ozone%20(air)",
             "cache": "sep-aq_fr_O3.csv",
             "ispra-base": "https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/451/",
-            "ispra-name": "TABELLA%201_O3_SALUTE_2019.xlsx"
+            "ispra-name": "TABELLA 1_O3_SALUTE_2019.xlsx"
         },
         {
             "id": "PM10",

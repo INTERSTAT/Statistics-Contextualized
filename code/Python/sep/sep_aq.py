@@ -1,4 +1,5 @@
 import json
+import urllib
 from io import BytesIO, StringIO
 
 from prefect import task, Flow, Parameter
@@ -50,14 +51,14 @@ def extract_aq_eea(pollutant, country, local):
     aq_eea = pd.read_csv(url, header=1, usecols=[0, 3, 5, 6, 8, 18], dtype=str,
                          names=['Country', 'StationID', 'Latitude', 'Longitude', 'AGType', 'AQValue'])
     logging.info('Data retrieved:')
-    logging.info(aq_eea.head(3))
+    logging.info('\n' + str(aq_eea.head(3)))
 
     return aq_eea
 
 
 @task(name='Extract French air quality data')
 def extract_french_aq(local=True):
-    """Extracts the French data on air quality.
+    """Extracts the French data on air quality for all pollutants.
     For France, air quality data is obtained through the EEA API (or local cache of the results).
 
     Args:
@@ -68,87 +69,80 @@ def extract_french_aq(local=True):
     logging.info('Reading EEA data for French air quality from ' + 'local cache' if local else 'API')
     frames = []
     for pollutant in conf["pollutants"]:
-        logging.info(f'Reading French air quality data for pollutant {pollutant}')
+        logging.info(f'Reading French air quality data for pollutant {pollutant["id"]}')
         new_cols = {'Pollutant': pollutant['id'], 'ReportingYear': REF_YEAR}
-        frames.append(extract_aq_eea(pollutant=pollutant, country='France', local=local).assign(**new_cols))
+        frames.append(extract_aq_eea.run(pollutant=pollutant, country='France', local=local).assign(**new_cols))
+    french_aq_df = pd.concat(frames)
+    logging.info('Data retrieved:')
+    logging.info('\n' + str(french_aq_df.head(3)) + '\n...\n' + str(french_aq_df.tail(3)))
+    return french_aq_df
 
-    return pd.concat(frames)
 
-
-@task(name='Get Italian geography')
-def get_lau_nuts_it(url):
-    """Creates the LAU-NUTS correspondence for Italy.
+@task(name='Get air quality data from Ispra')
+def extract_aq_ispra(pollutant, local):
+    """Extracts data on air quality from the data on the Ispra web site.
+    Here, the country value will be constantly equal to 'Italy'
 
     Args:
-        url (str): URL of the file containing geographic reference data for Italy.
+        pollutant (dict): pollutant for which the data is fetched.
+        local (boolean): indicates if locally cached data files are used.
     Returns:
-        DataFrame: Table indexed by LAU with 'NUTS3 2010' and 'NUTS3 2021' columns.
-    Raises:
-        AssertionError: If duplicate values of LAU are found in the source.
+        DataFrame: Table containing the measures of air quality for Italy and the given pollutant.
     """
-    logging.info(f'Reading LAU-NUTS3 correspondence from {url}')
-    # LAU expected in column 5, NUTS3 201O in column 23 and NUTS3 2021 in column 26
-    geo_it = pd.read_csv(url, encoding='ANSI', sep=';', dtype=str, usecols=[4, 22, 25])
-    # Rename columns
-    rename_dict = {geo_it.columns[0]: 'LAU', geo_it.columns[1]: 'NUTS3-2010', geo_it.columns[2]: 'NUTS3-2021'}
-    # geo_it.rename(columns=rename_dict, inplace=True)
-    geo_it.columns = ['LAU', 'NUTS3 2010', 'NUTS3 2021']
-
-    # Check uniqueness of LAU values and index the data frame
-    assert geo_it['LAU'].is_unique, 'There are duplicate values for the LAU'
-    geo_it.set_index('LAU', inplace=True)
-    logging.info(f'LAU-NUTS3 correspondence created, {geo_it.shape[0]} LAU found')
-
-    return geo_it
+    path = (WORK_DIRECTORY if local else pollutant['ispra-base']) + pollutant['ispra-name']
+    if local:
+        path = WORK_DIRECTORY + pollutant['ispra-name']
+    else:
+        path = pollutant['ispra-base'] + urllib.parse.quote(pollutant['ispra-name'])
+    logging.info(f'About to read Ispra data for Italian air quality from {path}')
+    # Municipality code and station identifier are always in columns C and D, pollutant mostly in column K
+    # but for PM10 the medium value is in column L, and for Ozone K is just one of multiple measures
+    columns = [2, 3, 10]
+    if pollutant["id"] == '10':
+        columns[2] = 11
+    # new_cols = {'Pollutant': pollutant['id'], 'ReportingYear': REF_YEAR}
+    # TODO Next sentence raises certificate error when using remote source, might have to use requests.get with verify=False
+    aq_ispra = pd.read_excel(path, header=1, usecols=columns, dtype=str, names=['Municipality', 'StationID', 'AQValue'])
+    # Municipality codes are not standard LAU values and have to be corrected: keep last 6 characters
+    aq_ispra['LAU'] = aq_ispra['Municipality'].map(lambda x: str(x)[-6:])
+    logging.info('Data retrieved:')
+    logging.info('\n' + str(aq_ispra.head(3)))
 
 
 @task(name='Extract Italian air quality data')
-def extract_italian_aq(url, geo_it):
+def extract_italian_aq(local=True):
     """Extracts the Italian data on air quality.
 
     Args:
-        url (str): URL of the file containing the data.
-        geo_it (DataFrame): table containing the correspondance between LAU and NUTS3.
+        local (boolean): indicates if locally cached API results are used.
     Returns:
         DataFrame: Table containing the measures of air quality.
     """
-    logging.info(f'Reading Italian air quality data from {url}')
-    new_cols = {'POLLUTANT': 'PM10', 'AGGREGATION_TYPE': 'Annual mean', 'REPORTING_YEAR': '2019'}
-    aq_it_raw = pd.read_excel(url, sheet_name='PM10 def', usecols=[2, 11], names=['LAU', 'AQValue']).assign(**new_cols)
-    # LAU values are not standard and have to be corrected: convert to string and keep last 6 characters
-    aq_it_raw['LAU'] = aq_it_raw['LAU'].map(lambda x: str(x)[-6:])
-    logging.info(f'Air quality data table created with {aq_it_raw.shape[0]} lines')
+    logging.info('Reading Ispra data for Italian air quality from ' + 'local cache' if local else 'web site')
+    frames = []
+    for pollutant in conf["pollutants"]:
+        logging.info(f'Reading Italian air quality data for pollutant {pollutant["id"]}')
+        new_cols = {'Pollutant': pollutant['id'], 'ReportingYear': REF_YEAR}
+        frames.append(extract_aq_ispra.run(pollutant=pollutant, local=local).assign(**new_cols))
+    italian_aq_df = pd.concat(frames)
+    logging.info('Data retrieved:')
+    logging.info('\n' + str(italian_aq_df.head(3)) + '\n...\n' + str(italian_aq_df.tail(3)))
 
-    # Get the correspondence between LAU and NUTS3 (choosing NUTS3 2021 here)
-    lau_nuts_it = geo_it.drop(columns=['NUTS3 2010'])
-    lau_nuts_it.rename(columns={'NUTS3 2021': 'NUTS3'}, inplace=True)
-
-    # Merge on LAU to add NUTS3
-    aq_it = aq_it_raw.merge(lau_nuts_it, left_on='LAU', right_index=True)
-
-    return aq_it
+    return italian_aq_df
 
 
 with Flow('aq_csv_to_rdf') as flow:
 
-    prefix_aq_fr = prefix_aq_it = prefix_geo_it = WORK_DIRECTORY
-    if not USE_LOCAL_FILES:
-        prefix_aq_it = 'https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/'
-        prefix_geo_it = 'https://www.istat.it/storage/codici-unita-amministrative/'
-
-    french_aq_data_url = Parameter('fr_url', default=prefix_aq_fr + 'sep-aq_fr.csv')
-    # french_aq = extract_french_aq(french_aq_data_url)
-    # french_aq = extract_aq_api(pollutant='Particulate+matter+%3C+10+%C2%B5m+(aerosol)')
-    # french_aq = extract_aq_api(pollutant='Nitrogen%20dioxide%20(air)', country='France')
-
-    # italian_aq_data_url = Parameter('it_url', default=prefix_aq_it + 'TABELLA 1_PM10_2019_rev.xlsx')
-    # italian_geo_url = Parameter('it_geo_url', default=prefix_geo_it + 'Elenco-comuni-italiani.csv')
-    # italian_aq = extract_italian_aq(italian_aq_data_url, get_lau_nuts_it(italian_geo_url))
-    # extract_aq_api(french_aq_data_url)
+    french_ex = extract_aq_eea(pollutant=conf['pollutants'][1], country='France', local=True)
+    # french_aq = extract_french_aq(local=True)
+    italian_ex = extract_aq_ispra(pollutant=conf['pollutants'][1], local=True)
+    # italian_aq = extract_italian_aq(local=True)
 
 
 if __name__ == '__main__':
 
+    pd.set_option('display.max_columns', 20)
+    pd.set_option('display.width', None)
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep-aq')
     else:
