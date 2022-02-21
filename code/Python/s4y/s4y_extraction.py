@@ -36,23 +36,9 @@ def extract_students_data(url, types):
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
                                        usecols=types.keys())
     # Rename the two first columns (see TARGET_STRUCTURE and order of parameter "types")
-    new_columns = df_students_data.columns.values
-    new_columns[0] = TARGET_STRUCTURE[0]
-    new_columns[1] = TARGET_STRUCTURE[1]
-    df_students_data.columns = new_columns
+    df_students_data.columns.values[0] = TARGET_STRUCTURE[0]
+    df_students_data.columns.values[1] = TARGET_STRUCTURE[1]
     return df_students_data
-
-
-def get_students_number(row, mapping):
-    # Get list of columns based on course_year code for one school
-    columns = mapping[row[TARGET_STRUCTURE[2]]]
-    # If list of columns contains only one item, get the value in "students_number" variable
-    if len(columns) == 1:
-        row[TARGET_STRUCTURE[3]] = row[columns[0]]
-    # Else sum the values of each column in the list et put the value in "students_number" variable
-    else:
-        row[TARGET_STRUCTURE[3]] = row.loc[columns].sum()
-    return row
 
 
 @task
@@ -64,8 +50,6 @@ def transform_students_data_to_df(df_students_data, mapping):
     ----------
     df_students_data : Dataframe
         Data extracted containing number of students
-    types : dict
-        List of names and intended data types of the variables to select
     mapping : dict
         Mapping between code list of courses year and columns names
 
@@ -80,7 +64,12 @@ def transform_students_data_to_df(df_students_data, mapping):
     # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
     df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
     # Create the new variable "students_number"
-    df_cartesian = df_cartesian.apply(lambda row: get_students_number(row, mapping), axis=1)
+    df_cartesian[TARGET_STRUCTURE[3]] = -1
+    for key, value in mapping.items():
+        if len(value) == 1:
+            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian[value[0]]
+        else:
+            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian.loc[:, value].sum(axis=1)
     return df_cartesian[TARGET_STRUCTURE]
 
 
