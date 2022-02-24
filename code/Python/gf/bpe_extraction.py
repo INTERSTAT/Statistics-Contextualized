@@ -10,6 +10,8 @@ import json
 import csv
 import pathlib
 import os
+import logging
+from gf.gf_conf import conf
 
 # Constants ----
 
@@ -80,9 +82,13 @@ def get_conf():
     """
     Grab this pipeline conf, handling various operating systems.
     """
+    logging.info("Getting GF conf")
     project_path = pathlib.Path(__file__).cwd()
+    
     sep = "\\" if os.name == "nt" else "/"
     conf_path = sep.join([str(project_path), "code", "Python", "gf", "gf.conf.json"])
+    logging.info(f"Project path is {str(project_path)}")
+    logging.info(f"Conf file path is {str(conf_path)}")
     with open(conf_path) as conf:
         return json.load(conf)
 
@@ -92,7 +98,7 @@ def get_working_directory(conf=None):
     If there is a working dir in the conf file, returns it, else returns a default one.
     """
     if conf is None or conf["env"]["workingDirectory"] == "":        
-        project_path = pathlib.Path(__file__).cwd()          
+        project_path = pathlib.Path(__file__).cwd()
         wd = str(project_path) + "/work/"        
         os.makedirs(wd, exist_ok=True)
         return wd
@@ -343,7 +349,7 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
     remote_path = "files/gf/output/"
-    with open("../secrets.json") as sf:
+    with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
@@ -405,11 +411,10 @@ def build_test_flow():
         extract_italian_educational_data(italian_educational_data_url)
     return flow
 
-
-# Run flow
-if __name__ == "__main__":
-
-    conf = get_conf()    
+def main():
+    """
+    Main entry point for the GF pipeline.
+    """    
 
     if conf["flags"]["flow"]["testing"]:
         flow = build_test_flow()
