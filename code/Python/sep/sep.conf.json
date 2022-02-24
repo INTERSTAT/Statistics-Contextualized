@@ -2,7 +2,7 @@
     "flags": {
         "prefect": {
             "pushToCloudDashboard": false,
-            "displayGraphviz": false
+            "displayGraphviz": true
         },
         "flow": {
             "testing": true

@@ -1,9 +1,7 @@
 import json
 import urllib
-from io import BytesIO, StringIO
 
-from prefect import task, Flow, Parameter
-from requests import get
+from prefect import task, Flow
 import pandas as pd
 import logging
 
@@ -16,7 +14,6 @@ FTP_PASSWORD = 'FTP_PASSWORD'
 
 WORK_DIRECTORY = "../../../work/"
 USE_LOCAL_FILES = True
-VISUALIZE_FLOW = False
 
 REF_YEAR = '2019'
 
@@ -89,7 +86,6 @@ def extract_aq_ispra(pollutant, local):
     Returns:
         DataFrame: Table containing the measures of air quality for Italy and the given pollutant.
     """
-    path = (WORK_DIRECTORY if local else pollutant['ispra-base']) + pollutant['ispra-name']
     if local:
         path = WORK_DIRECTORY + pollutant['ispra-name']
     else:
@@ -107,6 +103,8 @@ def extract_aq_ispra(pollutant, local):
     aq_ispra['LAU'] = aq_ispra['Municipality'].map(lambda x: str(x)[-6:])
     logging.info('Data retrieved:')
     logging.info('\n' + str(aq_ispra.head(3)))
+
+    return aq_ispra
 
 
 @task(name='Extract Italian air quality data')
@@ -133,10 +131,10 @@ def extract_italian_aq(local=True):
 
 with Flow('aq_csv_to_rdf') as flow:
 
-    french_ex = extract_aq_eea(pollutant=conf['pollutants'][1], country='France', local=True)
-    # french_aq = extract_french_aq(local=True)
-    italian_ex = extract_aq_ispra(pollutant=conf['pollutants'][1], local=True)
-    # italian_aq = extract_italian_aq(local=True)
+    # french_ex = extract_aq_eea(pollutant=conf['pollutants'][1], country='France', local=True)
+    french_aq = extract_french_aq(local=True)
+    # italian_ex = extract_aq_ispra(pollutant=conf['pollutants'][1], local=True)
+    italian_aq = extract_italian_aq(local=True)
 
 
 if __name__ == '__main__':
@@ -148,5 +146,5 @@ if __name__ == '__main__':
     else:
         flow.run()
 
-    if VISUALIZE_FLOW:
+    if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
