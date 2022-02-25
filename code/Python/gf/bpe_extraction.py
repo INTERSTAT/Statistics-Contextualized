@@ -423,7 +423,6 @@ def main():
         flow = build_flow(conf)
         params = flow_parameters(conf)
     
-
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
     else:        

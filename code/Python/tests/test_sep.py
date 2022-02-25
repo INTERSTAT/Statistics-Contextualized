@@ -14,7 +14,7 @@ import sep_aq
 import utils
 
 WORK_DIRECTORY = "../../../work/"
-conf = utils.get_conf('../sep/sep.conf.json')
+conf = utils.get_conf('../sep/sep_conf.py')
 logging.basicConfig(filename=WORK_DIRECTORY + 'tests.log', encoding='utf-8', level=logging.DEBUG)
 
 

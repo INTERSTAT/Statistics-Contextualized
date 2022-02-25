@@ -19,7 +19,7 @@ class CommonTestCase(unittest.TestCase):
         self.assertEqual(converted.iloc[0]['coord'][1], -71.86652837606594)
 
     def test_get_conf(self):
-        conf = utils.get_conf('../sep/sep.conf.json')
+        conf = utils.get_conf('../sep/sep_conf.py')
         self.assertIsNotNone(conf["pollutants"])
 
 
