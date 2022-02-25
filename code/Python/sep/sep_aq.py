@@ -1,11 +1,13 @@
 import json
 import urllib
 
-from prefect import task, Flow
+from prefect import task, Flow, unmapped
 import pandas as pd
 import logging
 
 # Constants ----
+from prefect.engine import state
+
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
 FTP_URL = 'FTP_URL'
@@ -68,7 +70,7 @@ def extract_french_aq(local=True):
     for pollutant in conf["pollutants"]:
         logging.info(f'Reading French air quality data for pollutant {pollutant["id"]}')
         new_cols = {'Pollutant': pollutant['id'], 'ReportingYear': REF_YEAR}
-        frames.append(extract_aq_eea.run(pollutant=pollutant, country='France', local=local).assign(**new_cols))
+        frames.append(extract_aq_eea(pollutant=pollutant, country='France', local=local).assign(**new_cols))
     french_aq_df = pd.concat(frames)
     logging.info('Data retrieved:')
     logging.info('\n' + str(french_aq_df.head(3)) + '\n...\n' + str(french_aq_df.tail(3)))
@@ -129,12 +131,19 @@ def extract_italian_aq(local=True):
     return italian_aq_df
 
 
+@task
+def concat(df_list):
+    return pd.concat(df_list)
+
+
 with Flow('aq_csv_to_rdf') as flow:
 
     # french_ex = extract_aq_eea(pollutant=conf['pollutants'][1], country='France', local=True)
-    french_aq = extract_french_aq(local=True)
+    # french_aq = extract_french_aq(local=True, upstream_tasks=['Get air quality data from EEA'])
+    frames = extract_aq_eea.map(conf['pollutants'], country=unmapped('France'), local=unmapped(True))
+
     # italian_ex = extract_aq_ispra(pollutant=conf['pollutants'][1], local=True)
-    italian_aq = extract_italian_aq(local=True)
+    # italian_aq = extract_italian_aq(local=True)
 
 
 if __name__ == '__main__':
@@ -144,7 +153,9 @@ if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep-aq')
     else:
-        flow.run()
+        state = flow.run()
+        frame_list = state.result[frames].result
+        print(pd.concat(frame_list))
 
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
