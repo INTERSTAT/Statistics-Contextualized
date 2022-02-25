@@ -31,6 +31,19 @@ Notes:
 
 Copy the `secrets.json` file in the `code\Python` folder.
 
+### Run pipelines
+
+Each package is a module on its own, discover via the `setup.py` program.
+
+In order to run a specific pipeline:
+
+- be sure you have activated the conda environment
+- place your favorite terminal in the root directory for Statistics-Contextualized
+- run the chosen launch script
+  - for example, the Global Facilities use case: `python .\code\Python\gf_run.py`
+
+Some pipelines will need files in the `work` directory, be sure to have it created and populated accordingly to the pipeline documentation.
+
 ### Connect IDE to virtual environment
 
 #### Spyder
