@@ -411,6 +411,7 @@ def build_test_flow():
         extract_italian_educational_data(italian_educational_data_url)
     return flow
 
+
 def main():
     """
     Main entry point for the GF pipeline.
