@@ -1,3 +1,3 @@
-from gf.bpe_extraction import main, own_path
+from gf.bpe_extraction import main
 
 main()

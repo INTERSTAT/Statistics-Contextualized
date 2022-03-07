@@ -2,6 +2,8 @@ import pandas as pd
 from prefect import task, Flow, Parameter
 import pysftp
 import json
+from s4y.s4y_conf import conf
+from common.utils import get_working_directory
 
 # Constants
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -10,8 +12,7 @@ FTP_USER = None
 FTP_PASSWORD = None
 # Rename items in TARGET_STRUCTURE is ok. Re-ordering implies change some part of coding (where a TARGET_STRUCTURE item is used).
 TARGET_STRUCTURE = ["school_id", "scholastic_year", "course_year", "students_number"]
-WORK_DIRECTORY = "../../../work/"
-DATA_FILE_NAME = WORK_DIRECTORY + "s4y_students_data_fr.csv"
+DATA_FILE_NAME = get_working_directory() + "s4y_students_data_fr.csv"
 
 
 @task
@@ -91,7 +92,7 @@ def load_file_to_ftp():
     """
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
-    with open("../secrets.json") as sf:
+    with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
@@ -129,8 +130,11 @@ def build_flow():
     return flow
 
 
-# Run flow
-if __name__ == "__main__":
+def main():
+    """
+    Main entry point for the S4Y pipeline.
+    """
+
     flow = build_flow()
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name="sample")

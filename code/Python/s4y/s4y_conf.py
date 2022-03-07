@@ -1,5 +1,5 @@
 """
-Technical configuration for the GF pipeline.
+Technical configuration for the S4Y pipeline.
 """
 
 conf = {

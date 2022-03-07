@@ -1,11 +1,15 @@
-{
+"""
+Technical configuration for the GF pipeline.
+"""
+
+conf = {
     "flags": {
         "prefect": {
-            "pushToCloudDashboard": false,
-            "displayGraphviz": true
+            "pushToCloudDashboard": False,
+            "displayGraphviz": False
         },
         "flow": {
-            "testing": true
+            "testing": True
         }
     },
     "env": {

@@ -411,6 +411,7 @@ def build_test_flow():
         extract_italian_educational_data(italian_educational_data_url)
     return flow
 
+
 def main():
     """
     Main entry point for the GF pipeline.
@@ -423,7 +424,6 @@ def main():
         flow = build_flow(conf)
         params = flow_parameters(conf)
     
-
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
     else:        

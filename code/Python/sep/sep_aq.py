@@ -1,9 +1,11 @@
 import json
+import os
+import pathlib
 import urllib
-
-from prefect import task, Flow
+from prefect import task, Flow, Parameter
 import pandas as pd
 import logging
+from sep.sep_conf import conf
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -12,15 +14,22 @@ FTP_URL = 'FTP_URL'
 FTP_USERNAME = 'FTP_USERNAME'
 FTP_PASSWORD = 'FTP_PASSWORD'
 
-WORK_DIRECTORY = "../../../work/"
 USE_LOCAL_FILES = True
 
 REF_YEAR = '2019'
 
-with open('../sep/sep.conf.json') as conf_str:
-    conf = json.load(conf_str)
 
-logging.basicConfig(filename=WORK_DIRECTORY + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
+def get_working_directory():
+    """
+    If there is a working dir in the conf file, returns it, else returns a default one.
+    """
+    if conf is None or conf["env"]["workingDirectory"] == "":
+        project_path = pathlib.Path(__file__).cwd()
+        wd = str(project_path) + "/work/"
+        os.makedirs(wd, exist_ok=True)
+        return wd
+    else:
+        return conf["env"]["workingDirectory"]
 
 # Tasks ----
 
@@ -38,7 +47,7 @@ def extract_aq_eea(pollutant, country, local):
     """
     logging.info(f'Fetching air quality data for pollutant {pollutant["name"]} and country {country}')
     if local:
-        url = WORK_DIRECTORY + pollutant["cache"]
+        url = get_working_directory() + pollutant["cache"]
     else:
         with open('aq-query.txt', 'r') as file:
             url = file.read().format(country=country, year=REF_YEAR, pollutant=pollutant["query-name"])
@@ -87,7 +96,7 @@ def extract_aq_ispra(pollutant, local):
         DataFrame: Table containing the measures of air quality for Italy and the given pollutant.
     """
     if local:
-        path = WORK_DIRECTORY + pollutant['ispra-name']
+        path = get_working_directory() + pollutant['ispra-name']
     else:
         path = pollutant['ispra-base'] + urllib.parse.quote(pollutant['ispra-name'])
     logging.info(f'About to read Ispra data for Italian air quality from {path}')
@@ -131,14 +140,21 @@ def extract_italian_aq(local=True):
 
 with Flow('aq_csv_to_rdf') as flow:
 
+    working_dir = Parameter(
+        name="working_dir", default=get_working_directory(), required=True
+    )
+    logging.basicConfig(filename=get_working_directory() + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
     # french_ex = extract_aq_eea(pollutant=conf['pollutants'][1], country='France', local=True)
     french_aq = extract_french_aq(local=True)
     # italian_ex = extract_aq_ispra(pollutant=conf['pollutants'][1], local=True)
     italian_aq = extract_italian_aq(local=True)
 
 
-if __name__ == '__main__':
-
+def main():
+    """
+    Main entry point for the SEP-AQ pipeline.
+    """
+    print(get_working_directory())
     pd.set_option('display.max_columns', 20)
     pd.set_option('display.width', None)
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
