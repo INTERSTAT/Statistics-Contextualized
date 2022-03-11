@@ -4,32 +4,25 @@ from requests import get, post, delete
 from zipfile import ZipFile
 from io import BytesIO
 import pandas as pd
-from rdflib import Graph, Literal, RDF, URIRef, Namespace #basic RDF handling
-from rdflib.namespace import RDF, RDFS, XSD, QB #most common namespaces
-import urllib.parse #for parsing strings to URI's
-import numpy as np
+from rdflib import Graph, Literal, URIRef, Namespace  # Basic RDF handling
+from rdflib.namespace import RDF, RDFS, XSD, QB  # Most common namespaces
 import pysftp
 import json
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 
-FTP_URL = 'FTP_URL'
-FTP_USER = 'FTP_USER'
-FTP_PASSWORD = 'FTP_PASSWORD'
-
-GRAPHDB_URL = 'GRAPHDB_URL'
-
 # Fns ----
 
+
 def raw_french_to_standard(df, age_classes, nuts3):
-    '''Transform the french census data source to our standard format.
+    """Transform the French census data source to our standard format.
 
     Arguments:
         df {dataframe} -- data source
         age_classes {list} -- a vector holding the age classes
-    '''
-    # Adding a age class column
+    """
+    # Adding an age class column
     ages_vector = df['AGED100']
     *age_classes_not_100, _ = age_classes
     age_groups = pd.cut(ages_vector, 20, labels=age_classes_not_100, right=False)
@@ -38,7 +31,7 @@ def raw_french_to_standard(df, age_classes, nuts3):
     df.loc[df['AGED100'] == 100, 'AGE_CLASS'] = 'Y_GE100'
 
     # Grouping by age class
-    df = df.groupby(by=['CODGEO', 'SEXE','AGE_CLASS'])['NB'].sum().reset_index()
+    df = df.groupby(by=['CODGEO', 'SEXE', 'AGE_CLASS'])['NB'].sum().reset_index()
 
     # Adding NUTS3
     df['CODGEO_COURT'] = df.apply(lambda row: row.CODGEO[0:3] if row.CODGEO[0:2] == '97' else row.CODGEO[0:2], axis=1) # FIXME column-wise
@@ -50,6 +43,7 @@ def raw_french_to_standard(df, age_classes, nuts3):
     df_final = df_selected_cols.rename(columns={'CODGEO': 'lau', 'SEXE': 'sex', 'AGE_CLASS': 'age', 'NB': 'population'})
 
     return df_final
+
 
 def raw_italian_to_standard(df, age_classes, nuts3):
     # Hold the variables of interest
@@ -70,61 +64,69 @@ def raw_italian_to_standard(df, age_classes, nuts3):
 
 # Tasks ----
 
-@task
+
+@task(name='Import DSD')
 def import_dsd():
     g = Graph()
     g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/sep/sep-dsd-1.ttl", format="turtle")
     return g.serialize(format="turtle", encoding='utf-8')
 
-@task
+
+@task(name='Retrieve age groups')
 def get_age_class_data(url):
     resp = get(url)
     data = BytesIO(resp.content)
     df = pd.read_csv(data)
-    return(list(df['group']))
+    return list(df['group'])
 
-@task
+
+@task(name='Retrieve French NUTS3')
 def get_nuts3_fr(url):
     resp = get(url)
     data = BytesIO(resp.content)
     df = pd.read_csv(data)
-    return(df)
+    return df
 
-@task
+
+@task(name='Retrieve French Census data')
 def extract_french_census(url, age_classes, nuts3):
     resp = get(url)
-    zip = ZipFile(BytesIO(resp.content))
-    file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=';', dtype="string")
+    archive = ZipFile(BytesIO(resp.content))
+    file_in_zip = archive.namelist().pop()
+    df = pd.read_csv(archive.open(file_in_zip), sep=';', dtype="string")
     df["NB"] = df["NB"].astype("float64")
     df["AGED100"] = df["AGED100"].astype("int")
     standard_df = raw_french_to_standard(df, age_classes, nuts3)
     return standard_df
 
-@task
+
+@task(name='Retrieve Italian NUTS3')
 def get_nuts3_it(url):
     resp = get(url)
-    zip = ZipFile(BytesIO(resp.content))
-    file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=';', dtype="string")
+    archive = ZipFile(BytesIO(resp.content))
+    file_in_zip = archive.namelist().pop()
+    df = pd.read_csv(archive.open(file_in_zip), sep=';', dtype="string")
     df_selected_cols = df[['LAU', 'NUTS3']]
     df_renamed = df_selected_cols.rename(columns={'LAU': 'lau', 'NUTS3': 'nuts3'})
-    return(df_renamed)
+    return df_renamed
 
-@task
+
+@task(name='Retrieve Italian Census data')
 def extract_italian_census(url, age_classes, nuts3):
     resp = get(url)
-    zip = ZipFile(BytesIO(resp.content))
-    file_in_zip = zip.namelist().pop()
-    df = pd.read_csv(zip.open(file_in_zip), sep=',', dtype="string")
+    archive = ZipFile(BytesIO(resp.content))
+    file_in_zip = archive.namelist().pop()
+    df = pd.read_csv(archive.open(file_in_zip), sep=',', dtype="string")
     standard_df = raw_italian_to_standard(df, age_classes, nuts3)
     return standard_df
 
-@task
+
+@task(name='Concatenate data frames')
 def concat_datasets(ds1, ds2):
     return pd.concat([ds1, ds2])
 
-@task
+
+@task(name='Create RDF data')
 def build_rdf_data(df):
     g = Graph()
     files = []
@@ -135,7 +137,7 @@ def build_rdf_data(df):
 
     # Generate prefixes
     g.bind('qb', QB)
-    g.bind('sdmx_concept', SDMX_ATTRIBUTE)
+    g.bind('sdmx_concept', SDMX_CONCEPT)
     g.bind('sdmx_attribute', SDMX_ATTRIBUTE)
     g.bind('sdmx_measure', SDMX_MEASURE)
     g.bind('isc', ISC)
@@ -181,16 +183,18 @@ def build_rdf_data(df):
             g = Graph()
     return files
 
-@task 
+
+@task(name='Delete RDF graph')
 def delete_graph(url):
     res_delete = delete(url)
 
     if res_delete.status_code != 204:
         return Failed(f"Delete graph failed: {str(res_delete.status_code)}")
     else: 
-        return Success(f"Graph deleted")
+        return Success("Graph deleted")
 
-@task
+
+@task(name='Load RDF graph in triple store')
 def load_turtle(ttl, url):
     headers = {'Content-Type': 'text/turtle'}
     
@@ -201,7 +205,8 @@ def load_turtle(ttl, url):
     else:
         return Success(f"Graph loaded")
 
-@task
+
+@task(name='Load list of RDF files in triple store')
 def load_turtles(ttl_list, url):
     headers = {'Content-Type': 'text/turtle'}
 
@@ -209,13 +214,13 @@ def load_turtles(ttl_list, url):
         res_post = post(url, data=f, headers=headers)
 
 
-@task 
+@task(name='Load file to FTP server')
 def write_csv_on_ftp(df):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None  
 
-    # TODO: Use tempfile
-    csv = df.to_csv (r'census_fr_it.csv', index = False, header=True)
+    # TODO: Use temporary file
+    csv = df.to_csv(r'census_fr_it.csv', index=False, header=True)
 
     with open("../secrets.json") as sf:
         secrets = json.load(sf)
@@ -233,7 +238,7 @@ with Flow('census_csv_to_rdf') as flow:
         secrets = json.load(sf)
         GRAPHDB_URL = secrets["graphdb"]["url"]
 
-    rdf_repo_url = Parameter('rdf_repo_url', default= GRAPHDB_URL + "repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+    rdf_repo_url = Parameter('rdf_repo_url', default=GRAPHDB_URL + "repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
 
     delete_graph(rdf_repo_url)
 
@@ -260,6 +265,7 @@ with Flow('census_csv_to_rdf') as flow:
     graph_files = build_rdf_data(df_fr_it)
 
     load_turtles(graph_files, rdf_repo_url)
+
 
 if __name__ == '__main__':
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
