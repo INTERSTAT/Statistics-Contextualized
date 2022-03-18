@@ -14,6 +14,21 @@ FTP_PASSWORD = None
 TARGET_STRUCTURE = ["school_id", "scholastic_year", "course_year", "students_number"]
 DATA_FILE_NAME = get_working_directory() + "s4y_students_data_fr.csv"
 
+# TODO table écoles
+# TODO table étudiants
+# TODO concat
+
+@task
+def extract_schools_data():
+    """
+    Extract schools information
+
+    school_id
+    """
+    target = "https://data.education.gouv.fr/api/v2/catalog/datasets/fr-en-ecoles-effectifs-nb_classes/exports/csv?select=numero_ecole%2C%20denomination_principale&limit=5&offset=0&timezone=UTC"
+    df = pd.read_csv(target)
+    print(df)
+
 
 @task
 def extract_students_data(url, types):
@@ -105,6 +120,9 @@ def load_file_to_ftp():
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
+        
+        french_schools = extract_schools_data() # WIP
+
         students_data_url1 = Parameter(name="students_data_url1", required=True)
         types_students_data1 = Parameter(name="types_students_data1", required=True)
         mapping_course_year_columns1 = Parameter(name="mapping_course_year_columns1", required=True)
@@ -186,4 +204,6 @@ def main():
                                              "11": ["1ères G", "1ères STI2D", "1ères STL", "1ères STMG", "1ères ST2S", "1ères STD2A", "1ères STHR", "1ères TMD", "1ères BT"],
                                              "12": ["Terminales G", "Terminales STI2D", "Terminales STL", "Terminales STMG", "Terminales ST2S", "Terminales STD2A", "Terminales STHR", "Terminales TMD", "Terminales BT"]}
         })
-    flow.visualize()
+
+    if conf["flags"]["prefect"]["displayGraphviz"]:
+        flow.visualize()
