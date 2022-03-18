@@ -24,7 +24,13 @@ def extract_schools_data():
     """
     Extract schools information
 
-    school_id
+    FIXME for now we're only getting:
+
+    "numero_ecole AS school_id", "denomination_principale AS name", "code_postal AS zip_code", "secteur AS institution_type"
+
+    from the API, some variables are to be computed or grabbed elsewhere.
+
+    See specs here : https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281
     """
     df = get_french_schools_data()
     print(df)
