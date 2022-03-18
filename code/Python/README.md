@@ -31,18 +31,22 @@ Notes:
 
 Copy the `secrets.json` file in the `code\Python` folder.
 
-### Run pipelines
+### Running pipelines
 
-Each package is a module on its own, discover via the `setup.py` program.
+Each package is a module on its own, discovered via the `setup.py` program.
 
 In order to run a specific pipeline:
 
 - be sure you have activated the conda environment
-- place your favorite terminal in the root directory for Statistics-Contextualized
+- place your favorite terminal at the root directory for Statistics-Contextualized
 - run the chosen launch script
   - for example, the Global Facilities use case: `python .\code\Python\gf_run.py`
 
 Some pipelines will need files in the `work` directory, be sure to have it created and populated accordingly to the pipeline documentation.
+
+#### Proxy issues
+
+For some reason at Insee, on some desktop configurations there is a noisy `no_proxy` env var that causes troubles. The best is to remove this pain point by  `set no_proxy=`- for example in your terminal before launching a script.
 
 ### Connect IDE to virtual environment
 
