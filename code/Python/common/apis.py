@@ -2,6 +2,7 @@
 This module is dedicated to API calls.
 """
 import pandas as pd
+from urllib.parse import quote
 
 def get_french_schools_data() -> pd.DataFrame:
     """
@@ -12,8 +13,9 @@ def get_french_schools_data() -> pd.DataFrame:
     base_url = "https://data.education.gouv.fr/api/v2/catalog/datasets"
     dataset_id = "fr-en-ecoles-effectifs-nb_classes" 
     row_limit = 5
-    cols = ["numero_ecole", "denomination_principale"]
-    cols_request = "%2C%20".join(cols)
+    # TODO create two lists and join'em around 'AS' ?
+    cols = ["numero_ecole AS school_id", "denomination_principale AS name", "code_postal AS zip_code", "secteur AS institution_type"]
+    cols_request = quote(",".join(cols))
     target = f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&offset=0&timezone=UTC"
     df = pd.read_csv(target)
     return df
