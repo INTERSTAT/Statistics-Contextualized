@@ -4,6 +4,7 @@ import pysftp
 import json
 from s4y.s4y_conf import conf
 from common.utils import get_working_directory
+from common.apis import get_french_schools_data
 
 # Constants
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -25,9 +26,9 @@ def extract_schools_data():
 
     school_id
     """
-    target = "https://data.education.gouv.fr/api/v2/catalog/datasets/fr-en-ecoles-effectifs-nb_classes/exports/csv?select=numero_ecole%2C%20denomination_principale&limit=5&offset=0&timezone=UTC"
-    df = pd.read_csv(target)
+    df = get_french_schools_data()
     print(df)
+    return df
 
 
 @task
