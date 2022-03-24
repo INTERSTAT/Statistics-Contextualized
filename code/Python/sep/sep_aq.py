@@ -25,8 +25,7 @@ def extract_aq_eea(pollutant, country, local):
     if local:
         url = get_working_directory() + pollutant["cache"]
     else:
-        with open('aq-query.txt', 'r') as file:
-            url = file.read().format(country=country, year=REF_YEAR, pollutant=pollutant["query-name"])
+        url = conf["aq_query"].format(country=country, year=REF_YEAR, pollutant=pollutant["query-name"])
     logging.info(f'About to read data from: {url}')
 
     # The following query dies horribly for API if 'dtype' is omitted, whereas it works on a local copy of the data
