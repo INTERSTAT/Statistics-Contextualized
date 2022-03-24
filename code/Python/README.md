@@ -41,6 +41,8 @@ In order to run a specific pipeline:
 - place your favorite terminal at the root directory for Statistics-Contextualized
 - run the chosen launch script
   - for example, the Global Facilities use case: `python .\code\Python\gf_run.py`
+  - in some execution, you might want to pay attention to the launch directory
+    - in IntelliJ, for example, you will need to modify the `Working directory` field of your Run configuration in order to have it target the _Statistics contextualised_ Git project root.
 
 Some pipelines will need files in the `work` directory, be sure to have it created and populated accordingly to the pipeline documentation.
 
