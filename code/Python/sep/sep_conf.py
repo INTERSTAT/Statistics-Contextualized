@@ -15,7 +15,8 @@ conf = {
     "env": {
         "workingDirectory": ""
     },
-    "countries": ["France"],
+    "ref-year": 2019,
+    "countries_eea": ["France"],
     "pollutants": [
         {
             "id": "NO2",
