@@ -9,7 +9,7 @@ from common.utils import get_working_directory
 REF_YEAR = conf["ref-year"]
 
 
-# Tasks ----
+# Extraction Tasks ----
 @task(name='Get EEA data for a pollutant and a country')
 def extract_aq_eea(pollutant, country, local):
     """Get data on air quality from the EEA API for one pollutant and one country.
@@ -149,6 +149,40 @@ def extract_aq_data(local=True):
     return aq_data
 
 
+# Transformation Tasks ----
+@task(name='Transform EEA data to common format')
+def transform_eaa_data():
+    logging.info('Starting the transformation of EEA data to the target format')
+    return
+
+
+@task(name='Transform Ispra data to common format')
+def transform_ispra_data():
+    logging.info('Starting the transformation of Ispra data to the target format')
+    return
+
+
+@task(name='Merge data from EEA and Ispra')
+def merge_data():
+    logging.info('Starting the merging of EEA and Ispra')
+    return
+
+
+# Loading Tasks ----
+@task(name='Load to FTP server')
+def load_to_ftp():
+    # Duplicate write_csv_on_ftp from sep-census (or better, move it to common)
+    logging.info('Uploading data to FTP')
+    return
+
+
+@task(name='Load to triple store')
+def load_to_graphdb():
+    logging.info('Uploading data to triple store')
+    return
+
+
+# Flow and main ----
 with Flow('aq_csv_to_rdf') as flow:
 
     # working_dir = Parameter(name="working_dir", default=get_working_directory(), required=True)

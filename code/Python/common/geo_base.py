@@ -26,6 +26,7 @@ BASE_URL = 'https://ec.europa.eu/eurostat/documents/345175/501971/'
 LOCAL_CSV = WORK_DIRECTORY + f'lau-nuts3-{REF_YEAR}.csv'
 
 
+# Tasks ----
 @task(name='Convert coordinates')
 def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     """
@@ -47,7 +48,20 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     return frame
 
 
-# Tasks ----
+@task(name='Coordinates to LAU')
+def coordinates_to_lau(frame, lau_column, lon_column, lat_column, crs):
+    """Adds in a DataFrame a column with the LAU calculated from existing coordinates.
+
+    Args:
+    frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
+    lau_column (str): Name of the column where the LAU should be written.
+    lon_column (str): Name of the column containing the longitude.
+    lat_column (str): Name of the column containing the latitude.
+    crs (str): Coordinate system used for latitude and longitude.
+    """
+    logging.info(f'Downloading from {geo_url} and saving to {geo_file}')
+    return
+
 
 @task(name='Download Excel file')
 def get_eurostat_file(geo_url, geo_file):
