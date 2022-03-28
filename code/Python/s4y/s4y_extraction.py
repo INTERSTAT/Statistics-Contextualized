@@ -26,7 +26,7 @@ def extract_schools_data():
 
     FIXME for now we're only getting:
 
-    "numero_ecole AS school_id", "denomination_principale AS name", "code_postal AS zip_code", "secteur AS institution_type"
+    "numero_uai AS school_id", "denomination_principale AS name", "latitude", "longitude", "code_commune AS lau", "secteur_public_prive_libe AS institution_type"
 
     from the API, some variables are to be computed or grabbed elsewhere.
 
