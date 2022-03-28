@@ -9,16 +9,18 @@ See description [here](https://github.com/INTERSTAT/Statistics-Contextualized/bl
 
 The SEP pilot use case uses data about air quality, and more precisely about concentration in the atmosphere of several pollutants. The pollutants selected are:
 
-* Nitrogen dioxide
-* Ozone
-* Particulate matter 10
-* Particulate matter 2.5
+| Name                   | Id    |
+|------------------------|-------|
+| Nitrogen dioxide       | NO2   |
+| Ozone                  | O3    |
+| Particulate matter 10  | PM10  |
+| Particulate matter 2.5 | PM2.5 |
 
 Different sources for the air quality data are used, detailed in the following sections.
 
 ### French data
 
-The French data is queried from the API provided by the European Environment Agency. The variables extracted are: Country, StationID, Latitude, Longitude, AGType (aggregation type), AQValue (air quality value).
+The French data is queried from the API provided by the European Environment Agency. The variables extracted are: `Country`, `StationID`, `Latitude`, `Longitude`, `AGType` (aggregation type), `AQValue` (air quality value). A query is made for each pollutant, and the results are concatenated with addition of two columns: `Pollutant`, containing the pollutant identifier (see table) and `ReportingYear`, which is constant and copied from the configuration file.
 
 ### Italian data
 

@@ -1,21 +1,18 @@
 # Constants ----
 import json
 import logging
+import time
 
 import pandas as pd
 import requests
 from prefect import Flow, Parameter, task
 from pyproj import Proj, transform, Transformer
+from common.utils import get_working_directory
+from common.common_conf import conf
 
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
-
-FTP_URL = 'FTP_URL'
-FTP_USERNAME = 'FTP_USERNAME'
-FTP_PASSWORD = 'FTP_PASSWORD'
 
 WORK_DIRECTORY = '../../../work/'
 USE_LOCAL_FILES = True
-VISUALIZE_FLOW = False
 
 REF_YEAR = '2019'
 
@@ -49,48 +46,61 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
 
 
 @task(name='Coordinates to LAU')
-def coordinates_to_lau(frame, lau_column, lon_column, lat_column, crs):
+def coordinates_to_lau(frame, lau_column, lat_column, lon_column, crs='epsg:4326'):
     """Adds in a DataFrame a column with the LAU calculated from existing coordinates.
+    The Nominatim API provided by OpenStreetMap (https://nominatim.org) is used
 
     Args:
     frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
     lau_column (str): Name of the column where the LAU should be written.
-    lon_column (str): Name of the column containing the longitude.
     lat_column (str): Name of the column containing the latitude.
+    lon_column (str): Name of the column containing the longitude.
     crs (str): Coordinate system used for latitude and longitude.
     """
-    logging.info(f'Downloading from {geo_url} and saving to {geo_file}')
+    url_pattern = 'https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2'
+
+    logging.info(f'Enrichment of data frame using Nominatim API with cols {lat_column} and {lon_column}')
+    # Get column indexes
+    idx_lat = frame.columns.get_loc(lat_column)
+    idx_lon = frame.columns.get_loc(lon_column)
+    delay = float(conf["nominatisDelay"])
+
+    for index, row in frame.iterrows():
+        query_url = url_pattern.format(lat=row[idx_lat], lon=row[idx_lon])
+        response = requests.get(query_url).json()
+        print(response['address'])
+        time.sleep(delay)  # wait a bit before sending the next request
+
+    # In the case of France, Nominatim provides the postal code (country_code": "fr") which has to be translated to LAU
     return
 
 
-@task(name='Download Excel file')
-def get_eurostat_file(geo_url, geo_file):
-    """Downloads the Excel LAU file from the Eurostat website.
-
-    Args:
-    geo_url (str): URL of the file containing geographic reference data from Eurostat.
-    geo_file (str): Local name for saving the file.
-    """
-    logging.info(f'Downloading from {geo_url} and saving to {geo_file}')
-    data = requests.get(geo_url)
-    with open(geo_file, 'wb') as file:
-        file.write(data.content)
-
-
 @task(name='Create LAU-NUTS table')
-def get_lau_nuts(geo_file_name):
-    """Creates the LAU-NUTS3 correspondence.
+def get_lau_nuts(ref_year):
+    """Creates the LAU-NUTS3 correspondence for a given reference year.
 
     Args:
-        geo_file_name (str): name of the file containing geographic reference data.
+        ref_year (str): Reference year.
     Returns:
         DataFrame: Table indexed by LAU with a 'NUTS3' column, containing both French and Italian LAUs.
     Raises:
         AssertionError: If duplicate values of LAU are found in the concatenated table.
     """
-    logging.info(f'Reading LAU-NUTS3 correspondence from {geo_file_name}')
+    logging.info(f'Creating the LAU-NUTS3 correspondence for year {ref_year}')
+    with open(GEO_FILE_NAMES) as geo_json:
+        file_names = json.load(geo_json)
+        file_name = file_names["file_names"][ref_year]
+        remote_file_url = BASE_URL + file_name
+        local_file_name = WORK_DIRECTORY + file_name
+
+    if not USE_LOCAL_FILES:
+        logging.info(f'Downloading from {remote_file_url} and saving to {local_file_name}')
+        data = requests.get(remote_file_url)
+        with open(local_file_name, 'wb') as file:
+            file.write(data.content)
+
     # NUTS3 is in the first column and LAU in the second
-    geo_dfs = pd.read_excel(geo_file_name, sheet_name=['FR', 'IT'], dtype=str, usecols=[0, 1], names=['NUTS3', 'LAU'])
+    geo_dfs = pd.read_excel(local_file_name, sheet_name=['FR', 'IT'], dtype=str, usecols=[0, 1], names=['NUTS3', 'LAU'])
 
     # Merge French and Italian data
     geo_df = pd.concat(geo_dfs)
@@ -133,28 +143,18 @@ def get_lau_nuts_it(url):
     return geo_it
 
 
-with Flow('get_geo') as flow:
+with Flow('test_flow') as flow:
 
-    with open(GEO_FILE_NAMES) as geo_json:
-        file_names = json.load(geo_json)
-        print(file_names)
-        file_name = file_names["file_names"][REF_YEAR]
-
-    remote_file_url = Parameter('lau_url', default=BASE_URL + file_name)
-    local_file_name = Parameter('lau_file name', default=WORK_DIRECTORY + file_name)
-
-    if not USE_LOCAL_FILES:
-        get_eurostat_file(remote_file_url, local_file_name)
-
-    get_lau_nuts(local_file_name)
+    df = pd.DataFrame([[48.862120000000004, 2.3446159999999998], [48.902503999999993, 2.4525000000000001]], columns=['lat', 'lon'])
+    coordinates_to_lau(frame=df, lau_column='lau', lat_column='lat', lon_column='lon')
 
 
-if __name__ == '__main__':
-    logging.basicConfig(filename=WORK_DIRECTORY + 'geo-base.log', encoding='utf-8', level=logging.DEBUG)
-    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
-        flow.register(project_name='sep-aq')
+def main():
+    logging.basicConfig(filename=get_working_directory() + 'geo-base.log', encoding='utf-8', level=logging.DEBUG)
+    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
+        flow.register(project_name='geo_base')
     else:
         flow.run()
 
-    if VISUALIZE_FLOW:
+    if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
