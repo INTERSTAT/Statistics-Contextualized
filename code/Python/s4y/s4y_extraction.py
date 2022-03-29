@@ -7,7 +7,6 @@ from common.utils import get_working_directory
 from common.apis import get_french_schools_data
 
 # Constants
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
@@ -26,7 +25,7 @@ def extract_schools_data():
 
     FIXME for now we're only getting:
 
-    "numero_uai AS school_id", "denomination_principale AS name", "latitude", "longitude", "code_commune AS lau", "secteur_public_prive_libe AS institution_type"
+    "numero_uai AS school_id", "appellation_officielle AS name", "latitude", "longitude", "code_commune AS lau", "secteur_public_prive_libe AS institution_type"
 
     from the API, some variables are to be computed or grabbed elsewhere.
 
@@ -62,6 +61,26 @@ def extract_students_data(url, types):
     df_students_data.columns.values[0] = TARGET_STRUCTURE[0]
     df_students_data.columns.values[1] = TARGET_STRUCTURE[1]
     return df_students_data
+
+
+@task
+def transform_schools_data(df_schools_data):
+    """
+    Transforms data about schools extracted.
+
+    Parameters
+    ----------
+    df_schools_data : Dataframe
+        Data extracted containing list of schools
+
+    Returns
+    -------
+    DataFrame
+        The data transformed
+    """
+    # Recoding type of institution
+    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"}, na_action="ignore")
+    return df_schools_data
 
 
 @task
@@ -159,10 +178,9 @@ def main():
     """
     Main entry point for the S4Y pipeline.
     """
-
     flow = build_flow()
-    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
-        flow.register(project_name="sample")
+    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
+        flow.register(project_name="gf")
     else:
         flow.run(parameters={
             "students_data_url1": "https://data.education.gouv.fr/explore/dataset/fr-en-ecoles-effectifs-nb_classes"
