@@ -15,8 +15,10 @@ def get_french_schools_data() -> pd.DataFrame:
     row_limit = 5
     filter_school_state = 1
     # TODO create two lists and join'em around 'AS' ?
-    cols = ["numero_uai AS school_id", "appellation_officielle AS name", "latitude", "longitude", "code_commune AS lau", "secteur_public_prive_libe AS institution_type"]
+    cols = ["numero_uai AS school_id", "appellation_officielle AS name", "latitude", "longitude", "code_commune AS lau",
+            "secteur_public_prive_libe AS institution_type"]
     cols_request = quote(",".join(cols))
-    target = f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&refine.etat_etablissement={filter_school_state}&offset=0&timezone=UTC"
+    target = f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&refine" \
+             f".etat_etablissement={filter_school_state}&offset=0&timezone=UTC "
     df = pd.read_csv(target)
     return df
