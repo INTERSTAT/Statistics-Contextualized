@@ -10,8 +10,6 @@ from common.apis import get_french_schools_data
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
-# Rename items in TARGET_STRUCTURE is ok. Re-ordering implies change some part of coding (where a TARGET_STRUCTURE item is used).
-TARGET_STRUCTURE = ["school_id", "scholastic_year", "course_year", "students_number"]
 DATA_FILE_NAME = get_working_directory() + "s4y_students_data_fr.csv"
 
 # TODO table écoles
@@ -57,9 +55,9 @@ def extract_students_data(url, types):
     else:
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
                                        usecols=types.keys())
-    # Rename the two first columns (see TARGET_STRUCTURE and order of parameter "types")
-    df_students_data.columns.values[0] = TARGET_STRUCTURE[0]
-    df_students_data.columns.values[1] = TARGET_STRUCTURE[1]
+    # TODO: Improve renaming. Here the order of the columns in the file is kept
+    df_students_data.columns.values[0] = "scholastic_year"
+    df_students_data.columns.values[1] = "school_id"
     return df_students_data
 
 
@@ -102,17 +100,17 @@ def transform_students_data_to_df(df_students_data, mapping):
     """
     # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
     df_course_year = pd.DataFrame(list(mapping.keys()),
-                                  columns=[TARGET_STRUCTURE[2]])
+                                  columns=["course_year"])
     # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
     df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
     # Create the new variable "students_number"
-    df_cartesian[TARGET_STRUCTURE[3]] = -1
+    df_cartesian["students_number"] = -1
     for key, value in mapping.items():
         if len(value) == 1:
-            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian[value[0]]
+            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
         else:
-            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian.loc[:, value].sum(axis=1)
-    return df_cartesian[TARGET_STRUCTURE]
+            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
+    return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
 
 
 @task
@@ -146,7 +144,8 @@ def load_file_to_ftp():
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
-        # french_schools = extract_schools_data() # WIP
+        french_schools = extract_schools_data() # WIP
+        # TODO: add getConf task?
         students_data_url1 = Parameter(name="students_data_url1", required=True)
         types_students_data1 = Parameter(name="types_students_data1", required=True)
         mapping_course_year1 = Parameter(name="mapping_course_year1", required=True)
