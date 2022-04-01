@@ -7,12 +7,9 @@ from common.utils import get_working_directory
 from common.apis import get_french_schools_data
 
 # Constants
-PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
-# Rename items in TARGET_STRUCTURE is ok. Re-ordering implies change some part of coding (where a TARGET_STRUCTURE item is used).
-TARGET_STRUCTURE = ["school_id", "scholastic_year", "course_year", "students_number"]
 DATA_FILE_NAME = get_working_directory() + "s4y_students_data_fr.csv"
 
 # TODO table écoles
@@ -26,7 +23,7 @@ def extract_schools_data():
 
     FIXME for now we're only getting:
 
-    "numero_ecole AS school_id", "denomination_principale AS name", "code_postal AS zip_code", "secteur AS institution_type"
+    "numero_uai AS school_id", "appellation_officielle AS name", "latitude", "longitude", "code_commune AS lau", "secteur_public_prive_libe AS institution_type"
 
     from the API, some variables are to be computed or grabbed elsewhere.
 
@@ -58,10 +55,30 @@ def extract_students_data(url, types):
     else:
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
                                        usecols=types.keys())
-    # Rename the two first columns (see TARGET_STRUCTURE and order of parameter "types")
-    df_students_data.columns.values[0] = TARGET_STRUCTURE[0]
-    df_students_data.columns.values[1] = TARGET_STRUCTURE[1]
+    # TODO: Improve renaming. Here the order of the columns in the file is kept
+    df_students_data.columns.values[0] = "scholastic_year"
+    df_students_data.columns.values[1] = "school_id"
     return df_students_data
+
+
+@task
+def transform_schools_data(df_schools_data):
+    """
+    Transforms data about schools extracted.
+
+    Parameters
+    ----------
+    df_schools_data : Dataframe
+        Data extracted containing list of schools
+
+    Returns
+    -------
+    DataFrame
+        The data transformed
+    """
+    # Recoding type of institution
+    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"}, na_action="ignore")
+    return df_schools_data
 
 
 @task
@@ -83,17 +100,17 @@ def transform_students_data_to_df(df_students_data, mapping):
     """
     # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
     df_course_year = pd.DataFrame(list(mapping.keys()),
-                                  columns=[TARGET_STRUCTURE[2]])
+                                  columns=["course_year"])
     # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
     df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
     # Create the new variable "students_number"
-    df_cartesian[TARGET_STRUCTURE[3]] = -1
+    df_cartesian["students_number"] = -1
     for key, value in mapping.items():
         if len(value) == 1:
-            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian[value[0]]
+            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
         else:
-            df_cartesian.loc[(df_cartesian[TARGET_STRUCTURE[2]] == key), TARGET_STRUCTURE[3]] = df_cartesian.loc[:, value].sum(axis=1)
-    return df_cartesian[TARGET_STRUCTURE]
+            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
+    return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
 
 
 @task
@@ -127,29 +144,28 @@ def load_file_to_ftp():
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
-        
         french_schools = extract_schools_data() # WIP
-
+        # TODO: add getConf task?
         students_data_url1 = Parameter(name="students_data_url1", required=True)
         types_students_data1 = Parameter(name="types_students_data1", required=True)
-        mapping_course_year_columns1 = Parameter(name="mapping_course_year_columns1", required=True)
+        mapping_course_year1 = Parameter(name="mapping_course_year1", required=True)
         french_data_extracted1 = extract_students_data(students_data_url1, types_students_data1)
-        french_data1 = transform_students_data_to_df(french_data_extracted1, mapping_course_year_columns1)
+        french_data1 = transform_students_data_to_df(french_data_extracted1, mapping_course_year1)
         students_data_url2 = Parameter(name="students_data_url2", required=True)
         types_students_data2 = Parameter(name="types_students_data2", required=True)
-        mapping_course_year_columns2 = Parameter(name="mapping_course_year_columns2", required=True)
+        mapping_course_year2 = Parameter(name="mapping_course_year2", required=True)
         french_data_extracted2 = extract_students_data(students_data_url2, types_students_data2)
-        french_data2 = transform_students_data_to_df(french_data_extracted2, mapping_course_year_columns2)
+        french_data2 = transform_students_data_to_df(french_data_extracted2, mapping_course_year2)
         students_data_url3 = Parameter(name="students_data_url3", required=True)
         types_students_data3 = Parameter(name="types_students_data3", required=True)
-        mapping_course_year_columns3 = Parameter(name="mapping_course_year_columns3", required=True)
+        mapping_course_year3 = Parameter(name="mapping_course_year3", required=True)
         french_data_extracted3 = extract_students_data(students_data_url3, types_students_data3)
-        french_data3 = transform_students_data_to_df(french_data_extracted3, mapping_course_year_columns3)
+        french_data3 = transform_students_data_to_df(french_data_extracted3, mapping_course_year3)
         students_data_url4 = Parameter(name="students_data_url4", required=True)
         types_students_data4 = Parameter(name="types_students_data4", required=True)
-        mapping_course_year_columns4 = Parameter(name="mapping_course_year_columns4", required=True)
+        mapping_course_year4 = Parameter(name="mapping_course_year4", required=True)
         french_data_extracted4 = extract_students_data(students_data_url4, types_students_data4)
-        french_data4 = transform_students_data_to_df(french_data_extracted4, mapping_course_year_columns4)
+        french_data4 = transform_students_data_to_df(french_data_extracted4, mapping_course_year4)
         students_data = concat_datasets([french_data1, french_data2, french_data3, french_data4])
         load_file_to_ftp(upstream_tasks=[transform_data_to_csv(students_data)])
     return flow
@@ -159,58 +175,22 @@ def main():
     """
     Main entry point for the S4Y pipeline.
     """
-
     flow = build_flow()
-    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
-        flow.register(project_name="sample")
+    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
+        flow.register(project_name="gf")
     else:
         flow.run(parameters={
-            "students_data_url1": "https://data.education.gouv.fr/explore/dataset/fr-en-ecoles-effectifs-nb_classes"
-                                  "/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true"
-                                  "&csv_separator=%3B",
-            "types_students_data1": {"Numéro de l'école": str, "Rentrée scolaire": str,
-                                     "Nombre d'élèves en pré-élémentaire hors ULIS": int,
-                                     "Nombre d'élèves en CP hors ULIS": int, "Nombre d'élèves en CE1 hors ULIS": int,
-                                     "Nombre d'élèves en CE2 hors ULIS": int, "Nombre d'élèves en CM1 hors ULIS": int,
-                                     "Nombre d'élèves en CM2 hors ULIS": int},
-            "mapping_course_year_columns1": {"0": ["Nombre d'élèves en pré-élémentaire hors ULIS"],
-                                             "1": ["Nombre d'élèves en CP hors ULIS"],
-                                             "2": ["Nombre d'élèves en CE1 hors ULIS"],
-                                             "3": ["Nombre d'élèves en CE2 hors ULIS"],
-                                             "4": ["Nombre d'élèves en CM1 hors ULIS"],
-                                             "5": ["Nombre d'élèves en CM2 hors ULIS"]},
-            "students_data_url2": "https://data.education.gouv.fr/explore/dataset/fr-en-college-effectifs-niveau-sexe"
-                                  "-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true"
-                                  "&csv_separator=%3B",
-            "types_students_data2": {"Numéro du collège": str, "Rentrée scolaire": str, "Nombre total de 6èmes": int,
-                                     "Nombre total de 5èmes": int, "Nombre total de 4èmes": int,
-                                     "Nombre total de 3èmes": int},
-            "mapping_course_year_columns2": {"6": ["Nombre total de 6èmes"], "7": ["Nombre total de 5èmes"],
-                                             "8": ["Nombre total de 4èmes"], "9": ["Nombre total de 3èmes"]},
-            "students_data_url3": "https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau"
-                                  "-sexe-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header"
-                                  "=true&csv_separator=%3B",
-            "types_students_data3": {"Numéro du lycée": str, "Rentrée scolaire": str, "2ndes GT": int,
-                                     "2ndes STHR": int, "2ndes TMD": int, "2ndes BT": int, "1ères G": int,
-                                     "1ères STI2D": int, "1ères STL": int, "1ères STMG": int, "1ères ST2S": int,
-                                     "1ères STD2A": int, "1ères STHR": int, "1ères TMD": int, "1ères BT": int,
-                                     "Terminales G": int, "Terminales STI2D": int, "Terminales STL": int,
-                                     "Terminales STMG": int, "Terminales ST2S": int, "Terminales STD2A": int,
-                                     "Terminales STHR": int, "Terminales TMD": int, "Terminales BT": int},
-            "mapping_course_year_columns3": {"10": ["2ndes GT", "2ndes STHR", "2ndes TMD", "2ndes BT"],
-                                             "11": ["1ères G", "1ères STI2D", "1ères STL", "1ères STMG", "1ères ST2S",
-                                                    "1ères STD2A", "1ères STHR", "1ères TMD", "1ères BT"],
-                                             "12": ["Terminales G", "Terminales STI2D", "Terminales STL",
-                                                    "Terminales STMG", "Terminales ST2S", "Terminales STD2A",
-                                                    "Terminales STHR", "Terminales TMD", "Terminales BT"]},
-            "students_data_url4": "https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau"
-                                  "-sexe-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header"
-                                  "=true&csv_separator=%3B",
-            "types_students_data4": {"Numéro du lycée": str, "Rentrée scolaire": str, "2ndes GT": int, "2ndes STHR": int, "2ndes TMD": int, "2ndes BT": int, "1ères G": int, "1ères STI2D": int, "1ères STL": int, "1ères STMG": int, "1ères ST2S": int, "1ères STD2A": int, "1ères STHR": int, "1ères TMD": int, "1ères BT": int, "Terminales G": int, "Terminales STI2D": int, "Terminales STL": int, "Terminales STMG": int, "Terminales ST2S": int, "Terminales STD2A": int, "Terminales STHR": int, "Terminales TMD": int, "Terminales BT": int},
-            "mapping_course_year_columns4": {"10": ["2ndes GT", "2ndes STHR", "2ndes TMD", "2ndes BT"],
-                                             "11": ["1ères G", "1ères STI2D", "1ères STL", "1ères STMG", "1ères ST2S", "1ères STD2A", "1ères STHR", "1ères TMD", "1ères BT"],
-                                             "12": ["Terminales G", "Terminales STI2D", "Terminales STL", "Terminales STMG", "Terminales ST2S", "Terminales STD2A", "Terminales STHR", "Terminales TMD", "Terminales BT"]}
-        })
-
+            "students_data_url1": conf["students_datasets"][0]["csv_url"],
+            "types_students_data1": conf["students_datasets"][0]["types"],
+            "mapping_course_year1": conf["students_datasets"][0]["mapping_course_year"],
+            "students_data_url2": conf["students_datasets"][1]["csv_url"],
+            "types_students_data2": conf["students_datasets"][1]["types"],
+            "mapping_course_year2": conf["students_datasets"][1]["mapping_course_year"],
+            "students_data_url3": conf["students_datasets"][2]["csv_url"],
+            "types_students_data3": conf["students_datasets"][2]["types"],
+            "mapping_course_year3": conf["students_datasets"][2]["mapping_course_year"],
+            "students_data_url4": conf["students_datasets"][3]["csv_url"],
+            "types_students_data4": conf["students_datasets"][3]["types"],
+            "mapping_course_year4": conf["students_datasets"][3]["mapping_course_year"]})
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
