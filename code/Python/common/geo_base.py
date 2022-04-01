@@ -1,4 +1,3 @@
-# Constants ----
 import json
 import logging
 import time
@@ -7,32 +6,51 @@ import pandas as pd
 import requests
 from prefect import Flow, Parameter, task
 from pyproj import Proj, transform, Transformer
-from common.utils import get_working_directory
+from common.utils import get_working_directory, get_resources_directory
 from common.common_conf import conf
 
 
-WORK_DIRECTORY = '../../../work/'
+working_dir = get_working_directory()
 USE_LOCAL_FILES = True
 
-REF_YEAR = '2019'
-
 # The LAU-NUTS files are taken from https://ec.europa.eu/eurostat/web/nuts/local-administrative-units
-# The names of the files for the different years are in the GEO_FILE_NAMES JSON file
-GEO_FILE_NAMES = '../../../pilots/resources/geo_files.json'
-BASE_URL = 'https://ec.europa.eu/eurostat/documents/345175/501971/'
-LOCAL_CSV = WORK_DIRECTORY + f'lau-nuts3-{REF_YEAR}.csv'
+# The names of the files for the different years are in the nuts_file_names key of the configuration file
+
+
+# Functions ----
+def get_dep_to_nuts3():
+    """
+    Returns a dictionary giving the correspondence between French départements and NUTS3.
+
+    Returns:
+        dict: A dictionary where keys are department codes and values are corresponding NUTS3 codes.
+    """
+    # Read the correspondance between departments and NUTS3 and transform it into a dictionary (easier for lookup)
+    dep_to_nuts_file = get_resources_directory() + 'dep-nuts3-fr.csv'
+    logging.info(f'Loading correspondance between départements and NUTS3 from {dep_to_nuts_file}')
+    dep_to_nuts_df = pd.read_csv(dep_to_nuts_file, header=0, dtype='string', usecols=[0, 1], index_col=0)
+    temp_dict = dep_to_nuts_df.to_dict('index')
+    # temp_dict will be of the form {'01': {'nuts3': 'FRK21'}, '02': {'nuts3': 'FRE21'}, ...}
+
+    return {key: value['nuts3'] for (key, value) in temp_dict.items()}
 
 
 # Tasks ----
 @task(name='Convert coordinates')
 def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     """
-    See https://spatialreference.org/
-    :param crs_from:
-    :param crs_to:
-    :param lon_column:
-    :param lat_column:
-    :type frame: DataFrame
+    Converts coordinates from on CRS to another.
+    See https://pyproj4.github.io/pyproj/stable/api/transformer.html for possible expressions of CRSs.
+    See https://spatialreference.org/ for reference naming of CRSs.
+
+    Args
+        frame (DataFrame): The data frame containing the coordinates.
+        lon_column (str): The name of the column containing the longitude.
+        lat_column (str): The name of the column containing the latitude.
+        crs_from (Any): The system to transform from.
+        crs_to (Any): The system to transform to.
+    Returns:
+        DataFrame: The input data frame with additional columns 'xy' and 'coord' containing original and converted coordinates.
     """
     transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
     frame["xy"] = frame[[lat_column, lon_column]].apply(tuple, axis=1)
@@ -45,17 +63,19 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     return frame
 
 
-@task(name='Coordinates to LAU')
-def coordinates_to_lau(frame, lau_column, lat_column, lon_column, crs='epsg:4326'):
+@task(name='Add NUTS3 from coordinates')
+def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs='epsg:4326'):
     """Adds in a DataFrame a column with the LAU calculated from existing coordinates.
     The Nominatim API provided by OpenStreetMap (https://nominatim.org) is used
 
     Args:
-    frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
-    lau_column (str): Name of the column where the LAU should be written.
-    lat_column (str): Name of the column containing the latitude.
-    lon_column (str): Name of the column containing the longitude.
-    crs (str): Coordinate system used for latitude and longitude.
+        frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
+        nuts3_column (str): Name of the column where the NUTS3 should be written.
+        lat_column (str): Name of the column containing the latitude.
+        lon_column (str): Name of the column containing the longitude.
+        crs (str): Coordinate system used for latitude and longitude.
+    Returns:
+        DataFrame: The input data frame with an additional nuts3_column containing the NUTS3 code or 'None'.
     """
     url_pattern = 'https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2'
 
@@ -63,16 +83,60 @@ def coordinates_to_lau(frame, lau_column, lat_column, lon_column, crs='epsg:4326
     # Get column indexes
     idx_lat = frame.columns.get_loc(lat_column)
     idx_lon = frame.columns.get_loc(lon_column)
-    delay = float(conf["nominatisDelay"])
+    delay = float(conf['nominatisDelay'])
+
+    # Get the dictionary giving the correspondance between départements and NUTS3
+    dep_to_nuts3_dict = get_dep_to_nuts3()
 
     for index, row in frame.iterrows():
         query_url = url_pattern.format(lat=row[idx_lat], lon=row[idx_lon])
         response = requests.get(query_url).json()
-        print(response['address'])
+        dep_code = response['address']['postcode'][0:2]
+        if dep_code == '97':
+            dep_code = response['address']['postcode'][0:3]
+        try:
+            frame.loc[index, nuts3_column] = dep_to_nuts3_dict[dep_code]
+        except KeyError:
+            logging.error(f"Département code does not exist: {dep_code}")
+            frame.loc[index, nuts3_column] = None
         time.sleep(delay)  # wait a bit before sending the next request
 
-    # In the case of France, Nominatim provides the postal code (country_code": "fr") which has to be translated to LAU
-    return
+    logging.info('Data with NUTS3 added:')
+    logging.info('\n' + str(frame.head(3)))
+
+    return frame
+
+
+@task(name='Add OSM info')
+def add_osm_info(frame, add_column, lat_column, lon_column, crs='epsg:4326'):
+    """Adds to a DataFrame a column with OSM information for existing coordinates.
+    The Nominatim API provided by OpenStreetMap (https://nominatim.org) is used. See example of information
+    returned at https://nominatim.openstreetmap.org/reverse?lat=48.99083&lon=2.444722&format=jsonv2.
+    The usage policy at https://operations.osmfoundation.org/policies/nominatim/ should be applied.
+
+    Args:
+        frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
+        add_column (str): Name of the column where the LAU should be written.
+        lat_column (str): Name of the column containing the latitude.
+        lon_column (str): Name of the column containing the longitude.
+        crs (str): Coordinate system used for latitude and longitude.
+    Returns:
+        DataFrame: The input data frame with an additional add_column containing the OSM info.
+    """
+    url_pattern = 'https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2'
+
+    logging.info(f'Enrichment of a data frame using Nominatim API with cols {lat_column} and {lon_column}')
+    # Get column indexes
+    idx_lat = frame.columns.get_loc(lat_column)
+    idx_lon = frame.columns.get_loc(lon_column)
+    delay = float(conf["nominatisDelay"])
+
+    for index, row in frame.iterrows():
+        query_url = url_pattern.format(lat=row[idx_lat], lon=row[idx_lon])
+        frame.loc[index, add_column] = requests.get(query_url).text
+        time.sleep(delay)  # wait a bit before sending the next request
+
+    return frame
 
 
 @task(name='Create LAU-NUTS table')
@@ -87,11 +151,9 @@ def get_lau_nuts(ref_year):
         AssertionError: If duplicate values of LAU are found in the concatenated table.
     """
     logging.info(f'Creating the LAU-NUTS3 correspondence for year {ref_year}')
-    with open(GEO_FILE_NAMES) as geo_json:
-        file_names = json.load(geo_json)
-        file_name = file_names["file_names"][ref_year]
-        remote_file_url = BASE_URL + file_name
-        local_file_name = WORK_DIRECTORY + file_name
+    lau_nuts_file_name = conf['nuts_file_names'][str(ref_year)]
+    remote_file_url = conf['nuts-ref-base-url'] + lau_nuts_file_name
+    local_file_name = working_dir + lau_nuts_file_name
 
     if not USE_LOCAL_FILES:
         logging.info(f'Downloading from {remote_file_url} and saving to {local_file_name}')
@@ -109,8 +171,9 @@ def get_lau_nuts(ref_year):
     geo_df.set_index('LAU', inplace=True)
     logging.info(f'LAU-NUTS3 correspondence created, {geo_df.shape[0]} LAU found')
 
-    geo_df.to_csv(LOCAL_CSV)
-    logging.info(f'LAU-NUTS3 correspondence saved to {LOCAL_CSV}')
+    local_csv = working_dir + f'lau-nuts3-{conf["ref-year"]}.csv'
+    geo_df.to_csv(local_csv)
+    logging.info(f'LAU-NUTS3 correspondence saved to {local_csv}')
 
     return geo_df
 
@@ -143,14 +206,16 @@ def get_lau_nuts_it(url):
     return geo_it
 
 
-with Flow('test_flow') as flow:
+# Flow and main ----
+with Flow('geo_flow') as flow:
 
     df = pd.DataFrame([[48.862120000000004, 2.3446159999999998], [48.902503999999993, 2.4525000000000001]], columns=['lat', 'lon'])
-    coordinates_to_lau(frame=df, lau_column='lau', lat_column='lat', lon_column='lon')
+    df_with_nuts3 = add_nuts3_from_coordinates(frame=df, nuts3_column='nuts3', lat_column='lat', lon_column='lon')
 
 
 def main():
     logging.basicConfig(filename=get_working_directory() + 'geo-base.log', encoding='utf-8', level=logging.DEBUG)
+    logging.info(f'Starting geo_base module, working directory is {working_dir}')
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name='geo_base')
     else:

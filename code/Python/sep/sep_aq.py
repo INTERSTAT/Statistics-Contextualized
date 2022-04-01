@@ -108,10 +108,10 @@ def extract_aq_ispra(pollutant, local):
 
 @task(name='Extract Italian air quality data')
 def extract_italian_aq(local=True):
-    """Extracts the Italian data on air quality.
+    """Extracts the Italian data on air quality from Ispra source.
 
     Args:
-        local (boolean): indicates if locally cached API results are used.
+        local (boolean): indicates if locally cached Ispra data are used.
     Returns:
         DataFrame: Table containing the measures of air quality.
     """
@@ -149,6 +149,16 @@ def extract_aq_data(local=True):
     return aq_data
 
 
+@task(name='Sample air quality data')
+def sample_aq_data(complete_data):
+    try:
+        size = conf['aq_sample_size']
+        logging.info(f'Sampling {size} records from data frame')
+        return complete_data.sample(size)
+    except KeyError:
+        return complete_data
+
+
 # Transformation Tasks ----
 @task(name='Transform EEA data to common format')
 def transform_eaa_data():
@@ -165,6 +175,27 @@ def transform_ispra_data():
 @task(name='Merge data from EEA and Ispra')
 def merge_data():
     logging.info('Starting the merging of EEA and Ispra')
+    return
+
+
+@task(name='Enrich stations')
+def enrich_stations(frame, id_column, res_column, lat_column, lon_column, crs='epsg:4326'):
+    """Enrich a data frame containing geolocalized stations with addresses from the Nominatis API.
+
+    Args:
+    frame (DataFrame): The Pandas data frame to enrich (containing the coordinates).
+    id_column (str): Name of the column where containing the identifiers (on which deduplication will be made).
+    res_column (str): Name of the column where the Nominatis results should be written (as a string).
+    lat_column (str): Name of the column containing the latitude.
+    lon_column (str): Name of the column containing the longitude.
+    crs (str): Coordinate system used for latitude and longitude.
+Returns:
+    DataFrame: The input data frame with an additional 'res_column' column containing the results of enrichment.
+"""
+    # First deduplicate the data frame on the identifier column, keeping only identifier and coordinates
+    logging.info('Enriching data identified by ' + id_column)
+    stations = frame[id_column, lat_column, lon_column].drop_duplicates(subset=[id_column])  # Will use keep='first' default value
+
     return
 
 
@@ -187,7 +218,7 @@ with Flow('aq_csv_to_rdf') as flow:
 
     # working_dir = Parameter(name="working_dir", default=get_working_directory(), required=True)
     logging.basicConfig(filename=get_working_directory() + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
-    french_aq = extract_french_aq(local=True)
+    french_aq = sample_aq_data(extract_french_aq(local=True))
     italian_aq = extract_italian_aq(local=True)
 
 

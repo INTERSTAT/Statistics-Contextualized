@@ -18,6 +18,7 @@ conf = {
     "ref-year": 2019,
     "countries_eea": ["France"],
     "aq_query": "http://aidef.apps.eea.europa.eu/tools/download?download_query=http://aidef.apps.eea.europa.eu/?source=%7B%22query%22:%7B%22bool%22:%7B%22must%22:%5B%7B%22term%22:%7B%22CountryOrTerritory%22:%22{country}%22%7D%7D,%7B%22term%22:%7B%22ReportingYear%22:%22{year}%22%7D%7D,%7B%22term%22:%7B%22Pollutant%22:%22{pollutant}%22%7D%7D%5D%7D%7D%7D&download_format=csv",
+    "aq_sample_size": 10,
     "pollutants": [
         {
             "id": "NO2",

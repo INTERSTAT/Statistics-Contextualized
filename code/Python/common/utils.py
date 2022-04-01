@@ -22,3 +22,13 @@ def get_working_directory(conf=None):
         return wd
     else:
         return conf["env"]["workingDirectory"]
+
+
+def get_resources_directory():
+    """
+    Returns the path of the directory containing resources for the pilots
+    """
+    project_path = pathlib.Path(__file__).cwd()
+    rd = str(project_path) + "/pilots/resources/"
+    os.makedirs(rd, exist_ok=True)
+    return rd
