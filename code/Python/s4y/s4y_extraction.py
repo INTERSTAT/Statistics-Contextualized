@@ -10,7 +10,7 @@ from common.apis import get_french_schools_data
 FTP_URL = None
 FTP_USER = None
 FTP_PASSWORD = None
-DATA_FILE_NAME = get_working_directory() + "s4y_students_data_fr.csv"
+DATA_FILE_NAME = get_working_directory() + "s4y_data_fr.csv"
 
 # TODO table écoles
 # TODO table étudiants
@@ -55,7 +55,7 @@ def extract_students_data(url, types):
     else:
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
                                        usecols=types.keys())
-    # TODO: Improve renaming. Here the order of the columns in the file is kept
+    # TODO: Improve renaming. Here the order of the columns in the file is kept and not in the order of types.keys()
     df_students_data.columns.values[0] = "scholastic_year"
     df_students_data.columns.values[1] = "school_id"
     return df_students_data
@@ -77,7 +77,8 @@ def transform_schools_data(df_schools_data):
         The data transformed
     """
     # Recoding type of institution
-    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"}, na_action="ignore")
+    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"})
+    # TODO: Add nuts3 variable based on lau variable?
     return df_schools_data
 
 
@@ -115,6 +116,7 @@ def transform_students_data_to_df(df_students_data, mapping):
 
 @task
 def concat_datasets(dss):
+    # TODO: check for duplication
     return pd.concat(dss, ignore_index=True)
 
 
@@ -124,28 +126,44 @@ def transform_data_to_csv(df):
 
 
 @task
+def merge_datasets(school_ds, students_ds):
+    return school_ds.merge(students_ds, left_on="school_id", right_on="school_id", how="left")
+
+
+@task
 def load_file_to_ftp():
     """
-    Loads data file created to FTP
+    Loads all files created to FTP
+
+    Parameters
+    ----------
+    csvw : File
+        csvw description file (json)
+    code_lists : List
+        code list files (csv)
 
     """
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None
+    remote_path = "files/s4y/output/"
     with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
         FTP_PASSWORD = secrets["ftp"]["password"]
-    # with pysftp.Connection(FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts) as sftp:
-    #    with sftp.cd("files/s4y/output"):
+    # with pysftp.Connection(
+    #        FTP_URL, username=FTP_USER, password=FTP_PASSWORD, cnopts=cnopts
+    # ) as sftp:
+    #    sftp.makedirs(remote_path)  # Create remote path if needed
+    #    with sftp.cd(remote_path):
     #        sftp.put(DATA_FILE_NAME)
 
 
 # Build flow
 def build_flow():
     with Flow("GF-EF") as flow:
-        french_schools = extract_schools_data() # WIP
-        # TODO: add getConf task?
+        french_schools = extract_schools_data()
+        french_schools_transformed = transform_schools_data(french_schools)
         students_data_url1 = Parameter(name="students_data_url1", required=True)
         types_students_data1 = Parameter(name="types_students_data1", required=True)
         mapping_course_year1 = Parameter(name="mapping_course_year1", required=True)
@@ -167,7 +185,8 @@ def build_flow():
         french_data_extracted4 = extract_students_data(students_data_url4, types_students_data4)
         french_data4 = transform_students_data_to_df(french_data_extracted4, mapping_course_year4)
         students_data = concat_datasets([french_data1, french_data2, french_data3, french_data4])
-        load_file_to_ftp(upstream_tasks=[transform_data_to_csv(students_data)])
+        french_data = merge_datasets(french_schools_transformed, students_data)
+        load_file_to_ftp(upstream_tasks=[transform_data_to_csv(french_data)])
     return flow
 
 
@@ -177,7 +196,7 @@ def main():
     """
     flow = build_flow()
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name="gf")
+        flow.register(project_name="s4y")
     else:
         flow.run(parameters={
             "students_data_url1": conf["students_datasets"][0]["csv_url"],
