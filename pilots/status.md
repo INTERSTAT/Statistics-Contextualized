@@ -42,22 +42,22 @@
   * pipeline operational
   * extraction automated
   * transform and load operational
-  * target RDF model to define?
+  * target RDF model to define ?
 
 * Italian data?
 
 ## S4Y
 
 * Models and metadata
-  * List of variables identified [here](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281)
-  * Not metadata model defined
+  * List of variables has been identified [here](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281)
+  * No defined metadata model yet
   * Code lists to define (sex and institution_type variables)
 
 * French data
   * pipeline partly operational
   * extraction automated
   * transform partly operational (retrieving "nuts3" and "sex" variables in progress)
-  * target RDF model to define?
+  * target RDF model to define ?
 
 * Italian data
   * pipeline not implemented. First step is to have a look at italian [datasets](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1013005178) to get the same list of variables
