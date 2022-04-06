@@ -337,7 +337,11 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     return files
 
 @task
-def extract_italian_museums():
+def extract_italian_cultural_facilities():
+    # TODO put in conf
+    # TODO handle limit configuration properly
+
+    # Building query
     query = """
     select * {
         select distinct ?s as ?subject ?Nome_Istituzionale ?Descrizione
@@ -365,23 +369,32 @@ def extract_italian_museums():
         }
         }
         order by ?s
-    } limit 1
+    } limit 20
     """
     quoted_query = quote(query.strip())
-    target_url_2 = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
-    target_url = "https://dati.beniculturali.it/sparql?default-graph-uri=&query=+select+*+{%0D%0A++select+distinct+%3Fs+as+%3Fsubject+%3FNome_Istituzionale+%3FDescrizione%0D%0A++%3FLatitudine+%3FLongitudine%0D%0A++%3FDisciplina+%3FIndirizzo%0D%0A++%3FCodice_postale+%3FComune+%3FProvincia+%3FWebSite+{%0D%0A+++graph+%3Chttp%3A%2F%2Fdati.beniculturali.it%2Fmibact%2Fluoghi%3E+{%0D%0A++++%3Fs+rdf%3Atype+cis%3ACulturalInstituteOrSite+%3B%0D%0A+++++++cis%3AinstitutionalCISName+%3FNome_Istituzionale+.%0D%0A++++optional+{+%3Fs+l0%3Adescription+%3FDescrizione+}%0D%0A++++optional+{+%3Fs+geo%3Alat+%3FLatitudine+}%0D%0A++++optional+{+%3Fs+geo%3Along+%3FLongitudine+}%0D%0A++++optional+{+%3Fs+cis%3AhasDiscipline+[l0%3Aname+%3FDisciplina]+}%0D%0A++++optional+{%0D%0A+++++%3Fs+cis%3AhasSite+[cis%3AsiteAddress+%3Faddress+]+.%0D%0A+++++optional+{+%3Faddress+clvapit%3AfullAddress+%3FIndirizzo+}%0D%0A+++++optional+{+%3Faddress+clvapit%3ApostCode+%3FCodice_postale+}%0D%0A+++++optional+{+%3Faddress+clvapit%3AhasCity+[rdfs%3Alabel+%3FComune]+}%0D%0A+++++optional+{+%3Faddress+clvapit%3AhasProvince+[rdfs%3Alabel+%3FProvincia]+}%0D%0A++++}%0D%0A++++optional+{%0D%0A+++++%3Fs+smapit%3AhasOnlineContactPoint+%3FcontactPoint+.+%0D%0A+++++optional+{+%3FcontactPoint+smapit%3AhasWebSite+[smapit%3AURL+%3FWebSite]+}++++%0D%0A++++}+++%0D%0A+++}%0D%0A++}%0D%0A++order+by+%3Fs%0D%0A+}%0D%0Alimit+1000&format=application%2Fjson&timeout=0&debug=on"
-    resp = requests.get(target_url_2)
+    target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"    
+
+    # Getting data
+    resp = requests.get(target_url)
+
     if resp.status_code != requests.codes.ok:
         raise signals.FAIL(f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})")
+    
     raw_data = resp.json()
-    # Building columns vectors
-    ids = []
-    names = []
+
+    # Building columns vectors    
+    table_generator = {key: [] for key in raw_data["head"]["vars"]}
+
     for result in raw_data["results"]["bindings"]:
-        ids.append(result["subject"]["value"]) # get last part as id?
-        names.append(result["Nome_Istituzionale"]["value"])
-    df = pd.DataFrame({"ID": ids, "NAME": names}, index=ids)
-    print(df)
+        for variable in table_generator.keys():
+            if variable in result.keys():
+                table_generator[variable].append(result[variable]["value"])
+            else:
+                # handling potential missing values in source data
+                table_generator[variable].append(None)
+    
+    # Creating the data frame from the table generator dict
+    df = pd.DataFrame(table_generator) # create index ?
     return df
 
 
@@ -459,7 +472,7 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        extract_italian_museums()
+        extract_italian_cultural_facilities()
     return flow
 
 
