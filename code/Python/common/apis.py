@@ -3,7 +3,8 @@ This module is dedicated to API calls.
 """
 import pandas as pd
 from urllib.parse import quote
-from requests import get
+from requests import get, codes
+from prefect.engine import signals
 
 def get_french_schools_data() -> pd.DataFrame:
     """
@@ -23,4 +24,29 @@ def get_french_schools_data() -> pd.DataFrame:
              f".etat_etablissement={filter_school_state}&offset=0&timezone=UTC "
     print(target)
     df = pd.read_csv(target, sep=";")
+    return df
+
+def get_italian_cultural_data(target_url) -> pd.DataFrame:
+    # Getting data
+    resp = get(target_url)
+
+    if resp.status_code != codes.ok:
+        # FIXME a basic error here, let the caller handle the prefect signal
+        raise signals.FAIL(f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})")
+    
+    raw_data = resp.json()
+    
+    # Building columns vectors    
+    table_generator = {key: [] for key in raw_data["head"]["vars"]}
+
+    for result in raw_data["results"]["bindings"]:
+        for variable in table_generator.keys():
+            if variable in result.keys():
+                table_generator[variable].append(result[variable]["value"])
+            else:
+                # handling potential missing values in source data
+                table_generator[variable].append(None)
+    
+    # Creating the data frame from the table generator dict
+    df = pd.DataFrame(table_generator) # create index ?
     return df

@@ -16,6 +16,7 @@ import os
 import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
+from common.apis import get_italian_cultural_data
 
 # Constants ----
 
@@ -337,65 +338,27 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     return files
 
 @task
-def extract_italian_cultural_facilities():
-    # TODO put in conf
-    # TODO handle limit configuration properly
-
-    # Building query
-    query = """
-    select * {
-        select distinct ?s as ?subject ?Nome_Istituzionale ?Descrizione
-        ?Latitudine ?Longitudine
-        ?Disciplina ?Indirizzo
-        ?Codice_postale ?Comune ?Provincia ?WebSite {
-        graph <http://dati.beniculturali.it/mibact/luoghi> {
-            ?s rdf:type cis:CulturalInstituteOrSite ;
-            cis:institutionalCISName ?Nome_Istituzionale .
-            optional { ?s l0:description ?Descrizione }
-            optional { ?s geo:lat ?Latitudine }
-            optional { ?s geo:long ?Longitudine }
-            optional { ?s cis:hasDiscipline [l0:name ?Disciplina] }
-            optional {
-            ?s cis:hasSite [cis:siteAddress ?address ] .
-            optional { ?address clvapit:fullAddress ?Indirizzo }
-            optional { ?address clvapit:postCode ?Codice_postale }
-            optional { ?address clvapit:hasCity [rdfs:label ?Comune] }
-            optional { ?address clvapit:hasProvince [rdfs:label ?Provincia] }
-            }
-            optional {
-            ?s smapit:hasOnlineContactPoint ?contactPoint . 
-            optional { ?contactPoint smapit:hasWebSite [smapit:URL ?WebSite] }    
-            }   
-        }
-        }
-        order by ?s
-    } limit 20
-    """
-    quoted_query = quote(query.strip())
+def extract_italian_cultural_facilities():        
+    # Building the query
+    # FIXME use a class here to materialise the query ?
+    query = conf["sparql"]["italianCulturalFacilities"]
+    limit = 5
+    query_with_limit = query + f"limit {limit}"
+    quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"    
 
-    # Getting data
-    resp = requests.get(target_url)
+    return get_italian_cultural_data(target_url)
 
-    if resp.status_code != requests.codes.ok:
-        raise signals.FAIL(f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})")
-    
-    raw_data = resp.json()
+@task
+def extract_italian_cultural_events():
+    # FIXME duplicated code → apis module ?
+    query = conf["sparql"]["italianCulturalEvents"]
+    limit = 5
+    query_with_limit = query + f"limit {limit}"
+    quoted_query = quote(query_with_limit.strip())
+    target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
 
-    # Building columns vectors    
-    table_generator = {key: [] for key in raw_data["head"]["vars"]}
-
-    for result in raw_data["results"]["bindings"]:
-        for variable in table_generator.keys():
-            if variable in result.keys():
-                table_generator[variable].append(result[variable]["value"])
-            else:
-                # handling potential missing values in source data
-                table_generator[variable].append(None)
-    
-    # Creating the data frame from the table generator dict
-    df = pd.DataFrame(table_generator) # create index ?
-    return df
+    return get_italian_cultural_data(target_url)
 
 
 @task
@@ -473,6 +436,7 @@ def build_flow(conf):
 def build_test_flow():
     with Flow("gf-test") as flow:
         extract_italian_cultural_facilities()
+        extract_italian_cultural_events()
     return flow
 
 
