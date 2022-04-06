@@ -9,7 +9,7 @@ conf = {
             "displayGraphviz": False
         },
         "flow": {
-            "testing": False
+            "testing": True
         }
     },
     "env": {

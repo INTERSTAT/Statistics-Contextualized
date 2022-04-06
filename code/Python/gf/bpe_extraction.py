@@ -1,8 +1,11 @@
 import re
 from unicodedata import name
+from unittest import signals
+from webbrowser import get
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
+from prefect.engine import signals
 from zipfile import ZipFile
 from io import BytesIO
 import pysftp
@@ -11,6 +14,7 @@ import csv
 import pathlib
 import os
 import logging
+from urllib.parse import quote
 from gf.gf_conf import conf
 
 # Constants ----
@@ -76,7 +80,7 @@ def flow_parameters(conf):
             }
 
 def test_flow_parameters():
-    return {"italian_educational_data_url": "C:/Users/ARKN1Q/Documents/code/Statistics-Contextualized/work/MIUR Schools with coordinates_new.csv"}
+    return None
 
 def get_conf():
     """
@@ -332,6 +336,54 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
         files.append(file)
     return files
 
+@task
+def extract_italian_museums():
+    query = """
+    select * {
+        select distinct ?s as ?subject ?Nome_Istituzionale ?Descrizione
+        ?Latitudine ?Longitudine
+        ?Disciplina ?Indirizzo
+        ?Codice_postale ?Comune ?Provincia ?WebSite {
+        graph <http://dati.beniculturali.it/mibact/luoghi> {
+            ?s rdf:type cis:CulturalInstituteOrSite ;
+            cis:institutionalCISName ?Nome_Istituzionale .
+            optional { ?s l0:description ?Descrizione }
+            optional { ?s geo:lat ?Latitudine }
+            optional { ?s geo:long ?Longitudine }
+            optional { ?s cis:hasDiscipline [l0:name ?Disciplina] }
+            optional {
+            ?s cis:hasSite [cis:siteAddress ?address ] .
+            optional { ?address clvapit:fullAddress ?Indirizzo }
+            optional { ?address clvapit:postCode ?Codice_postale }
+            optional { ?address clvapit:hasCity [rdfs:label ?Comune] }
+            optional { ?address clvapit:hasProvince [rdfs:label ?Provincia] }
+            }
+            optional {
+            ?s smapit:hasOnlineContactPoint ?contactPoint . 
+            optional { ?contactPoint smapit:hasWebSite [smapit:URL ?WebSite] }    
+            }   
+        }
+        }
+        order by ?s
+    } limit 1
+    """
+    quoted_query = quote(query.strip())
+    target_url_2 = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
+    target_url = "https://dati.beniculturali.it/sparql?default-graph-uri=&query=+select+*+{%0D%0A++select+distinct+%3Fs+as+%3Fsubject+%3FNome_Istituzionale+%3FDescrizione%0D%0A++%3FLatitudine+%3FLongitudine%0D%0A++%3FDisciplina+%3FIndirizzo%0D%0A++%3FCodice_postale+%3FComune+%3FProvincia+%3FWebSite+{%0D%0A+++graph+%3Chttp%3A%2F%2Fdati.beniculturali.it%2Fmibact%2Fluoghi%3E+{%0D%0A++++%3Fs+rdf%3Atype+cis%3ACulturalInstituteOrSite+%3B%0D%0A+++++++cis%3AinstitutionalCISName+%3FNome_Istituzionale+.%0D%0A++++optional+{+%3Fs+l0%3Adescription+%3FDescrizione+}%0D%0A++++optional+{+%3Fs+geo%3Alat+%3FLatitudine+}%0D%0A++++optional+{+%3Fs+geo%3Along+%3FLongitudine+}%0D%0A++++optional+{+%3Fs+cis%3AhasDiscipline+[l0%3Aname+%3FDisciplina]+}%0D%0A++++optional+{%0D%0A+++++%3Fs+cis%3AhasSite+[cis%3AsiteAddress+%3Faddress+]+.%0D%0A+++++optional+{+%3Faddress+clvapit%3AfullAddress+%3FIndirizzo+}%0D%0A+++++optional+{+%3Faddress+clvapit%3ApostCode+%3FCodice_postale+}%0D%0A+++++optional+{+%3Faddress+clvapit%3AhasCity+[rdfs%3Alabel+%3FComune]+}%0D%0A+++++optional+{+%3Faddress+clvapit%3AhasProvince+[rdfs%3Alabel+%3FProvincia]+}%0D%0A++++}%0D%0A++++optional+{%0D%0A+++++%3Fs+smapit%3AhasOnlineContactPoint+%3FcontactPoint+.+%0D%0A+++++optional+{+%3FcontactPoint+smapit%3AhasWebSite+[smapit%3AURL+%3FWebSite]+}++++%0D%0A++++}+++%0D%0A+++}%0D%0A++}%0D%0A++order+by+%3Fs%0D%0A+}%0D%0Alimit+1000&format=application%2Fjson&timeout=0&debug=on"
+    resp = requests.get(target_url_2)
+    if resp.status_code != requests.codes.ok:
+        raise signals.FAIL(f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})")
+    raw_data = resp.json()
+    # Building columns vectors
+    ids = []
+    names = []
+    for result in raw_data["results"]["bindings"]:
+        ids.append(result["subject"]["value"]) # get last part as id?
+        names.append(result["Nome_Istituzionale"]["value"])
+    df = pd.DataFrame({"ID": ids, "NAME": names}, index=ids)
+    print(df)
+    return df
+
 
 @task
 def load_files_to_ftp(csvw, code_lists, working_dir):
@@ -407,8 +459,7 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        italian_educational_data_url = Parameter(name="italian_educational_data_url", required=True)
-        extract_italian_educational_data(italian_educational_data_url)
+        extract_italian_museums()
     return flow
 
 
