@@ -4,6 +4,7 @@ import pandas as pd
 import logging
 from sep.sep_conf import conf
 from common.utils import get_working_directory
+from common.geo_base import add_nuts3_from_coordinates, add_osm_info
 
 # Constants ----
 REF_YEAR = conf["ref-year"]
@@ -161,9 +162,20 @@ def sample_aq_data(complete_data):
 
 # Transformation Tasks ----
 @task(name='Transform EEA data to common format')
-def transform_eaa_data():
-    logging.info('Starting the transformation of EEA data to the target format')
-    return
+def transform_eea_data(eea_data):
+    logging.info(f'Starting the transformation of EEA data to the target format, initial shape is {eea_data.shape}')
+    # Transformation of EEA data consists in adding a NUTS3 column
+    # First we deduplicate the list of stations and their coordinates to minimize Nominatim usage, then add NUTS3
+    stations = eea_data[['StationID', 'Latitude', 'Longitude']].drop_duplicates(subset=['StationID'])  # Will use keep='first' default value
+    logging.info(f'List of stations extracted, number of stations: {eea_data.shape[0]}')
+    # Add a 'NUTS3' column
+    stations_with_nuts3 = add_nuts3_from_coordinates.run(stations, 'NUTS3', 'Latitude', 'Longitude')[['StationID', 'NUTS3']]
+    # Join with original data frame on station identifier
+    eea_data_with_nuts3 = pd.merge(left=eea_data, right=stations_with_nuts3, on='StationID', sort=False)
+
+    logging.info(f'Data after addition of NUTS3 (shape {eea_data_with_nuts3.shape}):')
+    logging.info('\n' + str(eea_data_with_nuts3.head(3)))
+    return eea_data_with_nuts3
 
 
 @task(name='Transform Ispra data to common format')
@@ -196,7 +208,7 @@ Returns:
     logging.info('Enriching data identified by ' + id_column)
     stations = frame[id_column, lat_column, lon_column].drop_duplicates(subset=[id_column])  # Will use keep='first' default value
 
-    return
+    return add_osm_info(stations, 'nominatim_res', lat_column, lon_column)
 
 
 # Loading Tasks ----
@@ -220,6 +232,7 @@ with Flow('aq_csv_to_rdf') as flow:
     logging.basicConfig(filename=get_working_directory() + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
     french_aq = sample_aq_data(extract_french_aq(local=True))
     italian_aq = extract_italian_aq(local=True)
+    french_aq_transformed = transform_eea_data(french_aq)
 
 
 def main():

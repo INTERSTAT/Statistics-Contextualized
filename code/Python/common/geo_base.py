@@ -91,6 +91,12 @@ def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs=
     for index, row in frame.iterrows():
         query_url = url_pattern.format(lat=row[idx_lat], lon=row[idx_lon])
         response = requests.get(query_url).json()
+        try:
+            postcode = response['address']['postcode']
+        except KeyError:
+            logging.error(f'No postal code in response to query {query_url}')
+            frame.loc[index, nuts3_column] = None
+            continue
         dep_code = response['address']['postcode'][0:2]
         if dep_code == '97':
             dep_code = response['address']['postcode'][0:3]

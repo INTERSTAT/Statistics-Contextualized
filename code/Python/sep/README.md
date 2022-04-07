@@ -24,4 +24,4 @@ The French data is queried from the API provided by the European Environment Age
 
 ### Italian data
 
-For Italy, the data is taken from the [Ispra website](https://annuario.isprambiente.it/).
+For Italy, the data is taken from the [Ispra website](https://annuario.isprambiente.it/). Ispra publishes data as Excel files that are different for each pollutant, and also have different structures. This is detailed in [issue 17](https://github.com/INTERSTAT/Statistics-Contextualized/issues/17). The variables extracted from the different Excel files or added are `Country`, `StationID`, `Municipality`, `LAU`, `AQValue`, `Pollutant` and `ReportingYear`.      
