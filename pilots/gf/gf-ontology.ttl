@@ -1,0 +1,447 @@
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix voaf:    <http://purl.org/vocommons/voaf#> .
+@prefix geo:     <http://www.opengis.net/ont/geosparql#> .
+@prefix igf:     <http://rdf.insee.fr/def/interstat/gf#> .
+@prefix cc:      <http://creativecommons.org/ns#> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+
+
+#################################################################
+# Ontology
+#################################################################
+
+<http://rdf.insee.fr/def/interstat/gf> a owl:Ontology , voaf:Vocabulary ;
+	rdfs:label "Ontology for the Interstat Geolocalized Facilities pilot"@en ;
+	dc:created "2022-04-07"^^xsd:date ;
+	dcterms:creator [ a foaf:Person ; foaf:name "Franck Cotton" ];
+	dcterms:publisher <http://dbpedia.org/resource/INSEE> ;
+	vann:preferredNamespacePrefix "igf" ;
+	vann:preferredNamespaceUri <http://rdf.insee.fr/def/interstat/gf#> ;
+	dc:rights "Copyright © 2022 INSEE" ; 
+	cc:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+	voaf:classNumber "10"^^xsd:integer ;
+	voaf:propertyNumber "5"^^xsd:integer ;
+	owl:versionInfo "Version 0.5 - 2022-04-07" .
+
+
+#################################################################
+# Classes
+#################################################################
+
+igf:Facility a owl:Class ;
+	rdfs:label "Facility"@en ;
+	rdfs:subClassOf geo:Feature ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:FacilityType ;
+			owl:onProperty dcterms:type
+		] ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:EducationFacility a owl:Class ;
+	rdfs:label "Education facility"@en ;
+	rdfs:subClassOf igf:Facility ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:EducationFacilityType ;
+			owl:onProperty dcterms:type
+		] ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:EducationCharacteristic ;
+			owl:onProperty igf:characteristic
+		] ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:EducationCharacteristic ;
+			owl:onProperty igf:absentCharacteristic
+		] ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:cardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onProperty igf:sector
+		] ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:SportLeisureFacility a owl:Class ;
+	rdfs:label "Sport & leisure facility"@en ;
+	rdfs:subClassOf igf:Facility ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:SportLeisureFacilityType ;
+			owl:onProperty dcterms:type
+		] ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:SportLeisureCharacteristic ;
+			owl:onProperty igf:characteristic
+		] ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:SportLeisureCharacteristic ;
+			owl:onProperty igf:absentCharacteristic
+		] ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:Characteristic a owl:Class ;
+	rdfs:label "Characteristic"@en ;
+	rdfs:subClassOf skos:Concept ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:EducationCharacteristic a owl:Class ;
+	rdfs:label "Education facility characteristic"@en ;
+	rdfs:subClassOf igf:Characteristic ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:SportLeisureCharacteristic a owl:Class ;
+	rdfs:label "Sport & leisure facility characteristic"@en ;
+	rdfs:subClassOf igf:Characteristic ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:FacilityType a owl:Class ;
+	rdfs:label "Type of facility"@en ;
+	rdfs:subClassOf skos:Concept ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:EducationFacilityType a owl:Class ;
+	rdfs:label "Type of education facility"@en ;
+	rdfs:subClassOf igf:FacilityType ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:EducationCharacteristic ;
+			owl:onProperty igf:applicableCharacteristic
+		] ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:SportLeisureFacilityType a owl:Class ;
+	rdfs:label "Type of sport & leisure characteristic"@en ;
+	rdfs:subClassOf igf:FacilityType ;
+	rdfs:subClassOf
+		[   a owl:Restriction ;
+			owl:allValuesFrom igf:SportLeisureCharacteristic ;
+			owl:onProperty igf:applicableCharacteristic
+		] ;
+	  rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+igf:Sector a owl:Class ;
+	rdfs:label "Sector"@en ;
+	rdfs:subClassOf skos:Concept ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+
+#################################################################
+# Datatype properties
+#################################################################
+
+
+igf:descriptionYear a owl:DatatypeProperty ;
+	rdfs:label "year of description"@en ;
+	rdfs:domain igf:Facility ;
+	rdfs:range <http://www.w3.org/2001/XMLSchema#gYear> ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
+
+
+#################################################################
+# Object properties
+#################################################################
+
+igf:characteristic a owl:ObjectProperty ;
+	rdfs:label "characteristic"@en ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
+	rdfs:comment "Indicates that the subject facility has the object characteristic"@en ;
+	owl:propertyDisjointWith igf:absentCharacteristic ;
+	rdfs:domain igf:Equipement ;
+	rdfs:range igf:Characteristic .
+
+igf:absentCharacteristic a owl:ObjectProperty ;
+	rdfs:label "absent characteristic"@en ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
+	rdfs:comment "Indicates that the subject facility does not have the object characteristic"@en ;
+	owl:propertyDisjointWith igf:characteristic ;
+	rdfs:domain igf:Equipement ;
+	rdfs:range igf:Characteristic .
+
+igf:applicableCharacteristic a owl:ObjectProperty ;
+	rdfs:label "applicable characteristic"@en ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
+	rdfs:comment "Indicates that the object characteristic is applicable to the subject facility type"@en ;
+	rdfs:subPropertyOf skos:related;
+	rdfs:domain igf:FacilityType ;
+	rdfs:range igf:Characteristic .
+
+igf:sector a owl:ObjectProperty ;
+	rdfs:label "secteur"@en ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
+	rdfs:domain igf:EducationFacility ;
+	rdfs:range igf:Sector .
+
+
+#################################################################
+# Individuals
+#################################################################
+
+### Sector (private or public) ###
+### TODO: add concept scheme? ###
+
+<http://rdf.insee.fr/def/interstat/gf/sector/private>
+	a igf:Sector ;
+	owl:differentFrom <http://rdf.insee.fr/def/interstat/gf/sector/public> ;
+	skos:prefLabel "Private sector"@en , "Secteur privé"@fr .
+
+<http://rdf.insee.fr/def/interstat/gf/sector/public>
+	a igf:Sector ;
+	owl:differentFrom <http://rdf.insee.fr/def/interstat/gf/sector/private> ;
+	skos:prefLabel "Public sector"@en , "Secteur public"@fr .
+
+### Characteristics of education facilities ###
+### TODO: add English labels ###
+
+<http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> a skos:ConceptScheme ;
+	rdfs:label "Caractères d'équipement scolaire"@en ;
+	skos:hasTopLevel <http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CANT> , <http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_ELEM> , <http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_PELEM> , <http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_PGE> , <http://rdf.insee.fr/def/interstat/gf/FducationCharacteristic/INT> , <http://rdf.insee.fr/def/interstat/gf/FducationCharacteristic/REP> , <http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/RPIC> .
+
+<http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CANT> a skos:Concept, igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Cantine"@en ;
+	skos:notation "CANT".
+
+<http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_ELEM> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Classe élémentaire en maternelle"@en ;
+	skos:notation "CL_ELEM".
+
+<http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_PELEM> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Classe pré-élémentaire en école élémentaire"@en ;
+	skos:notation "CL_PELEM".
+
+<http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/CL_PGE> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Classe préparatoire aux grandes écoles en lycée"@en ;
+	skos:notation "CL_PGE".
+
+<http://rdf.insee.fr/def/interstat/gf/FducationCharacteristic/INT> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Internat"@en ;
+	skos:notation "INT".
+
+<http://rdf.insee.fr/def/interstat/gf/FducationCharacteristic/REP> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Réseau d'éducation prioritaire"@en ;
+	skos:notation "REP".
+
+<http://rdf.insee.fr/def/interstat/gf/EducationCharacteristic/RPIC> a skos:Concept , igf:EducationCharacteristic ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationCharacteristics> ;
+	skos:prefLabel "Regroupement pédagogique intercommunal concentré"@en ;
+	skos:notation "RPIC".
+
+### Characteristics  of sport & leisure facilities ###
+### TODO: add English labels ###
+
+<http://rdf.insee.fr/def/interstat/gf/sportLeisureCharacteristics> a skos:ConceptScheme ;
+	rdfs:label "Caractères d'équipement de sport et loisir"@fr ;
+	skos:hasTopLevel <http://rdf.insee.fr/def/interstat/gf/SportLeisureCharacteristic/COUVERT> , <http://rdf.insee.fr/def/interstat/gf/SportLeisureCharacteristic/ECLAIRE> .
+
+<http://rdf.insee.fr/def/interstat/gf/SportLeisureCharacteristic/COUVERT> a skos:Concept , igf:CaractereSportLoisir ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/sportLeisureCharacteristics> ;
+	skos:prefLabel "Couvert"@en ;
+	skos:notation "COUVERT" .
+
+<http://rdf.insee.fr/def/interstat/gf/SportLeisureCharacteristic/ECLAIRE> a skos:Concept , igf:CaractereSportLoisir ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/sportLeisureCharacteristics> ;
+	skos:prefLabel "Éclairé"@en ;
+	skos:notation "ECLAIRE" .
+
+### Types of eduction facilities ###
+### TODO: add English labels ###
+
+<http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> a skos:ConceptScheme ;
+	rdfs:label "Types d'équipements scolaires"@fr .
+	skos:hasTopLevel <http://rdf.insee.fr/def/interstat/gf/FacilityType/C101> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C102> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C104> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C105> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C201> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C203> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C301> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C302> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C303> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C304> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C305> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C401> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C402> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C403> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C409> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C501> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C502> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C503> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C504> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C505> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C509> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C601> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C602> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C603> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C604> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C605> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C609> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C701> , <http://rdf.insee.fr/def/interstat/gf/FacilityType/C702> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C101> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C101" ;
+	skos:prefLabel "École maternelle"@fr ;                                             
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CANT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_ELEM> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/RPIC> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C102> a skos:Concept , igf:EducationFacilityType ;                                                       
+	skos:notation "C102" ;
+	skos:prefLabel "École maternelle de regroupement pédagogique intercommunal (RPI) dispersé"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CANT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_ELEM> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C104> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C104" ;
+	skos:prefLabel "École élémentaire"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CANT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_PELEM> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/RPIC> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C105> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C105" ;
+	skos:prefLabel "École élémentaire de regroupement pédagogique intercommunal (RPI) dispersé"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CANT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_PELEM> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C201> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C201" ;
+	skos:prefLabel "Collège"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/INT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C203> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C203" ;
+	skos:prefLabel "SET : Section d'enseignement technologique"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C301> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C301" ;
+	skos:prefLabel "Lycée d'enseignement général et/ou technologique"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/INT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_PGE> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C302> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C302" ;
+	skos:prefLabel "Lycée d'enseignement professionnel"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_PGE> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/INT> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/REP> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C303> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C303" ;
+	skos:prefLabel "Lycée d'enseignement technique et/ou professionnel agricole"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ; 
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/CL_PGE> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C304> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C304" ;
+	skos:prefLabel "SGT : Section d'enseignement général et technologique"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C305> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C305" ;
+	skos:prefLabel "SEP : Section d'enseignement professionnel"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C401> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C401" ;
+	skos:prefLabel "STS : Section Technicien supérieur, CPGE : Classe préparatoire aux Grandes Écoles"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C402> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C402" ;
+	skos:prefLabel "Formation santé"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C403> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C403" ;
+	skos:prefLabel "Formation commerce"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C409> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C409" ;
+	skos:prefLabel "Autre formation post bac non universitaire"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C501> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C501" ;
+	skos:prefLabel "UFR"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C502> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C502" ;
+	skos:prefLabel "Institut universitaire"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C503> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C503" ;
+	skos:prefLabel "École d'ingénieurs"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C504> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C504" ;
+	skos:prefLabel "Enseignement général supérieur privé"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C505> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C505" ;
+	skos:prefLabel "Enseignement général supérieur agricole"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C509> a skos:Concept , igf:EducationFacilityType ;
+	skos:prefLabel "Autre enseignement supérieur"@fr ;
+	skos:notation "C509" ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C601> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C601" ;
+	skos:prefLabel "Centre de formation d'apprentis (hors agriculture)"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C602> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C602" ;
+	skos:prefLabel "GRETA"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C603> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C603" ;
+	skos:prefLabel "Centre dispensant de la formation continue agricole"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C604> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C604" ;
+	skos:prefLabel "Formation aux métiers du sport"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C605> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C605" ;
+	skos:prefLabel "Centre dispensant des formations d'apprentissage agricole"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://rdf.insee.fr/def/interstat/gf/educationtCharacteristic/INT>.
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C609> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C609" ;
+	skos:prefLabel "Autre formation continue"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C701> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C701" ;
+	skos:prefLabel "Résidence universitaire"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/C702> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C702" ;
+	skos:prefLabel "Restaurant universitaire"@fr ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/educationFacilityTypes> .
+
+### Types of sport & leisure facilities (only one type used in GF pilot) ###
+### TODO: add English labels ###
+
+<http://rdf.insee.fr/def/interstat/gf/sportLeisureFacilityTypes> a skos:ConceptScheme ;
+	rdfs:label "Types d'équipements de sport et loisir"@fr ;
+	skos:hasTopLevel <http://rdf.insee.fr/def/interstat/gf/FacilityType/F309> .
+
+<http://rdf.insee.fr/def/interstat/gf/FacilityType/F309> a skos:Concept , igf:SportLeisureFacilityType ;
+	skos:prefLabel "Lieux d'exposition et patrimoine"@fr ;
+	skos:notation "F309" ;
+	skos:inScheme <http://rdf.insee.fr/def/interstat/gf/sportLeisureFacilityTypes> .
