@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
 from prefect.engine import signals
+import prefect
 from zipfile import ZipFile
 from io import BytesIO
 import pysftp
@@ -53,12 +54,9 @@ def flow_parameters(conf):
                 "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
                 "types1": {
                     "AN": str,
-                    "COUVERT": str,
                     "DEPCOM": str,
-                    "ECLAIRE": str,
                     "LAMBERT_X": float,
                     "LAMBERT_Y": float,
-                    "NBSALLES": "Int64",
                     "QUALITE_XY": str,
                     "TYPEQU": str,
                 },
@@ -338,19 +336,23 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     return files
 
 @task
-def extract_italian_cultural_facilities():        
+def extract_italian_cultural_facilities():
+    logger = prefect.context.get("logger")        
     # Building the query
     # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
-    limit = 5
-    query_with_limit = query + f"limit {limit}"
+    limit = None    
+    query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"    
 
-    return get_italian_cultural_data(target_url)
+    df = get_italian_cultural_data(target_url)
+    logger.info(f"{len(df)} italian cultural facilities grabbed.")
+    return df
 
 @task
 def extract_italian_cultural_events():
+    logger = prefect.context.get("logger")
     # FIXME duplicated code → apis module ?
     query = conf["sparql"]["italianCulturalEvents"]
     limit = 5
@@ -358,7 +360,9 @@ def extract_italian_cultural_events():
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
 
-    return get_italian_cultural_data(target_url)
+    df = get_italian_cultural_data(target_url)
+    logger.info(f"{len(df)} italian cultural events grabbed.")
+    return df
 
 
 @task
@@ -423,6 +427,9 @@ def build_flow(conf):
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
         extract_italian_educational_data(italian_educational_data_url)
+
+        italian_cultural_facilities = extract_italian_cultural_facilities()
+        italian_cultural_events = extract_italian_cultural_events()
 
         load_files_to_ftp(
             csvw,

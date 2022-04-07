@@ -26,7 +26,7 @@ def get_french_schools_data() -> pd.DataFrame:
     df = pd.read_csv(target, sep=";")
     return df
 
-def get_italian_cultural_data(target_url) -> pd.DataFrame:
+def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
     # Getting data
     resp = get(target_url)
 
