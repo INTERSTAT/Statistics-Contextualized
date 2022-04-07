@@ -54,12 +54,9 @@ def flow_parameters(conf):
                 "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
                 "types1": {
                     "AN": str,
-                    "COUVERT": str,
                     "DEPCOM": str,
-                    "ECLAIRE": str,
                     "LAMBERT_X": float,
                     "LAMBERT_Y": float,
-                    "NBSALLES": "Int64",
                     "QUALITE_XY": str,
                     "TYPEQU": str,
                 },
