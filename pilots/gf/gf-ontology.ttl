@@ -160,7 +160,7 @@ igf:characteristic a owl:ObjectProperty ;
 	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
 	rdfs:comment "Indicates that the subject facility has the object characteristic"@en ;
 	owl:propertyDisjointWith igf:absentCharacteristic ;
-	rdfs:domain igf:Equipement ;
+	rdfs:domain igf:Facility ;
 	rdfs:range igf:Characteristic .
 
 igf:absentCharacteristic a owl:ObjectProperty ;
@@ -168,7 +168,7 @@ igf:absentCharacteristic a owl:ObjectProperty ;
 	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> ;
 	rdfs:comment "Indicates that the subject facility does not have the object characteristic"@en ;
 	owl:propertyDisjointWith igf:characteristic ;
-	rdfs:domain igf:Equipement ;
+	rdfs:domain igf:Facility ;
 	rdfs:range igf:Characteristic .
 
 igf:applicableCharacteristic a owl:ObjectProperty ;
