@@ -9,6 +9,7 @@ from prefect.engine import signals
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
+from rdflib import Graph, Namespace, RDF, Literal, RDFS
 import pysftp
 import json
 import csv
@@ -46,6 +47,7 @@ CSVW_INTRO = {
 DATA_FILE_NAME = "gf_data_fr.csv"
 WORK_DIRECTORY = "../../../work/"
 
+
 def flow_parameters(conf):
     wd = get_working_directory(conf)
     return {                
@@ -78,8 +80,10 @@ def flow_parameters(conf):
                 "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv"
             }
 
+
 def test_flow_parameters():
     return None
+
 
 def get_conf():
     """
@@ -200,7 +204,7 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
     start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")        
-    italian_educ_data["YEAR"] = ["".join(start_end.match(str(year)).group(1,2)) for year in italian_educ_data["AnnoScolastico"]]    
+    italian_educ_data["YEAR"] = ["".join(start_end.match(str(year)).group(1, 2)) for year in italian_educ_data["AnnoScolastico"]]
     return italian_educ_data
 
 
@@ -335,6 +339,7 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
         files.append(file)
     return files
 
+
 @task
 def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")        
@@ -350,6 +355,7 @@ def extract_italian_cultural_facilities():
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
     return df
 
+
 @task
 def extract_italian_cultural_events():
     logger = prefect.context.get("logger")
@@ -363,6 +369,32 @@ def extract_italian_cultural_events():
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
+
+
+@task(name='Create RDF data')
+def build_rdf_data(df):
+
+    ISC = Namespace('http://id.cef-interstat.eu/sc/')
+    ISC_F = Namespace('http://id.cef-interstat.eu/sc/gf/facility')
+    ISC_G = Namespace('http://id.cef-interstat.eu/sc/gf/geometry')
+    IGF = Namespace('http://rdf.insee.fr/def/interstat/gf#')
+    GEO = Namespace('http://www.opengis.net/ont/geosparql#')
+    graph = Graph()
+
+    for index, row in df.iterrows():
+        # Create the facility
+        facility_uri = ISC-F.index
+        graph.add((facility_uri, RDF.type, IGF.Facility))
+        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {index}', lang='en')))
+        # Add other properties for facility
+        # Create the geometry
+        geometry_uri = ISC-G.index
+        graph.add((geometry_uri, RDF.type, GEO.Feature))
+        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {index}', lang='en')))
+        # Add other properties for geometry
+        # Create quality annotation and attach it to the geometry
+        # Associate geometry to facility
+        graph.add(facility_uri, GEO.hasGeometry, geometry_uri)
 
 
 @task
@@ -440,6 +472,7 @@ def build_flow(conf):
 
     return flow
 
+
 def build_test_flow():
     with Flow("gf-test") as flow:
         extract_italian_cultural_facilities()
@@ -450,8 +483,7 @@ def build_test_flow():
 def main():
     """
     Main entry point for the GF pipeline.
-    """    
-
+    """
     if conf["flags"]["flow"]["testing"]:
         flow = build_test_flow()
         params = test_flow_parameters()
