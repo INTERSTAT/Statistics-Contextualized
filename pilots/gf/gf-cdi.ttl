@@ -8,7 +8,7 @@
 @prefix dct: <http://purl.org/dc/terms/> .
 
 ###############################################################################
-#             DDI-CDI RDF serializtion for the Interstat GF pilot             #
+#             DDI-CDI RDF serialization for the Interstat GF pilot             #
 ###############################################################################
 
 ex:A a cdi:Concept ;
@@ -17,258 +17,364 @@ cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "A"^^xsd:anyURI .
 
 ex:B a cdi:Concept ;
-cdi:displayLabel "Type of Facility"@en ;
+cdi:displayLabel "Year"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "B"^^xsd:anyURI .
 
 ex:C a cdi:Concept ;
-cdi:displayLabel "Year"@en ;
+cdi:displayLabel "Municipality"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "C"^^xsd:anyURI .
 
 ex:D a cdi:Concept ;
-cdi:displayLabel "Covered"@en ;
+cdi:displayLabel "Lambert X"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "D"^^xsd:anyURI .
 
 ex:E a cdi:Concept ;
-cdi:displayLabel "Lit"@en ;
+cdi:displayLabel "Lambert Y"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "E"^^xsd:anyURI .
 
 ex:F a cdi:Concept ;
-cdi:displayLabel "Lambert X"@en ;
+cdi:displayLabel "Quality"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "F"^^xsd:anyURI .
 
 ex:G a cdi:Concept ;
-cdi:displayLabel "Lambert Y"@en ;
+cdi:displayLabel "Type of Facility"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "G"^^xsd:anyURI .
 
 ex:H a cdi:Concept ;
-cdi:displayLabel "Number of rooms"@en ;
+cdi:displayLabel "Presence or absence of a pre-elementary class in primary schools"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "H"^^xsd:anyURI .
 
 ex:I a cdi:Concept ;
-cdi:displayLabel "Number of playing fields/courts"@en ;
+cdi:displayLabel "Covered"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "I"^^xsd:anyURI .
 
 ex:J a cdi:Concept ;
-cdi:displayLabel "Quality"@en ;
+cdi:displayLabel "Presence or absence of a preparatory class for the high schools in upper secondary"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "J"^^xsd:anyURI .
 
+ex:K a cdi:Concept ;
+cdi:displayLabel "Membership or not in a priority education scheme"@en ;
+cdi:externalDefinition ex:INSEE_SKOS_def ;
+cdi:identifier "K"^^xsd:anyURI .
+
+ex:L a cdi:Concept ;
+cdi:displayLabel "Membership of the public or private education sector"@en ;
+cdi:externalDefinition ex:INSEE_SKOS_def ;
+cdi:identifier "L"^^xsd:anyURI .
 
 ex:INSEE_SKOS_def  a skos:Concept;
 skos:prefLabel "Some External Reference" .
 
 
-ex:K a cdi:RepresentedVariable ;
+ex:M a cdi:RepresentedVariable ;
 cdi:name "Facility_ID" ;
 cdi:displayLabel "Facility ID"@en , "Identifiant d'équipement"@fr ;
 cdi:uses ex:A ;
 cdi:definition "The ID of a variable containing a Facility"@en ;
 cdi:hasIntendedDatatype xsd:token .
 
-ex:L a cdi:RepresentedVariable ;
-cdi:name "Type_of_facility" ;
-cdi:displayLabel "Type of facility"@en ;
-cdi:uses ex:B ;
-cdi:definition "The type of facility"@en ;
-cdi:takesSubstantiveValueFrom ex:codelist .
-
-ex:M a cdi:RepresentedVariable ;
+ex:N a cdi:RepresentedVariable ;
 cdi:name "Year" ;
 cdi:displayLabel "Year "@en , "Année"@fr ;
-cdi:uses ex:C ;
+cdi:uses ex:B ;
 cdi:definition "The reference year"@en ;
 cdi:hasIntendedDatatype xsd:gYear .
 
-ex:M a cdi:RepresentedVariable ;
-cdi:name "Covered" ;
-cdi:displayLabel "Covered"@en , "Couvert"@fr ;
-cdi:uses ex:D ;
-cdi:definition "Whether the facility is covered"@en ;
-cdi:takesSubstantiveValueFrom ex:codelist0 ;
-cdi:takesSentinelValueFrom ex:sv1 .
-
-ex:N a cdi:RepresentedVariable ;
-cdi:name "Lit" ;
-cdi:displayLabel "Lit"@en , "Éclairé"@fr ;
-cdi:uses ex:E ;
-cdi:definition "Whether the facility has lighting"@en ;
-cdi:takesSubstantiveValueFrom ex:codelist0 ;
-cdi:takesSentinelValueFrom ex:sv1 .
-
-
 ex:O a cdi:RepresentedVariable ;
-cdi:name "Facility_ID" ;
-cdi:displayLabel "Facility ID"@en , "Identifiant d'équipement"@fr ;
-cdi:uses ex:F ;
-cdi:definition "The ID of a variable containing a facility"@en ;
-cdi:hasIntendedDatatype xsd:token .
+cdi:name "Municipality" ;
+cdi:displayLabel "Municipality"@en ;
+cdi:uses ex:C ;
+cdi:definition "Code of the municipality"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist1 .
 
 ex:P a cdi:RepresentedVariable ;
 cdi:name "Lambert_X" ;
 cdi:displayLabel "Lambert X"@en , "Lambert X"@fr ;
-cdi:uses ex:G ;
+cdi:uses ex:D ;
 cdi:definition "The Lambert X coordinate of the facility"@en ;
 cdi:hasIntendedDatatype xsd:float .
 
 ex:Q a cdi:RepresentedVariable ;
 cdi:name "Lambert_Y" ;
 cdi:displayLabel "Lambert Y"@en , "Lambert Y"@fr ;
-cdi:uses ex:H ;
+cdi:uses ex:E ;
 cdi:definition "The Lambert Y coordinate of the facility"@en ;
 cdi:hasIntendedDatatype xsd:float .
 
 ex:R a cdi:RepresentedVariable ;
-cdi:name "Number_of_rooms" ;
-cdi:displayLabel "Number of rooms"@en ;
-cdi:uses ex:I ;
-cdi:definition "The number of rooms in a facility"@en ;
-cdi:hasIntendedDatatype xsd:integer .
-
-ex:S a cdi:RepresentedVariable ;
-cdi:name "Number_of_playing_fields_courts" ;
-cdi:displayLabel "Number of playing fields/courts"@en ;
-cdi:uses ex:J ;
-cdi:definition "Number of playing fields/courts in the facility"@en ;
-cdi:hasIntendedDatatype xsd:integer .
-
-ex:T a cdi:RepresentedVariable ;
 cdi:name "Quality" ;
 cdi:displayLabel "Quality"@en  ;
-cdi:uses ex:J ;
+cdi:uses ex:F ;
 cdi:definition "The quality of the geocoding" ;
-cdi:hasIntendedDatatype xsd:integer .
+cdi:hasIntendedDatatype ex:codeList2 .
 
-ex:codelist a cdi:Codelist ;
-cdi:name "codelist" ;
-cdi:has "Cinema" , "Playing Field" , "School" .
+ex:S a cdi:RepresentedVariable ;
+cdi:name "Type_of_facility" ;
+cdi:displayLabel "Type of facility"@en ;
+cdi:uses ex:G ;
+cdi:definition "The type of facility"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist3 .
 
-ex:codelist0 a cdi:Codelist ;
-cdi:name "codelist 0" ;
-cdi:has ex:c1, ex:c2; .
+ex:T a cdi:RepresentedVariable ;
+cdi:name "CL_PELEM" ;
+cdi:displayLabel "Presence or absence of a pre-elementary class in primary schools"@en ;
+cdi:uses ex:H ;
+cdi:definition "Presence or absence of a pre-elementary class in primary schools"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist4 ;
+cdi:takesSentinelValueFrom ex:sv1 .
+
+ex:U a cdi:RepresentedVariable ;
+cdi:name "CL_PGE ;
+cdi:displayLabel "Presence or absence of a preparatory class for the high schools in upper secondary"@en ;
+cdi:uses ex:I ;
+cdi:definition "Presence or absence of a preparatory class for the high schools in upper secondary"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist5 ;
+cdi:takesSentinelValueFrom ex:sv1 .
+
+ex:V a cdi:RepresentedVariable ;
+cdi:name "EP" ;
+cdi:displayLabel "Membership or not in a priority education scheme"@en ;
+cdi:uses ex:J ;
+cdi:definition "Membership or not in a priority education scheme"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist6 ;
+cdi:takesSentinelValueFrom ex:sv1 .
+
+ex:W a cdi:RepresentedVariable ;
+cdi:name "SECT" ;
+cdi:displayLabel "Membership of the public or private education sector"@en ;
+cdi:uses ex:K ;
+cdi:definition "Membership of the public or private education sector"@en ;
+cdi:takesSubstantiveValueFrom ex:codelist7 ;
 
 ex:codelist1 a cdi:Codelist ;
-cdi:name "codelist 1 for quality" ;
-#cdi:has  ; 
-.
+cdi:name "codelist 1 for municipalities" ;
+# cdi:has ex:cx, ex:cx .
+
+ex:codelist2 a cdi:Codelist ;
+cdi:name "codelist 2 for quality" ;
+cdi:has  ex:c1, ex:c2, ex:c3, ex:c4 .
+
+ex:codelist3 a cdi:Codelist ;
+cdi:name "codelist 3 for types of facility" ;
+# cdi:has ex:cx, ex:cx .
+
+ex:codelist4 a cdi:Codelist ;
+cdi:name "codelist 4 for Presence or absence of a pre-elementary class in primary schools" ;
+cdi:has  ex:c5, ex:c6 .
+
+ex:codelist5 a cdi:Codelist ;
+cdi:name "codelist 5 for Presence or absence of a preparatory class for the high schools in upper secondary" ;
+cdi:has  ex:c7, ex:c8 .
+
+ex:codelist6 a cdi:Codelist ;
+cdi:name "codelist 6 for Membership or not in a priority education scheme" ;
+cdi:has  ex:c9, ex:c10 .
+
+ex:codelist7 a cdi:Codelist ;
+cdi:name "Membership of the public or private education sector" ;
+cdi:has  ex:c11, ex:c12 .
+
 
 ex:c1 a cdi:Code ;
-cdi:notation "1";
+cdi:notation "0";
 cdi:externalDefinition ex:skos_c1 .
 
 ex:skos_c1 a skos:Concept;
-skos:prefLabel "Yes"@en .
+skos:prefLabel "Acceptable"@fr .
 
 ex:c2 a cdi:Code ;
-cdi:notation "0";
-cdi:value ex:skos_c2 .
+cdi:notation "1";
+cdi:externalDefinition ex:skos_c2 .
 
 ex:skos_c2 a skos:Concept;
-skos:prefLabel "No" .
+skos:prefLabel "Bonne"@fr .
 
 ex:c3 a cdi:Code ;
-cdi:notation "NA";
-cdi:value "NA" .
+cdi:notation "2";
+cdi:externalDefinition ex:skos_c3 .
+
+ex:skos_c3 a skos:Concept;
+skos:prefLabel "Mauvaise"@fr .
+
+ex:c4 a cdi:Code ;
+cdi:notation "3";
+cdi:externalDefinition ex:skos_c4 .
+
+ex:skos_c4 a skos:Concept;
+skos:prefLabel "Non géolocalisé"@fr .
+
+ex:c5 a cdi:Code ;
+cdi:notation "0";
+cdi:externalDefinition ex:skos_c5 .
+
+ex:skos_c5 a skos:Concept;
+skos:prefLabel "Absence d'une classe pré-élémentaire"@fr .
+
+ex:c6 a cdi:Code ;
+cdi:notation "1";
+cdi:externalDefinition ex:skos_c6 .
+
+ex:skos_c6 a skos:Concept;
+skos:prefLabel "Présence d'une classe pré-élémentaire"@fr .
+
+ex:c7 a cdi:Code ;
+cdi:notation "0";
+cdi:externalDefinition ex:skos_c7 .
+
+ex:skos_c7 a skos:Concept;
+skos:prefLabel "Absence d'une classe préparatoire aux grandes écoles"@fr .
+
+ex:c8 a cdi:Code ;
+cdi:notation "1";
+cdi:externalDefinition ex:skos_c8 .
+
+ex:skos_c8 a skos:Concept;
+skos:prefLabel "Présence d'une classe préparatoire aux grandes écoles"@fr .
+
+ex:c9 a cdi:Code ;
+cdi:notation "0";
+cdi:externalDefinition ex:skos_c9 .
+
+ex:skos_c9 a skos:Concept;
+skos:prefLabel "Non-appartenance à un EP"@fr .
+
+ex:c10 a cdi:Code ;
+cdi:notation "1";
+cdi:externalDefinition ex:skos_c10 .
+
+ex:skos_c10 a skos:Concept;
+skos:prefLabel "Appartenance à un EP"@fr .
+
+ex:c11 a cdi:Code ;
+cdi:notation "PR";
+cdi:externalDefinition ex:skos_c11 .
+
+ex:skos_c11 a skos:Concept;
+skos:prefLabel "Secteur privé"@fr .
+
+ex:c12 a cdi:Code ;
+cdi:notation "PU";
+cdi:externalDefinition ex:skos_c12 .
+
+ex:skos_c12 a skos:Concept;
+skos:prefLabel "Secteur public"@fr .
 
 ex:sv1 a cdi:Codelist ;
 cdi:name "Sentinel value for NA";
-cdi:has ex:c3 .
+cdi:has ex:c13, ex:c14 .
 
+ex:c13 a cdi:Code ;
+cdi:notation "NA";
+cdi:value "NA" .
+
+ex:c13 a cdi:Code ;
+cdi:notation "X";
+cdi:value "Sans objet" .
 
 ex:WDS a cdi:WideDataStructure ;
 cdi:identifier "WDS1" ;
-cdi:has ex:IC1, ex:IC2, ex:IC3, ex:IC4, ex:IC5, ex:IC6, ex:IC7, ex:IC8, ex:IC9, ex:IC10;
+cdi:has ex:IC1, ex:IC2, ex:IC3, ex:IC4, ex:IC5, ex:IC6, ex:IC7, ex:IC8, ex:IC9, ex:IC10, ex:IC11 ;
 cdi:has ex:PRS1 .
 
-
 ex:IC1 a cdi:IdentifierComponent ;
-cdi:isDefinedBy ex:K .
-
-ex:IC2 a cdi:MeasureComponent ;
-cdi:isDefinedBy ex:L .
-
-ex:IC3 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:M .
 
-ex:IC4 a cdi:MeasureComponent ;
+ex:IC2 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:N .
 
-ex:IC5 a cdi:MeasureComponent ;
+ex:IC3 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:O .
 
-ex:IC6 a cdi:MeasureComponent ;
+ex:IC4 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:P .
 
-ex:IC7 a cdi:MeasureComponent ;
+ex:IC5 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:Q .
 
-ex:IC8 a cdi:MeasureComponent ;
+ex:IC6 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:R .
 
-ex:IC9 a cdi:MeasureComponent ;
+ex:IC7 a cdi:MeasureComponent ;
 cdi:isDefinedBy ex:S .
 
+ex:IC8 a cdi:MeasureComponent ;
+cdi:isDefinedBy ex:T .
+
+ex:IC9 a cdi:MeasureComponent ;
+cdi:isDefinedBy ex:U .
+
+ex:IC10 a cdi:MeasureComponent ;
+cdi:isDefinedBy ex:V .
+
+ex:IC11 a cdi:MeasureComponent ;
+cdi:isDefinedBy ex:W .
 
 ex:PRS1 a cdi:PhysicalRecordSegmentStructure ;
-cdi:has ex:dp1, ex:dp2, ex:dp3, ex:dp4, ex:dp5, ex:dp6, ex:dp7, ex:dp8, ex:dp9, ex:dp10 .
+cdi:has ex:dp1, ex:dp2, ex:dp3, ex:dp4, ex:dp5, ex:dp6, ex:dp7, ex:dp8, ex:dp9, ex:dp10, ex:dp11 .
 
 ex:dp1 a cdi:DataPoint ;
 cdi:identifier "data point 1" ;
 cdi:sequence "1" ;
-cdi:correspondsTo ex:K .
+cdi:correspondsTo ex:M .
 
 ex:dp2 a cdi:DataPoint ;
 cdi:identifier "data point 2" ;
 cdi:sequence "2" ;
-cdi:correspondsTo ex:L .
+cdi:correspondsTo ex:N .
 
 ex:dp3 a cdi:DataPoint ;
 cdi:identifier "data point 3" ;
 cdi:sequence "3" ;
-cdi:correspondsTo ex:M .
+cdi:correspondsTo ex:O .
 
 ex:dp4 a cdi:DataPoint ;
 cdi:identifier "data point 4" ;
 cdi:sequence "4" ;
-cdi:correspondsTo ex:N .
+cdi:correspondsTo ex:P .
 
 ex:dp5 a cdi:DataPoint ;
 cdi:identifier "data point 5" ;
 cdi:sequence "5" ;
-cdi:correspondsTo ex:O .
+cdi:correspondsTo ex:Q .
 
 ex:dp6 a cdi:DataPoint ;
 cdi:identifier "data point 6" ;
 cdi:sequence "6" ;
-cdi:correspondsTo ex:P .
+cdi:correspondsTo ex:R .
 
 ex:dp7 a cdi:DataPoint ;
 cdi:identifier "data point 7" ;
 cdi:sequence "7" ;
-cdi:correspondsTo ex:Q .
+cdi:correspondsTo ex:S .
 
 ex:dp8 a cdi:DataPoint ;
 cdi:identifier "data point 8" ;
 cdi:sequence "8" ;
-cdi:correspondsTo ex:R .
+cdi:correspondsTo ex:T .
 
 ex:dp9 a cdi:DataPoint ;
 cdi:identifier "data point 9" ;
 cdi:sequence "9" ;
-cdi:correspondsTo ex:S .
+cdi:correspondsTo ex:U .
 
 ex:dp10 a cdi:DataPoint ;
 cdi:identifier "data point 10" ;
 cdi:sequence "10" ;
-cdi:correspondsTo ex:T .
+cdi:correspondsTo ex:V .
 
+ex:dp11 a cdi:DataPoint ;
+cdi:identifier "data point 11" ;
+cdi:sequence "11" ;
+cdi:correspondsTo ex:W
 
 #### Linking to DCAT ###
 
