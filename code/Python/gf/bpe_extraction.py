@@ -62,6 +62,7 @@ def flow_parameters(conf):
                     "QUALITE_XY": str,
                     "TYPEQU": str,
                 },
+                "rename1": {"AN": "Year", "DEPCOM": "LAU", "LAMBERT_X": "Lambert_X", "LAMBERT_Y": "Lambert_Y", "QUALITE_XY": "Quality_XY", "TYPEQU": "FacilityType"},
                 "facilities_filter": ("F309",),
                 "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
                 "bpe_metadata_url2": wd + "bpe-education-variables.csv",
@@ -76,7 +77,8 @@ def flow_parameters(conf):
                     "QUALITE_XY": str,
                     "SECT": str,
                     "TYPEQU": str,
-                },                
+                },
+                "rename2": {"AN": "Year", "DEPCOM": "LAU", "LAMBERT_X": "Lambert_X", "LAMBERT_Y": "Lambert_Y", "QUALITE_XY": "Quality_XY", "SECT": "Sector", "TYPEQU": "FacilityType", "CL_PELEM": "CL_PELEM", "EP": "EP", "CL_PGE": "CL_PGE"},
                 "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv"
             }
 
@@ -125,7 +127,7 @@ def get_json_datatype(var_type):
 
 
 @task
-def extract_french_data(url, types={}, facilities_filter=()):
+def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     """
     Extracts the French data about geolocalized facilities.
 
@@ -153,16 +155,19 @@ def extract_french_data(url, types={}, facilities_filter=()):
         bpe_data = pd.read_csv(
             archive.open(data_zip), sep=";", dtype=types, usecols=types.keys()
         )
-    bpe_data["QUALITE_XY"] = bpe_data["QUALITE_XY"].map(
-        {"Acceptable": "0", "Bonne": "1", "Mauvaise": "2", "Non géolocalisé": "3"},
+    bpe_data.rename(columns=rename, inplace=True)
+    print(bpe_data.columns)
+    bpe_data["Quality_XY"] = bpe_data["Quality_XY"].map(
+        {"Acceptable": "ACCEPTABLE", "Bonne": "GOOD", "Mauvaise": "BAD", "Non géolocalisé": "NO_GEOLOCALIZED"},
         na_action="ignore",
     )
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[
-            (bpe_data["TYPEQU"].str.startswith(facilities_filter))
+            (bpe_data["FacilityType"].str.startswith(facilities_filter))
         ]
         return bpe_data_filtered
+
     return bpe_data
 
 
@@ -443,16 +448,17 @@ def build_flow(conf):
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
+        rename1 = Parameter(name="rename1", required=False)
         facilities_filter = Parameter(name="facilities_filter", required=False)
         bpe_zip_url2 = Parameter(name="bpe_zip_url2", required=True)
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
-
+        rename2 = Parameter(name="rename2", required=False)
         italian_educational_data_url = Parameter(name="italian_educational_data_url", required=True)
 
         # Flow tasks
-        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter)
-        french_data2 = extract_french_data(bpe_zip_url2, types2)
+        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter, rename1)
+        french_data2 = extract_french_data(bpe_zip_url2, types2, rename = rename2)
         french_data = concat_datasets(french_data1, french_data2)
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, types1, facilities_filter
