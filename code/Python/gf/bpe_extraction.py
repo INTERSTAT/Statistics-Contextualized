@@ -9,7 +9,7 @@ from prefect.engine import signals
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
-from rdflib import Graph, Namespace, RDF, Literal, RDFS
+from rdflib import Graph, Namespace, RDF, Literal, RDFS, SKOS
 import pysftp
 import json
 import csv
@@ -19,13 +19,6 @@ import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
 from common.apis import get_italian_cultural_data
-
-"""
-TODO Test geocode.maps.co API
- → http https://geocode.maps.co/search?q="12 via cesare balbo roma"
-TODO Graph production in column
-TODO Move the load ttl function to the API module
-"""
 
 # Constants ----
 
@@ -390,14 +383,16 @@ def build_rdf_data(df):
 
     for index, row in df.iterrows():
         # Create the facility
-        facility_uri = ISC_F.index
+        facility_id = row['Facility_ID']
+        facility_uri = ISC_F.facility_id
         graph.add((facility_uri, RDF.type, IGF.Facility))
-        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {index}', lang='en')))
+        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {facility_id}', lang='en')))
+        graph.add((facility_uri, SKOS.notation, facility_id))
         # Add other properties for facility
         # Create the geometry
-        geometry_uri = ISC_G.index
+        geometry_uri = ISC_G.facility_id
         graph.add((geometry_uri, RDF.type, GEO.Feature))
-        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {index}', lang='en')))
+        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {facility_id}', lang='en')))
         # Add other properties for geometry
         # Create quality annotation and attach it to the geometry
         # Associate geometry to facility
