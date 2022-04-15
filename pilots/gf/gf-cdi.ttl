@@ -11,65 +11,67 @@
 #             DDI-CDI RDF serialization for the Interstat GF pilot             #
 ###############################################################################
 
-ex:A a cdi:Concept ;
+ex:Facility a cdi:Concept ;
 cdi:displayLabel "Facility"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "A"^^xsd:anyURI .
+cdi:identifier "Facility"^^xsd:anyURI .
+# TODO Why anyURI?
 
-ex:B a cdi:Concept ;
+ex:Year a cdi:Concept ;
 cdi:displayLabel "Year"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "B"^^xsd:anyURI .
+cdi:identifier "Year"^^xsd:anyURI .
 
-ex:C a cdi:Concept ;
-cdi:displayLabel "Municipality"@en ;
+ex:LAU a cdi:Concept ;
+cdi:displayLabel "LAU"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "C"^^xsd:anyURI .
+cdi:identifier "LAU"^^xsd:anyURI .
 
-ex:D a cdi:Concept ;
+ex:Lambert_X a cdi:Concept ;
 cdi:displayLabel "Lambert X"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "D"^^xsd:anyURI .
+cdi:identifier "Lambert_X"^^xsd:anyURI .
 
-ex:E a cdi:Concept ;
+ex:Lambert_Y a cdi:Concept ;
 cdi:displayLabel "Lambert Y"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "E"^^xsd:anyURI .
+cdi:identifier "Lambert_Y"^^xsd:anyURI .
 
-ex:F a cdi:Concept ;
-cdi:displayLabel "Quality"@en ;
+ex:Quality_XY a cdi:Concept ;
+cdi:displayLabel "Quality XY"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "F"^^xsd:anyURI .
+cdi:identifier "Lambert_Y"^^xsd:anyURI .
 
-ex:G a cdi:Concept ;
+ex:FacilityType a cdi:Concept ;
 cdi:displayLabel "Type of Facility"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "G"^^xsd:anyURI .
+cdi:identifier "FacilityType"^^xsd:anyURI .
 
-ex:H a cdi:Concept ;
+ex:CL_PELEM a cdi:Concept ;
 cdi:displayLabel "Presence or absence of a pre-elementary class in primary schools"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "H"^^xsd:anyURI .
+cdi:identifier "CL_PELEM"^^xsd:anyURI .
 
+# TODO Not used
 ex:I a cdi:Concept ;
 cdi:displayLabel "Covered"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "I"^^xsd:anyURI .
 
-ex:J a cdi:Concept ;
+ex:CL_PGE a cdi:Concept ;
 cdi:displayLabel "Presence or absence of a preparatory class for the high schools in upper secondary"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "J"^^xsd:anyURI .
+cdi:identifier "CL_PGE"^^xsd:anyURI .
 
-ex:K a cdi:Concept ;
+ex:EP a cdi:Concept ;
 cdi:displayLabel "Membership or not in a priority education scheme"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "K"^^xsd:anyURI .
+cdi:identifier "EP"^^xsd:anyURI .
 
-ex:L a cdi:Concept ;
+ex:Sector a cdi:Concept ;
 cdi:displayLabel "Membership of the public or private education sector"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "L"^^xsd:anyURI .
+cdi:identifier "Sector"^^xsd:anyURI .
 
 ex:INSEE_SKOS_def  a skos:Concept;
 skos:prefLabel "Some External Reference" .

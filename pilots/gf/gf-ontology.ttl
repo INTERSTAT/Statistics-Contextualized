@@ -26,8 +26,8 @@
 	dc:rights "Copyright © 2022 INSEE" ; 
 	cc:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
 	voaf:classNumber "11"^^xsd:integer ;
-	voaf:propertyNumber "5"^^xsd:integer ;
-	owl:versionInfo "Version 0.5 - 2022-04-07" .
+	voaf:propertyNumber "6"^^xsd:integer ;
+	owl:versionInfo "Version 0.5 - 2022-04-07",  "Version 0.6 - 2022-04-15" .
 
 
 #################################################################
@@ -132,6 +132,7 @@ igf:SportLeisureFacilityType a owl:Class ;
 igf:Sector a owl:Class ;
 	rdfs:label "Sector"@en ;
 	rdfs:subClassOf skos:Concept ;
+	rdfs:seeAlso <http://id.insee.fr/interstat/gf/sectors> ;
 	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
 
 igf:QualityLevel a owl:Class ;
@@ -144,12 +145,17 @@ igf:QualityLevel a owl:Class ;
 # Datatype properties
 #################################################################
 
-igf:descriptionYear a owl:DatatypeProperty ;
+igf:year a owl:DatatypeProperty ;
 	rdfs:label "year of description"@en ;
 	rdfs:domain igf:Facility ;
 	rdfs:range <http://www.w3.org/2001/XMLSchema#gYear> ;
 	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
 
+igf:inLAU a owl:DatatypeProperty ;
+	rdfs:label "in LAU"@en ;
+	rdfs:domain igf:Facility ;
+	rdfs:range <http://www.w3.org/2001/XMLSchema#token> ;
+	rdfs:isDefinedBy <http://rdf.insee.fr/def/interstat/gf> .
 
 #################################################################
 # Object properties
@@ -191,16 +197,22 @@ igf:sector a owl:ObjectProperty ;
 #################################################################
 
 ### Sector (private or public) ###
-### TODO: add concept scheme? ###
+
+<http://id.insee.fr/interstat/gf/sectors> a skos:ConceptScheme ;
+	rdfs:label "Sectors"@fr ;
+	skos:hasTopLevel <http://id.insee.fr/interstat/gf/sector/private> , <http://id.insee.fr/interstat/gf/sector/public> ;
+	rdfs:seeAlso <http://id.insee.fr/interstat/gf/Sector> .
 
 <http://id.insee.fr/interstat/gf/sector/private>
 	a igf:Sector ;
 	owl:differentFrom <http://id.insee.fr/interstat/gf/sector/public> ;
+	skos:notation "PR" ;
 	skos:prefLabel "Private sector"@en , "Secteur privé"@fr .
 
 <http://id.insee.fr/interstat/gf/sector/public>
 	a igf:Sector ;
 	owl:differentFrom <http://id.insee.fr/interstat/gf/sector/private> ;
+	skos:notation "PU" ;
 	skos:prefLabel "Public sector"@en , "Secteur public"@fr .
 
 ### Characteristics of education facilities ###
@@ -208,7 +220,7 @@ igf:sector a owl:ObjectProperty ;
 
 <http://id.insee.fr/interstat/gf/educationCharacteristics> a skos:ConceptScheme ;
 	rdfs:label "Caractères d'équipement scolaire"@fr ;
-	skos:hasTopLevel <http://id.insee.fr/interstat/gf/EducationCharacteristic/CANT> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_ELEM> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PELEM> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PGE> , <http://id.insee.fr/interstat/gf/FducationCharacteristic/INT> , <http://id.insee.fr/interstat/gf/FducationCharacteristic/REP> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/RPIC> .
+	skos:hasTopLevel <http://id.insee.fr/interstat/gf/EducationCharacteristic/CANT> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_ELEM> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PELEM> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PGE> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/INT> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/REP> , <http://id.insee.fr/interstat/gf/EducationCharacteristic/RPIC> .
 
 <http://id.insee.fr/interstat/gf/EducationCharacteristic/CANT> a skos:Concept, igf:EducationCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/educationCharacteristics> ;
@@ -230,22 +242,22 @@ igf:sector a owl:ObjectProperty ;
 	skos:prefLabel "Classe préparatoire aux grandes écoles en lycée"@fr ;
 	skos:notation "CL_PGE".
 
-<http://id.insee.fr/interstat/gf/FducationCharacteristic/INT> a skos:Concept , igf:EducationCharacteristic ;
+<http://id.insee.fr/interstat/gf/EducationCharacteristic/INT> a skos:Concept , igf:EducationCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/educationCharacteristics> ;
 	skos:prefLabel "Internat"@fr ;
 	skos:notation "INT".
 
-<http://id.insee.fr/interstat/gf/FducationCharacteristic/REP> a skos:Concept , igf:EducationCharacteristic ;
+<http://id.insee.fr/interstat/gf/EducationCharacteristic/EP> a skos:Concept , igf:EducationCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/educationCharacteristics> ;
-	skos:prefLabel "Réseau d'éducation prioritaire"@fr ;
-	skos:notation "REP".
+	skos:prefLabel "Dispositif d'éducation prioritaire"@fr ;
+	skos:notation "EP".
 
 <http://id.insee.fr/interstat/gf/EducationCharacteristic/RPIC> a skos:Concept , igf:EducationCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/educationCharacteristics> ;
 	skos:prefLabel "Regroupement pédagogique intercommunal concentré"@fr ;
 	skos:notation "RPIC".
 
-### Characteristics  of sport & leisure facilities ###
+### Characteristics of sport & leisure facilities ###
 ### TODO: add English labels ###
 
 <http://id.insee.fr/interstat/gf/sportLeisureCharacteristics> a skos:ConceptScheme ;
