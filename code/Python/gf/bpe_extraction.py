@@ -381,17 +381,21 @@ def build_rdf_data(df):
     ISC_G = Namespace('http://id.cef-interstat.eu/sc/gf/geometry')
     IGF = Namespace('http://rdf.insee.fr/def/interstat/gf#')
     GEO = Namespace('http://www.opengis.net/ont/geosparql#')
-    graph = Graph()
+    graph = Graph()    
 
-    for index, row in df.iterrows():
-        # Create the facility
-        facility_id = row['Facility_ID']
-        facility_uri = ISC_F.facility_id
-        graph.add((facility_uri, RDF.type, IGF.Facility))
-        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {facility_id}', lang='en')))
-        graph.add((facility_uri, SKOS.notation, facility_id))
-        # Add other properties for facility
-        # Create the geometry
+    # FIXME still not fast enough, i suspect rdflib object creation is guilty here
+    df["FACILITY_TYPE"] = [
+        graph.add((ISC_F.facility_id, RDF.type, IGF.Facility)).serialize() for id in df["Facility_ID"]
+        ]
+    df["FACILITY_LABEL"] = [
+        graph.add((ISC_F.facility_id, RDFS.label, Literal(f'Facility number {id}', lang='en'))).serialize() for id in df["Facility_ID"]
+        ]
+    df["FACILITY_NOTATION"] = [
+        graph.add((ISC_F.facility_id, SKOS.notation, Literal(f"{id}"))).serialize() for id in df["Facility_ID"]
+    ]
+
+    """ TODO resume with the following:
+    # Create the geometry
         geometry_uri = ISC_G.facility_id
         graph.add((geometry_uri, RDF.type, GEO.Feature))
         graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {facility_id}', lang='en')))
@@ -399,6 +403,13 @@ def build_rdf_data(df):
         # Create quality annotation and attach it to the geometry
         # Associate geometry to facility
         graph.add(facility_uri, GEO.hasGeometry, geometry_uri)
+    """
+    
+    print(df)
+    # ↓↓ <http://id.cef-interstat.eu/sc/gf/facilityfacility_id> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
+    print(df.iloc[0]["FACILITY_TYPE"])
+    print(df.iloc[0]["FACILITY_LABEL"])
+
 
 
 @task
@@ -479,8 +490,10 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        extract_italian_cultural_facilities()
-        extract_italian_cultural_events()
+        df = pd.DataFrame()
+        df["FACILITY"] = [f"FAC{x}" for x in range(100)]
+        df["Facility_ID"] = [x for x in range(100)]
+        build_rdf_data(df)
     return flow
 
 
