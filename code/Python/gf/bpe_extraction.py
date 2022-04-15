@@ -210,7 +210,9 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
 
 @task
 def concat_datasets(ds1, ds2):
-    return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
+    df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
+    df["Facility_ID"] = range(1, len(df)+1)
+    return df
 
 
 @task
