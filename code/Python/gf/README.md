@@ -6,6 +6,6 @@ See description [here](https://github.com/INTERSTAT/Statistics-Contextualized/bl
 
 # Sprint april 2022
 
-- [ ] geocodes API
+- [ ] geocodes API (https://geocode.maps.co/search?q={address})
 - [ ] refactoring the load turtle function in the API module
 - [ ] vectorize of graph creation
