@@ -139,6 +139,8 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
         List of names and intended data types of the variables to select
     facilities_filter : list
         List of types of facilities selected
+    rename  : dict
+        Dictionary for renaming columns
 
     Returns
     -------
@@ -172,7 +174,7 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
 
 
 @task
-def extract_french_metadata(url, types={}, facilities_filter=()):
+def extract_french_metadata(url, rename={}, facilities_filter=()):
     """
     Extracts the French metadata about geolocalized facilities.
 
@@ -180,8 +182,8 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
     ----------
     url : str
         URL of the metadata file
-    types : dict
-        List of names and intended data types of the variables to select
+    rename : dict
+        List of values renamed
     facilities_filter : tuple
         List of types of facilities selected
 
@@ -191,11 +193,12 @@ def extract_french_metadata(url, types={}, facilities_filter=()):
         The metadata extracted
     """
     bpe_metadata = pd.read_csv(url, sep=",", usecols=types_var_mod.keys())
-    if types:
-        bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(types)]
+    print("RENAME VALUES", rename.values())
+    if rename:
+        bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(rename.values())]
     if facilities_filter:
         indexes = bpe_metadata[
-            (bpe_metadata["COD_VAR"] == "TYPEQU")
+            (bpe_metadata["COD_VAR"] == "FacilityType")
             & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))
         ].index
         bpe_metadata = bpe_metadata.drop(indexes)
@@ -218,6 +221,10 @@ def concat_datasets(ds1, ds2):
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
     df["Facility_ID"] = range(1, len(df)+1)
     return df
+
+@task
+def concat_metadatasets(ds1, ds2):
+    return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
 
 
 @task
@@ -472,10 +479,10 @@ def build_flow(conf):
         french_data2 = extract_french_data(bpe_zip_url2, types2, rename = rename2)
         french_data = concat_datasets(french_data1, french_data2)
         french_metadata1 = extract_french_metadata(
-            bpe_metadata_url1, types1, facilities_filter
+            bpe_metadata_url1, rename1, facilities_filter
         )
-        french_metadata2 = extract_french_metadata(bpe_metadata_url2, types2)
-        french_metadata = concat_datasets(french_metadata1, french_metadata2)
+        french_metadata2 = extract_french_metadata(bpe_metadata_url2, rename2)
+        french_metadata = concat_metadatasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata, working_dir)
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
