@@ -9,7 +9,7 @@ from prefect.engine import signals
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
-from rdflib import Graph, Namespace, RDF, Literal, RDFS, SKOS
+from rdflib import Graph, Namespace, RDF, Literal, RDFS
 import pysftp
 import json
 import csv
@@ -383,16 +383,14 @@ def build_rdf_data(df):
 
     for index, row in df.iterrows():
         # Create the facility
-        facility_id = row['Facility_ID']
-        facility_uri = ISC_F.facility_id
+        facility_uri = ISC-F.index
         graph.add((facility_uri, RDF.type, IGF.Facility))
-        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {facility_id}', lang='en')))
-        graph.add((facility_uri, SKOS.notation, facility_id))
+        graph.add((facility_uri, RDFS.label, Literal(f'Facility number {index}', lang='en')))
         # Add other properties for facility
         # Create the geometry
-        geometry_uri = ISC_G.facility_id
+        geometry_uri = ISC-G.index
         graph.add((geometry_uri, RDF.type, GEO.Feature))
-        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {facility_id}', lang='en')))
+        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {index}', lang='en')))
         # Add other properties for geometry
         # Create quality annotation and attach it to the geometry
         # Associate geometry to facility
