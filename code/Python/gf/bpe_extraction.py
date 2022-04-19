@@ -50,37 +50,55 @@ WORK_DIRECTORY = "../../../work/"
 
 def flow_parameters(conf):
     wd = get_working_directory(conf)
-    return {                
-                "working_dir": wd,
-                "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-                "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
-                "types1": {
-                    "AN": str,
-                    "DEPCOM": str,
-                    "LAMBERT_X": float,
-                    "LAMBERT_Y": float,
-                    "QUALITE_XY": str,
-                    "TYPEQU": str,
-                },
-                "rename1": {"AN": "Year", "DEPCOM": "LAU", "LAMBERT_X": "Lambert_X", "LAMBERT_Y": "Lambert_Y", "QUALITE_XY": "Quality_XY", "TYPEQU": "FacilityType"},
-                "facilities_filter": ("F309",),
-                "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-                "bpe_metadata_url2": wd + "bpe-education-variables.csv",
-                "types2": {
-                    "AN": str,
-                    "CL_PELEM": str,
-                    "CL_PGE": str,
-                    "DEPCOM": str,
-                    "EP": str,
-                    "LAMBERT_X": float,
-                    "LAMBERT_Y": float,
-                    "QUALITE_XY": str,
-                    "SECT": str,
-                    "TYPEQU": str,
-                },
-                "rename2": {"AN": "Year", "DEPCOM": "LAU", "LAMBERT_X": "Lambert_X", "LAMBERT_Y": "Lambert_Y", "QUALITE_XY": "Quality_XY", "SECT": "Sector", "TYPEQU": "FacilityType", "CL_PELEM": "CL_PELEM", "EP": "EP", "CL_PGE": "CL_PGE"},
-                "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv"
-            }
+    return {
+        "working_dir": wd,
+        "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+        "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
+        "types1": {
+            "AN": str,
+            "DEPCOM": str,
+            "LAMBERT_X": float,
+            "LAMBERT_Y": float,
+            "QUALITE_XY": str,
+            "TYPEQU": str,
+        },
+        "rename1": {
+            "AN": "Year",
+            "DEPCOM": "LAU",
+            "LAMBERT_X": "Lambert_X",
+            "LAMBERT_Y": "Lambert_Y",
+            "QUALITE_XY": "Quality_XY",
+            "TYPEQU": "FacilityType",
+        },
+        "facilities_filter": ("F309",),
+        "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+        "bpe_metadata_url2": wd + "bpe-education-variables.csv",
+        "types2": {
+            "AN": str,
+            "CL_PELEM": str,
+            "CL_PGE": str,
+            "DEPCOM": str,
+            "EP": str,
+            "LAMBERT_X": float,
+            "LAMBERT_Y": float,
+            "QUALITE_XY": str,
+            "SECT": str,
+            "TYPEQU": str,
+        },
+        "rename2": {
+            "AN": "Year",
+            "DEPCOM": "LAU",
+            "LAMBERT_X": "Lambert_X",
+            "LAMBERT_Y": "Lambert_Y",
+            "QUALITE_XY": "Quality_XY",
+            "SECT": "Sector",
+            "TYPEQU": "FacilityType",
+            "CL_PELEM": "CL_PELEM",
+            "EP": "EP",
+            "CL_PGE": "CL_PGE",
+        },
+        "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv",
+    }
 
 
 def test_flow_parameters():
@@ -93,7 +111,7 @@ def get_conf():
     """
     logging.info("Getting GF conf")
     project_path = pathlib.Path(__file__).cwd()
-    
+
     sep = "\\" if os.name == "nt" else "/"
     conf_path = sep.join([str(project_path), "code", "Python", "gf", "gf.conf.json"])
     logging.info(f"Project path is {str(project_path)}")
@@ -106,9 +124,9 @@ def get_working_directory(conf=None):
     """
     If there is a working dir in the conf file, returns it, else returns a default one.
     """
-    if conf is None or conf["env"]["workingDirectory"] == "":        
+    if conf is None or conf["env"]["workingDirectory"] == "":
         project_path = pathlib.Path(__file__).cwd()
-        wd = str(project_path) + "/work/"        
+        wd = str(project_path) + "/work/"
         os.makedirs(wd, exist_ok=True)
         return wd
     else:
@@ -160,7 +178,12 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     bpe_data.rename(columns=rename, inplace=True)
     print(bpe_data.columns)
     bpe_data["Quality_XY"] = bpe_data["Quality_XY"].map(
-        {"Acceptable": "ACCEPTABLE", "Bonne": "GOOD", "Mauvaise": "BAD", "Non géolocalisé": "NO_GEOLOCALIZED"},
+        {
+            "Acceptable": "ACCEPTABLE",
+            "Bonne": "GOOD",
+            "Mauvaise": "BAD",
+            "Non géolocalisé": "NO_GEOLOCALIZED",
+        },
         na_action="ignore",
     )
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
@@ -209,18 +232,23 @@ def extract_french_metadata(url, rename={}, facilities_filter=()):
 def extract_italian_educational_data(url: str) -> pd.DataFrame:
     italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
     import re
+
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
-    start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")        
-    italian_educ_data["YEAR"] = ["".join(start_end.match(str(year)).group(1, 2)) for year in italian_educ_data["AnnoScolastico"]]
+    start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")
+    italian_educ_data["YEAR"] = [
+        "".join(start_end.match(str(year)).group(1, 2))
+        for year in italian_educ_data["AnnoScolastico"]
+    ]
     return italian_educ_data
 
 
 @task
 def concat_datasets(ds1, ds2):
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
-    df["Facility_ID"] = range(1, len(df)+1)
+    df["Facility_ID"] = range(1, len(df) + 1)
     return df
+
 
 @task
 def concat_metadatasets(ds1, ds2):
@@ -356,14 +384,14 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
 
 @task
 def extract_italian_cultural_facilities():
-    logger = prefect.context.get("logger")        
+    logger = prefect.context.get("logger")
     # Building the query
     # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
-    limit = None    
+    limit = None
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
-    target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"    
+    target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
 
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
@@ -384,32 +412,44 @@ def extract_italian_cultural_events():
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
 
+
 # FIXME move
 def gen_rdf_facility_type(id):
     return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> ."
 
+
 def gen_rdf_facility_label(id):
-    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label \"Facility number {id}\"@en ."
+    return f'<http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .'
+
 
 def gen_rdf_facility_skos_notation(id):
-    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <stub>" # TODO see with Franck
+    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <stub>"  # TODO see with Franck
 
-@task(name='Create RDF data')
+
+def gen_rdf_geo_feature(id):
+    pass  # TODO also see with Franck
+
+
+@task(name="Create RDF data")
 def build_rdf_data(df):
 
-    ISC = Namespace('http://id.cef-interstat.eu/sc/')
-    ISC_F = Namespace('http://id.cef-interstat.eu/sc/gf/facility')
-    ISC_G = Namespace('http://id.cef-interstat.eu/sc/gf/geometry')
-    IGF = Namespace('http://rdf.insee.fr/def/interstat/gf#')
-    GEO = Namespace('http://www.opengis.net/ont/geosparql#')
+    ISC = Namespace("http://id.cef-interstat.eu/sc/")
+    ISC_F = Namespace("http://id.cef-interstat.eu/sc/gf/facility")
+    ISC_G = Namespace("http://id.cef-interstat.eu/sc/gf/geometry")
+    IGF = Namespace("http://rdf.insee.fr/def/interstat/gf#")
+    GEO = Namespace("http://www.opengis.net/ont/geosparql#")
     graph = Graph()
 
     # FIXME still not fast enough, i suspect rdflib object creation is guilty here
-    df["FACILITY_TYPE"] = [ gen_rdf_facility_type(id) for id in df["Facility_ID"] ]
+    df["FACILITY_TYPE"] = [gen_rdf_facility_type(id) for id in df["Facility_ID"]]
 
-    df["FACILITY_LABEL"] = [ gen_rdf_facility_label(id) for id in df["Facility_ID"] ]
-    
-    df["FACILITY_NOTATION"] = [ gen_rdf_facility_skos_notation(id) for id in df["Facility_ID"] ]
+    df["FACILITY_LABEL"] = [gen_rdf_facility_label(id) for id in df["Facility_ID"]]
+
+    df["FACILITY_NOTATION"] = [
+        gen_rdf_facility_skos_notation(id) for id in df["Facility_ID"]
+    ]
+
+    print(graph.add((Literal("fake_id"), RDF.type, GEO.Feature)).serialize())
 
     """ TODO resume with the following:
     # Create the geometry
@@ -421,13 +461,12 @@ def build_rdf_data(df):
         # Associate geometry to facility
         graph.add(facility_uri, GEO.hasGeometry, geometry_uri)
     """
-    
-    #print(df)
+
+    # print(df)
     # ↓↓ <http://id.cef-interstat.eu/sc/gf/facilityfacility_id> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
     print(df.iloc[0]["FACILITY_TYPE"])
     print(df.iloc[0]["FACILITY_LABEL"])
-    #print(df.iloc[0]["FACILITY_NOTATION"])
-
+    print(df.iloc[0]["FACILITY_NOTATION"])
 
 
 @task
@@ -478,11 +517,15 @@ def build_flow(conf):
         bpe_metadata_url2 = Parameter(name="bpe_metadata_url2", required=True)
         types2 = Parameter(name="types2", required=False)
         rename2 = Parameter(name="rename2", required=False)
-        italian_educational_data_url = Parameter(name="italian_educational_data_url", required=True)
+        italian_educational_data_url = Parameter(
+            name="italian_educational_data_url", required=True
+        )
 
         # Flow tasks
-        french_data1 = extract_french_data(bpe_zip_url1, types1, facilities_filter, rename1)
-        french_data2 = extract_french_data(bpe_zip_url2, types2, rename = rename2)
+        french_data1 = extract_french_data(
+            bpe_zip_url1, types1, facilities_filter, rename1
+        )
+        french_data2 = extract_french_data(bpe_zip_url2, types2, rename=rename2)
         french_data = concat_datasets(french_data1, french_data2)
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, rename1, facilities_filter
@@ -527,13 +570,11 @@ def main():
     else:
         flow = build_flow(conf)
         params = flow_parameters(conf)
-    
+
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
         flow.register(project_name="sample")
-    else:        
-        flow.run(            
-            parameters=params
-        )
+    else:
+        flow.run(parameters=params)
 
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
