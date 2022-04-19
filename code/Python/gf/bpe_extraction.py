@@ -384,6 +384,15 @@ def extract_italian_cultural_events():
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
 
+# FIXME move
+def gen_rdf_facility_type(id):
+    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> ."
+
+def gen_rdf_facility_label(id):
+    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label \"Facility number {id}\"@en ."
+
+def gen_rdf_facility_skos_notation(id):
+    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <stub>" # TODO see with Franck
 
 @task(name='Create RDF data')
 def build_rdf_data(df):
@@ -393,18 +402,14 @@ def build_rdf_data(df):
     ISC_G = Namespace('http://id.cef-interstat.eu/sc/gf/geometry')
     IGF = Namespace('http://rdf.insee.fr/def/interstat/gf#')
     GEO = Namespace('http://www.opengis.net/ont/geosparql#')
-    graph = Graph()    
+    graph = Graph()
 
     # FIXME still not fast enough, i suspect rdflib object creation is guilty here
-    df["FACILITY_TYPE"] = [
-        graph.add((ISC_F.facility_id, RDF.type, IGF.Facility)).serialize() for id in df["Facility_ID"]
-        ]
-    df["FACILITY_LABEL"] = [
-        graph.add((ISC_F.facility_id, RDFS.label, Literal(f'Facility number {id}', lang='en'))).serialize() for id in df["Facility_ID"]
-        ]
-    df["FACILITY_NOTATION"] = [
-        graph.add((ISC_F.facility_id, SKOS.notation, Literal(f"{id}"))).serialize() for id in df["Facility_ID"]
-    ]
+    df["FACILITY_TYPE"] = [ gen_rdf_facility_type(id) for id in df["Facility_ID"] ]
+
+    df["FACILITY_LABEL"] = [ gen_rdf_facility_label(id) for id in df["Facility_ID"] ]
+    
+    df["FACILITY_NOTATION"] = [ gen_rdf_facility_skos_notation(id) for id in df["Facility_ID"] ]
 
     """ TODO resume with the following:
     # Create the geometry
@@ -417,10 +422,11 @@ def build_rdf_data(df):
         graph.add(facility_uri, GEO.hasGeometry, geometry_uri)
     """
     
-    print(df)
+    #print(df)
     # ↓↓ <http://id.cef-interstat.eu/sc/gf/facilityfacility_id> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
     print(df.iloc[0]["FACILITY_TYPE"])
     print(df.iloc[0]["FACILITY_LABEL"])
+    #print(df.iloc[0]["FACILITY_NOTATION"])
 
 
 
@@ -503,9 +509,10 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
+        N = 100000
         df = pd.DataFrame()
-        df["FACILITY"] = [f"FAC{x}" for x in range(100)]
-        df["Facility_ID"] = [x for x in range(100)]
+        df["FACILITY"] = [f"FAC{x}" for x in range(N)]
+        df["Facility_ID"] = [x for x in range(N)]
         build_rdf_data(df)
     return flow
 
