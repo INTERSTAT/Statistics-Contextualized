@@ -13,7 +13,7 @@
 
 ### Report on work done
 
-* Update of the [../pilots/status.md](status document)
+* Update of the [status document](../pilots/status.md)
 
 
 ## Thursday 20
