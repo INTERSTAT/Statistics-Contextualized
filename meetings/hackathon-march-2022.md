@@ -14,13 +14,17 @@
 ### Report on work done
 
 * Update of the [status document](../pilots/status.md)
+* Development of the pilots code
+* Improvement of the documentation
 
 
 ## Thursday 20
 
 ### Objectives
 
-* Work on CB import
+* Work on Context Broker import
+  * Metadata (including SDMX)
+  * Data
 * Work on data catalogue
 * Work on client applications
 
@@ -40,3 +44,7 @@
 
 
 ## Overall report
+
+### Work done
+
+### Next steps
