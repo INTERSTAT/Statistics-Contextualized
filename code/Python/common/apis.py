@@ -77,7 +77,7 @@ def load_turtle(url: str, ttl_data: str):
     print("Target URL :")
     print(f"  {url}")
     resp = post(url, data=ttl_data, headers=headers)
-    if resp.status_code != codes.ok:
+    if resp.status_code != 204:
         raise Exception(
             f"Error connecting to back-end, status code is: {resp.status_code} - {resp.text}"
         )
