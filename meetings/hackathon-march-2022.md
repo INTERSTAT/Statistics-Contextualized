@@ -6,7 +6,21 @@
 
 #### Work on data pipelines
 
-* Istat: SEP and S4Y
+* Istat SEP:
+* Ontology update for semantic operability with standard metamodels (started but not concluded)
+* Data and metadata loaded on mySQL
+* Harmonization done via sql query. Sql code to be shared.
+* Mapping done via monolith. 
+* Query / Integration done via SparQL query. Code to be shared
+* Query output in rdf format 
+
+* Istat S4Y:
+* Ontology to be completed and revised with Insee
+* Data and metadata loaded on mySQL
+* Harmonization student attendance to be finished, school facilities done.
+* Mapping student attendance to be finished, school facilities done.
+* Query / Integration to be produced
+* rdf output to be produced
 
 * Insee: GF
   * Ontology final
