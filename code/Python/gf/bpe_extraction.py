@@ -466,8 +466,6 @@ def build_rdf_data(df):
     final_rdf = "\n".join(
         [namespaces, raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf]
     )
-    with open("C:\\Users\\ARKN1Q\\Downloads\\gf.ttl", "w") as ttl_file:
-        ttl_file.writelines(final_rdf)
 
     return final_rdf
 
