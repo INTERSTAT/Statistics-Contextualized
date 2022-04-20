@@ -410,7 +410,6 @@ def extract_italian_cultural_events():
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
-    # TODO handle missing data
 
     logger = prefect.context.get("logger")
     logger.info("Building a RDF file from the input data frame.")
