@@ -4,7 +4,6 @@ from prefect import task, Flow, Parameter
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
-from rdflib import Graph, Namespace, RDF, Literal, RDFS, SKOS
 import pysftp
 import json
 import csv
