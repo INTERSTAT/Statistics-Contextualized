@@ -36,16 +36,24 @@
 ## GF
 
 * Models and metadata
-  * first version of [DDI-CDI RDF serialization for the Interstat GF pilot](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-cdi.ttl), has to be updated
-  * CSVW specification automated for french data, metadata are expressed in French
+  * updated version of [DDI-CDI RDF serialization for the Interstat GF pilot](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-cdi.ttl)
+  * target RDF model defined
+  * CSVW specification automated for French data, metadata are expressed in French
+  * First version of DCAT description created
 
-* French data (Geolocalized Facilities 2020 for location of exposure and heritage & education)
+
+* French data (Geolocalized Facilities 2020 for venues of exhibition and heritage & education)
   * pipeline operational
   * extraction automated
-  * transform and load operational
-  * target RDF model to define?
+  * upload to GraphDB automated
 
-* Italian data?
+
+
+* Italian data
+  * data on schools extraction operational
+  * alignment with data model in progress in progress (missing LAU)
+  * first steps for extraction of museum data and cultural events
+
 
 ## S4Y
 
