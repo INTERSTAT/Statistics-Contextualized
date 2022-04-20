@@ -407,55 +407,68 @@ def extract_italian_cultural_events():
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
 
+
 def gen_rdf_facility(id, equipment_type):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
-        df:identifier {id} ;
+        dc:identifier {id} ;
         rdfs:label "Facility number {id}"@en ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
+
+
 def gen_rdf_geometry(id, x, y):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
         rdfs:label "Geometry for facility {id}" ;
-        as:WKT "POINT({x},{y})" .
+        geo:asWKT "POINT({x},{y})"^^geo:wktLiteral .
     """
+
 
 def gen_rdf_quality(id, quality):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/quality/{id}> dqw:QualityAnnotation ;
-        ao:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
-        ao:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
+        oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
+        oa:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
+
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
 
-    ISC = Namespace("http://id.cef-interstat.eu/sc/")
-    ISC_F = Namespace("http://id.cef-interstat.eu/sc/gf/facility")
-    ISC_G = Namespace("http://id.cef-interstat.eu/sc/gf/geometry")
-    IGF = Namespace("http://rdf.insee.fr/def/interstat/gf#")
-    GEO = Namespace("http://www.opengis.net/ont/geosparql#")
-    graph = Graph()
-
-    df["FACILITY_RDF"] = [gen_rdf_facility(id, equ_type) for (id, equ_type) in zip(df["Facility_ID"], df["FacilityType"])]
-
-    df["GEOMETRY_RDF"] = [gen_rdf_geometry(id, x, y) for (id, x, y) in zip(df["Facility_ID"], df["Lambert_X"], df["Lambert_Y"])] 
-
-    df["QUALITY_RDF"] = [gen_rdf_quality(id, quality) for (id, quality) in zip(df["Facility_ID"], df["Quality_XY"])] # TODO see graph ""
-
-    print(df.iloc[0]["GEOMETRY_RDF"])
-    print(df.iloc[0]["QUALITY_RDF"])
+    df["FACILITY_RDF"] = [
+        gen_rdf_facility(id, equ_type)
+        for (id, equ_type) in zip(df["Facility_ID"], df["FacilityType"])
+    ]
+    df["GEOMETRY_RDF"] = [
+        gen_rdf_geometry(id, x, y)
+        for (id, x, y) in zip(df["Facility_ID"], df["Lambert_X"], df["Lambert_Y"])
+    ]
+    df["QUALITY_RDF"] = [
+        gen_rdf_quality(id, quality)
+        for (id, quality) in zip(df["Facility_ID"], df["Quality_XY"])
+    ]
 
     # Producing RDF text for the turtle file
+    namespaces = """
+    @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix geo:     <http://www.opengis.net/ont/geosparql#> .
+    @prefix igf:     <http://rdf.insee.fr/def/interstat/gf#> .
+    @prefix dc:      <http://purl.org/dc/elements/1.1/> .
+    @prefix dcterms: <http://purl.org/dc/terms/> .
+    @prefix oa:      <http://www.w3.org/ns/oa#> .
+    """
     raw_facility_rdf = "\n".join(df["FACILITY_RDF"])
     raw_geometry_rdf = "\n".join(df["GEOMETRY_RDF"])
     raw_quality_rdf = "\n".join(df["QUALITY_RDF"])
-    final_rdf = "\n".join([raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf])
-    print(final_rdf[:1000])
+    final_rdf = "\n".join(
+        [namespaces, raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf]
+    )
+    return final_rdf
+
 
 @task
 def load_files_to_ftp(csvw, code_lists, working_dir):
@@ -549,6 +562,7 @@ def build_test_flow():
         df["FacilityType"] = [f"Facility type {x}" for x in range(N)]
         df["Facility_ID"] = [x for x in range(N)]
         from random import randint
+
         df["Lambert_X"] = [randint(1, 150) for x in range(N)]
         df["Lambert_Y"] = [randint(1, 150) for x in range(N)]
         build_rdf_data(df)
