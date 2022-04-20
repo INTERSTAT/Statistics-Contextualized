@@ -51,13 +51,13 @@ An example of corresponding code is given below (prefix declarations are omitted
 
 ```ttl
     <http://id.cef-interstat.eu/sc/gf/facility/AJFQKT500> a igf:Facility ;
-        rdfs:label "Lycée Frédéric Mistral"@en ;    
+        rdfs:label "Lycée Frédéric Mistral"@fr ;    
         dc:identifier "AJFQKT500" ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/C501> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/1> .
 
     <http://id.cef-interstat.eu/sc/gf/geometry/AJFQKT500> a geo:Geometry ;
-        rdfs:label "Localization of Lycée Frédéric Mistral" ;
+        rdfs:label "Localization of Lycée Frédéric Mistral"@fr ;
         geo:asWKT "POINT(841092.05,6545270.87)"^^geo:wktLiteral .
 
     <http://id.cef-interstat.eu/sc/gf/quality/AJFQKT500> a dqv:QualityAnnotation ;
