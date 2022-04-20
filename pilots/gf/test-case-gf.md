@@ -41,11 +41,11 @@ In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentati
 
 The target model for the data on facilities is [expressed in OWL](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-ontology.ttl) (see also [WebVOWL visualization](https://service.tib.eu/webvowl/#iri=https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/gf/gf-ontology.ttl)). The overall structure of the ontology is represented in the following figure:
 
-![GF ontology](../../gf-ontology.png)
+![GF ontology](../../img/gf-ontology.png)
 
 The facility coordinates are represented using the [GeoSPARQL](https://www.ogc.org/standards/geosparql) ontology. In the BPE, the quality of the geocoding is documented according to a 3-star-like system. This is rendered in RDF using quality annotations defined in the [DQV vocabulary](https://www.w3.org/TR/vocab-dqv/). The articulation of these different elements is shown in the following figure.
 
-![GF quality](../../gf-quality.png)
+![GF quality](../../img/gf-quality.png)
 
 An example of corresponding code is given below (prefix declarations are omitted):
 
