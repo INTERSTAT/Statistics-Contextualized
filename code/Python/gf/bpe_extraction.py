@@ -14,6 +14,7 @@ import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
 from common.apis import get_italian_cultural_data
+from common.rdf import gen_rdf_facility, gen_rdf_geometry, gen_rdf_quality
 
 # Constants ----
 
@@ -406,34 +407,6 @@ def extract_italian_cultural_events():
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
-
-
-def gen_rdf_facility(id, equipment_type):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
-        rdfs:label "Facility number {id}"@en ;    
-        dc:identifier "{id}" ;
-        rdfs:label "Facility number {id}"@en ;
-        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
-    """
-
-
-def gen_rdf_geometry(id, x, y):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
-        rdfs:label "Geometry for facility {id}" ;
-        geo:asWKT "POINT({x},{y})"^^geo:wktLiteral .
-    """
-
-
-def gen_rdf_quality(id, quality):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/quality/{id}> a dqw:QualityAnnotation ;
-        oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
-        oa:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
-    """
-
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
