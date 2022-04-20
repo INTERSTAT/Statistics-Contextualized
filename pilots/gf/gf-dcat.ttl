@@ -1,0 +1,36 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix isd: <http://id.cef-interstat.eu/sc/data/> .
+
+
+isd:bpe
+    a dcat:Dataset ;
+    dcterms:title "Base permanente des équipements 2020"@fr , "Permanent database of facilities 2020"@en ;
+    dcterms:description "Exhibition venues and heritage"@en , "Lieux d'exposition et patrimoine"@fr ;
+    dcat:keyword "facility"@en, "équipement"@fr ;
+    dcat:theme <http://id.insee.fr/concepts/definition/c2187> , <http://eurovoc.europa.eu/668> ;
+    dcterms:publisher <http://www.insee.fr> ;
+    dcterms:spatial <http://id.insee.fr/geo/pays/france> ;
+    dcterms:temporal <http://id.cef-interstat.eu/sc/time/2020> ;
+    dcat:contactPoint <mailto:contact@insee.fr> ;
+    dcat:landingPage <https://www.insee.fr/fr/statistiques/5395878> ;
+    dcat:distribution isd:bpe-csv .
+
+isd:bpe-csv
+    a dcat:Distribution ;
+    dcterms:description "Base permanente des équipements 2020 - format CSV"@fr , "Permanent database of facilities 2020 - CSV format"@en ;
+    dcat:accessURL <https://www.insee.fr/fr/statistiques/3568638> ;
+    dcat:mediaType <http://www.iana.org/assignments/media-types/text/csv> ;
+    dcat:compressFormat <https://www.iana.org/assignments/media-types/application/zip> ;
+    dcat:downloadURL <https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1A_2018.zip> ;
+    dcatap:availability <http://data.europa.eu/r5r/availability/stable> ;
+    dcterms:license <https://www.insee.fr/fr/information/2381863> .
+
+
+# We could also use https://reference.data.gov.uk/id/year/2020
+<http://id.cef-interstat.eu/sc/time/2020>
+    a dcterms:PeriodOfTime ;
+    dcat:startDate "2020-01-01"^^xsd:date ;
+    dcat:endDate   "2020-12-31"^^xsd:date .
