@@ -410,10 +410,9 @@ def extract_italian_cultural_events():
 
 def gen_rdf_facility(id, equipment_type):
     return f"""
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
-        dc:identifier {id} ;
+        rdfs:label "Facility number {id}"@en ;    
+        dc:identifier "{id}" ;
         rdfs:label "Facility number {id}"@en ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
@@ -430,7 +429,7 @@ def gen_rdf_geometry(id, x, y):
 
 def gen_rdf_quality(id, quality):
     return f"""
-    <http://id.cef-interstat.eu/sc/gf/quality/{id}> dqw:QualityAnnotation ;
+    <http://id.cef-interstat.eu/sc/gf/quality/{id}> a dqw:QualityAnnotation ;
         oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
         oa:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
@@ -467,6 +466,9 @@ def build_rdf_data(df):
     final_rdf = "\n".join(
         [namespaces, raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf]
     )
+    with open("C:\\Users\\ARKN1Q\\Downloads\\gf.ttl", "w") as ttl_file:
+        ttl_file.writelines(final_rdf)
+
     return final_rdf
 
 
