@@ -407,24 +407,29 @@ def extract_italian_cultural_events():
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
 
+def gen_rdf_facility(id, equipment_type):
+    return f"""
+    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
+    <http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .
+    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
+        df:identifier {id} ;
+        rdfs:label "Facility number {id}"@en ;
+        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
+        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
+    """
+def gen_rdf_geometry(id, x, y):
+    return f"""
+    <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
+        rdfs:label "Geometry for facility {id}" ;
+        as:WKT "POINT({x},{y})" .
+    """
 
-# FIXME move
-def gen_rdf_facility_type(id):
-    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> ."
-
-
-def gen_rdf_facility_label(id):
-    return f'<http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .'
-
-
-def gen_rdf_facility_skos_notation(id):
-    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <stub>"  # TODO see with Franck
-
-
-def gen_rdf_geo_feature(id):
-    # TODO also see with Franck
-    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://www.opengis.net/ont/geosparql#Feature> ."
-
+def gen_rdf_quality(id, quality):
+    return f"""
+    <http://id.cef-interstat.eu/sc/gf/quality/{id}> dqw:QualityAnnotation ;
+        ao:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
+        ao:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
+    """
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
@@ -436,34 +441,21 @@ def build_rdf_data(df):
     GEO = Namespace("http://www.opengis.net/ont/geosparql#")
     graph = Graph()
 
-    # FIXME still not fast enough, i suspect rdflib object creation is guilty here
-    df["FACILITY_TYPE"] = [gen_rdf_facility_type(id) for id in df["Facility_ID"]]
+    df["FACILITY_RDF"] = [gen_rdf_facility(id, equ_type) for (id, equ_type) in zip(df["Facility_ID"], df["FacilityType"])]
 
-    df["FACILITY_LABEL"] = [gen_rdf_facility_label(id) for id in df["Facility_ID"]]
+    df["GEOMETRY_RDF"] = [gen_rdf_geometry(id, x, y) for (id, x, y) in zip(df["Facility_ID"], df["Lambert_X"], df["Lambert_Y"])] 
 
-    df["FACILITY_NOTATION"] = [
-        gen_rdf_facility_skos_notation(id) for id in df["Facility_ID"]
-    ]
+    df["QUALITY_RDF"] = [gen_rdf_quality(id, quality) for (id, quality) in zip(df["Facility_ID"], df["Quality_XY"])] # TODO see graph ""
 
-    df["GEO_FEATURE"] = [gen_rdf_geo_feature(id) for id in df["Facility_ID"]]
+    print(df.iloc[0]["GEOMETRY_RDF"])
+    print(df.iloc[0]["QUALITY_RDF"])
 
-    """ TODO resume with the following:
-    # Create the geometry
-        geometry_uri = ISC_G.facility_id
-        graph.add((geometry_uri, RDF.type, GEO.Feature))
-        graph.add((geometry_uri, RDFS.label, Literal(f'Geometry number {facility_id}', lang='en')))
-        # Add other properties for geometry
-        # Create quality annotation and attach it to the geometry
-        # Associate geometry to facility
-        graph.add(facility_uri, GEO.hasGeometry, geometry_uri)
-    """
-
-    # print(df)
-    # ↓↓ <http://id.cef-interstat.eu/sc/gf/facilityfacility_id> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
-    print(df.iloc[0]["FACILITY_TYPE"])
-    print(df.iloc[0]["FACILITY_LABEL"])
-    print(df.iloc[0]["FACILITY_NOTATION"])
-
+    # Producing RDF text for the turtle file
+    raw_facility_rdf = "\n".join(df["FACILITY_RDF"])
+    raw_geometry_rdf = "\n".join(df["GEOMETRY_RDF"])
+    raw_quality_rdf = "\n".join(df["QUALITY_RDF"])
+    final_rdf = "\n".join([raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf])
+    print(final_rdf[:1000])
 
 @task
 def load_files_to_ftp(csvw, code_lists, working_dir):
@@ -536,6 +528,9 @@ def build_flow(conf):
         italian_cultural_facilities = extract_italian_cultural_facilities()
         italian_cultural_events = extract_italian_cultural_events()
 
+        # WIP
+        build_rdf_data(french_data)
+
         load_files_to_ftp(
             csvw,
             code_lists,
@@ -551,7 +546,11 @@ def build_test_flow():
         N = 100000
         df = pd.DataFrame()
         df["FACILITY"] = [f"FAC{x}" for x in range(N)]
+        df["FacilityType"] = [f"Facility type {x}" for x in range(N)]
         df["Facility_ID"] = [x for x in range(N)]
+        from random import randint
+        df["Lambert_X"] = [randint(1, 150) for x in range(N)]
+        df["Lambert_Y"] = [randint(1, 150) for x in range(N)]
         build_rdf_data(df)
     return flow
 
