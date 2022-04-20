@@ -2,6 +2,7 @@
 Helping functions for producing RDF triples
 """
 
+
 def gen_rdf_facility(id, equipment_type):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
@@ -23,7 +24,7 @@ def gen_rdf_geometry(id, x, y):
 
 def gen_rdf_quality(id, quality):
     return f"""
-    <http://id.cef-interstat.eu/sc/gf/quality/{id}> a dqw:QualityAnnotation ;
+    <http://id.cef-interstat.eu/sc/gf/quality/{id}> a dqv:QualityAnnotation ;
         oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
         oa:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """

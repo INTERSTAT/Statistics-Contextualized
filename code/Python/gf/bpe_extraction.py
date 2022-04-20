@@ -13,7 +13,7 @@ import os
 import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
-from common.apis import get_italian_cultural_data
+from common.apis import get_italian_cultural_data, load_turtle
 from common.rdf import gen_rdf_facility, gen_rdf_geometry, gen_rdf_quality
 
 # Constants ----
@@ -410,6 +410,8 @@ def extract_italian_cultural_events():
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
+    logger = prefect.context.get("logger")
+    logger.info("Building a RDF file from the input data frame.")
 
     df["FACILITY_RDF"] = [
         gen_rdf_facility(id, equ_type)
@@ -432,6 +434,7 @@ def build_rdf_data(df):
     @prefix dc:      <http://purl.org/dc/elements/1.1/> .
     @prefix dcterms: <http://purl.org/dc/terms/> .
     @prefix oa:      <http://www.w3.org/ns/oa#> .
+    @prefix dqv:     <http://www.w3.org/ns/dqv#> .
     """
     raw_facility_rdf = "\n".join(df["FACILITY_RDF"])
     raw_geometry_rdf = "\n".join(df["GEOMETRY_RDF"])
@@ -474,6 +477,14 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
             for f in code_lists:
                 sftp.put(f.name)
 
+@task(name="Upload RDF data")
+def upload_rdf_data(rdf_data):
+    logger = prefect.context.get("logger")
+    # FIXME as a Prefect parameter ?
+    graph_url = "https://interstat.eng.it/graphdb/repositories/gf-test/statements?context=<http://www.interstat.org/graphs/gf>"
+    logger.info(f"Uploading RDF data to {graph_url}")
+    load_turtle(graph_url, rdf_data)
+
 
 # Build flow
 def build_flow(conf):
@@ -511,11 +522,12 @@ def build_flow(conf):
 
         extract_italian_educational_data(italian_educational_data_url)
 
-        italian_cultural_facilities = extract_italian_cultural_facilities()
-        italian_cultural_events = extract_italian_cultural_events()
+        #italian_cultural_facilities = extract_italian_cultural_facilities()
+        #italian_cultural_events = extract_italian_cultural_events()
 
         # WIP
-        build_rdf_data(french_data)
+        rdf_data = build_rdf_data(french_data)
+        upload_rdf_data(rdf_data)
 
         load_files_to_ftp(
             csvw,

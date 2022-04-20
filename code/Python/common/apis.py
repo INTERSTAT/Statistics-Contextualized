@@ -3,8 +3,9 @@ This module is dedicated to API calls.
 """
 import pandas as pd
 from urllib.parse import quote
-from requests import get, codes
+from requests import get, post, delete, codes
 from prefect.engine import signals
+
 
 def get_french_schools_data() -> pd.DataFrame:
     """
@@ -13,18 +14,29 @@ def get_french_schools_data() -> pd.DataFrame:
     TODO expose API parameters as function params
     """
     base_url = "https://data.education.gouv.fr/api/v2/catalog/datasets"
-    dataset_id = "fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre"    
-    row_limit = -1 # -1 means no limit
+    dataset_id = (
+        "fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre"
+    )
+    row_limit = -1  # -1 means no limit
     filter_school_state = 1
     # TODO create two lists and join'em around 'AS' ?
-    cols = ["numero_uai AS school_id", "appellation_officielle AS name", "latitude", "longitude", "code_commune AS lau",
-            "secteur_public_prive_libe AS institution_type"]
+    cols = [
+        "numero_uai AS school_id",
+        "appellation_officielle AS name",
+        "latitude",
+        "longitude",
+        "code_commune AS lau",
+        "secteur_public_prive_libe AS institution_type",
+    ]
     cols_request = quote(",".join(cols))
-    target = f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&refine" \
-             f".etat_etablissement={filter_school_state}&offset=0&timezone=UTC "
+    target = (
+        f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&refine"
+        f".etat_etablissement={filter_school_state}&offset=0&timezone=UTC "
+    )
     print(target)
     df = pd.read_csv(target, sep=";")
     return df
+
 
 def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
     # Getting data
@@ -32,11 +44,13 @@ def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
 
     if resp.status_code != codes.ok:
         # FIXME a basic error here, let the caller handle the prefect signal
-        raise signals.FAIL(f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})")
-    
+        raise signals.FAIL(
+            f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})"
+        )
+
     raw_data = resp.json()
-    
-    # Building columns vectors    
+
+    # Building columns vectors
     table_generator = {key: [] for key in raw_data["head"]["vars"]}
 
     for result in raw_data["results"]["bindings"]:
@@ -46,7 +60,25 @@ def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
             else:
                 # handling potential missing values in source data
                 table_generator[variable].append(None)
-    
+
     # Creating the data frame from the table generator dict
-    df = pd.DataFrame(table_generator) # create index ?
+    df = pd.DataFrame(table_generator)  # create index ?
     return df
+
+
+def load_turtle(url: str, ttl_data: str):
+    """
+    Upload a new RDF graph.
+    """
+    # Before loading a new graph, we get rid of the previous one
+    delete(url)
+
+    headers = {"Content-Type": "text/turtle"}
+    print("Target URL :")
+    print(f"  {url}")
+    resp = post(url, data=ttl_data, headers=headers)
+    if resp.status_code != codes.ok:
+        raise Exception(
+            f"Error connecting to back-end, status code is: {resp.status_code} - {resp.text}"
+        )
+    return resp.status_code
