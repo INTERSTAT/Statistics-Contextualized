@@ -44,8 +44,7 @@ def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
     resp = get(target_url)
 
     if resp.status_code != codes.ok:
-        # FIXME a basic error here, let the caller handle the prefect signal
-        raise signals.FAIL(
+        raise Exception(
             f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})"
         )
 
