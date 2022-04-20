@@ -422,7 +422,8 @@ def gen_rdf_facility_skos_notation(id):
 
 
 def gen_rdf_geo_feature(id):
-    pass  # TODO also see with Franck
+    # TODO also see with Franck
+    return f"<http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://www.opengis.net/ont/geosparql#Feature> ."
 
 
 @task(name="Create RDF data")
@@ -444,7 +445,7 @@ def build_rdf_data(df):
         gen_rdf_facility_skos_notation(id) for id in df["Facility_ID"]
     ]
 
-    print(graph.add((Literal("fake_id"), RDF.type, GEO.Feature)).serialize())
+    df["GEO_FEATURE"] = [gen_rdf_geo_feature(id) for id in df["Facility_ID"]]
 
     """ TODO resume with the following:
     # Create the geometry
