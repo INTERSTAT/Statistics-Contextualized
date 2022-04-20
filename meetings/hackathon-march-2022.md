@@ -4,12 +4,18 @@
 
 ### Objectives
 
-* Work on data pipelines
-  * Istat: SEP and S4Y
-  * Insee: GF
+#### Work on data pipelines
 
-* Work on client applications
-  * Suggested priorities: GF, SEP
+* Istat: SEP and S4Y
+
+* Insee: GF
+  * Ontology final
+  * Data published on FTP and GraphDB
+  * Metadata: CSVW and DCAT
+
+#### Work on client applications
+
+* Suggested priorities: GF, SEP
 
 ### Report on work done
 
@@ -22,11 +28,13 @@
 
 ### Objectives
 
-* Work on Context Broker import
-  * Metadata (including SDMX)
-  * Data
-* Work on data catalogue
-* Work on client applications
+#### Work on Context Broker import
+
+* Metadata (including SDMX)
+* Data
+#### Work on data catalogue
+
+#### Work on client applications
 
 
 ### Report on work done
