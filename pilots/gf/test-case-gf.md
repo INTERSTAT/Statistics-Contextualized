@@ -49,7 +49,7 @@ The facility coordinates are represented using the [GeoSPARQL](https://www.ogc.o
 
 An example of corresponding code is given below (prefix declarations are omitted):
 
-```
+```ttl
     <http://id.cef-interstat.eu/sc/gf/facility/AJFQKT500> a igf:Facility ;
         rdfs:label "Lycée Frédéric Mistral"@en ;    
         dc:identifier "AJFQKT500" ;
