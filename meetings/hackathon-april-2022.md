@@ -42,6 +42,16 @@
 
 ### Objectives
 
+ Istat SEP:
+  * Query output in rdf format 
+
+* Istat S4Y:
+  * 11 AM Work on student attendance harmonization with Thomas (to be confirmed)
+  * Mapping student attendance to be finished, school facilities done.
+  * Query / Integration to be produced
+  * RDF output to be produced
+
+
 #### Work on Context Broker import
 
 * Metadata (including SDMX)
