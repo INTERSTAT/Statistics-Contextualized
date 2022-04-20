@@ -15,6 +15,9 @@ def gen_rdf_facility(id, equipment_type):
 
 
 def gen_rdf_geometry(id, x, y):
+    # Handling missing coordinates
+    if str(x) == "nan" or str(y) == "nan":
+        return ""
     return f"""
     <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
         rdfs:label "Geometry for facility {id}" ;
