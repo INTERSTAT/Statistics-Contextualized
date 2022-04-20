@@ -8,4 +8,4 @@ See description [here](https://github.com/INTERSTAT/Statistics-Contextualized/bl
 
 - [ ] geocodes API (https://geocode.maps.co/search?q={address})
 - [ ] refactoring the load turtle function in the API module
-- [ ] vectorize of graph creation
+- [X] vectorizing RDF graph creation
