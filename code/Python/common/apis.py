@@ -1,6 +1,7 @@
 """
 This module is dedicated to API calls.
 """
+import gzip
 import pandas as pd
 from urllib.parse import quote
 from requests import get, post, delete, codes
@@ -43,8 +44,7 @@ def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
     resp = get(target_url)
 
     if resp.status_code != codes.ok:
-        # FIXME a basic error here, let the caller handle the prefect signal
-        raise signals.FAIL(
+        raise Exception(
             f"Fail to connect to italian museums endpoint (status code: {str(resp.status_code)})"
         )
 
@@ -66,17 +66,31 @@ def get_italian_cultural_data(target_url: str) -> pd.DataFrame:
     return df
 
 
-def load_turtle(url: str, ttl_data: str):
+def load_turtle(url: str, ttl_data: str, compression=False):
     """
     Upload a new RDF graph.
+
+    FIXME the GraphDB API we are using does not support application/gzip or application/zip as MIME Types
     """
     # Before loading a new graph, we get rid of the previous one
     delete(url)
 
-    headers = {"Content-Type": "text/turtle"}
+    ttl_final_data = None
+
+    # Compress data
+    if compression:
+        print("Using compression")
+        ttl_final_data = gzip.compress(bytes(ttl_data, "utf-8"))
+        headers = {"Content-Type": "application/gzip"}
+    else:
+        ttl_final_data = ttl_data
+        headers = {"Content-Type": "text/turtle"}
+    
     print("Target URL :")
     print(f"  {url}")
-    resp = post(url, data=ttl_data, headers=headers)
+
+    resp = post(url, data=ttl_final_data, headers=headers)
+    
     if resp.status_code != 204:
         raise Exception(
             f"Error connecting to back-end, status code is: {resp.status_code} - {resp.text}"

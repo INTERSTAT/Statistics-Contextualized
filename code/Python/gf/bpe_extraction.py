@@ -4,7 +4,6 @@ from prefect import task, Flow, Parameter
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
-from rdflib import Graph, Namespace, RDF, Literal, RDFS, SKOS
 import pysftp
 import json
 import csv
@@ -410,7 +409,6 @@ def extract_italian_cultural_events():
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
-    # TODO handle missing data
 
     logger = prefect.context.get("logger")
     logger.info("Building a RDF file from the input data frame.")

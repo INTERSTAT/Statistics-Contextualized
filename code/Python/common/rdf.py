@@ -8,7 +8,6 @@ def gen_rdf_facility(id, equipment_type):
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         rdfs:label "Facility number {id}"@en ;    
         dc:identifier "{id}" ;
-        rdfs:label "Facility number {id}"@en ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
