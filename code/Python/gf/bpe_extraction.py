@@ -62,10 +62,10 @@ def flow_parameters(conf):
         "rename1": {
             "AN": "Year",
             "DEPCOM": "LAU",
-            "LAMBERT_X": "Lambert_X",
-            "LAMBERT_Y": "Lambert_Y",
+            "LAMBERT_X": "Coord_X",
+            "LAMBERT_Y": "Coord_Y",
             "QUALITE_XY": "Quality_XY",
-            "TYPEQU": "FacilityType",
+            "TYPEQU": "Facility_Type",
         },
         "facilities_filter": ("F309",),
         "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
@@ -85,11 +85,11 @@ def flow_parameters(conf):
         "rename2": {
             "AN": "Year",
             "DEPCOM": "LAU",
-            "LAMBERT_X": "Lambert_X",
-            "LAMBERT_Y": "Lambert_Y",
+            "LAMBERT_X": "Coord_X",
+            "LAMBERT_Y": "Coord_Y",
             "QUALITE_XY": "Quality_XY",
             "SECT": "Sector",
-            "TYPEQU": "FacilityType",
+            "TYPEQU": "Facility_Type",
             "CL_PELEM": "CL_PELEM",
             "EP": "EP",
             "CL_PGE": "CL_PGE",
@@ -173,7 +173,6 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
             archive.open(data_zip), sep=";", dtype=types, usecols=types.keys()
         )
     bpe_data.rename(columns=rename, inplace=True)
-    print(bpe_data.columns)
     bpe_data["Quality_XY"] = bpe_data["Quality_XY"].map(
         {
             "Acceptable": "ACCEPTABLE",
@@ -186,7 +185,7 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[
-            (bpe_data["FacilityType"].str.startswith(facilities_filter))
+            (bpe_data["Facility_Type"].str.startswith(facilities_filter))
         ]
         return bpe_data_filtered
 
@@ -213,12 +212,11 @@ def extract_french_metadata(url, rename={}, facilities_filter=()):
         The metadata extracted
     """
     bpe_metadata = pd.read_csv(url, sep=",", usecols=types_var_mod.keys())
-    print("RENAME VALUES", rename.values())
     if rename:
         bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(rename.values())]
     if facilities_filter:
         indexes = bpe_metadata[
-            (bpe_metadata["COD_VAR"] == "FacilityType")
+            (bpe_metadata["COD_VAR"] == "Facility_Type")
             & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))
         ].index
         bpe_metadata = bpe_metadata.drop(indexes)
@@ -436,10 +434,9 @@ def extract_italian_cultural_facilities():
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
     df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
-    df["FacilityType"] = "F3"
+    df["Facility_Type"] = "F3"
     df.rename(columns={"Latitudine":"Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
-    final_df = df[["Facility_ID", "Coord_X", "Coord_Y", "FacilityType"]]
-    print(final_df)
+    final_df = df[["Facility_ID", "Coord_X", "Coord_Y", "Facility_Type"]]
     return final_df
 
 
@@ -468,11 +465,11 @@ def build_rdf_data(df):
 
     df["FACILITY_RDF"] = [
         gen_rdf_facility(id, equ_type)
-        for (id, equ_type) in zip(df["Facility_ID"], df["FacilityType"])
+        for (id, equ_type) in zip(df["Facility_ID"], df["Facility_Type"])
     ]   
     df["GEOMETRY_RDF"] = [
         gen_rdf_geometry(id, x, y)
-        for (id, x, y) in zip(df["Facility_ID"], df["Lambert_X"], df["Lambert_Y"])
+        for (id, x, y) in zip(df["Facility_ID"], df["Coord_X"], df["Coord_Y"])
     ]
     df["QUALITY_RDF"] = [
         gen_rdf_quality(id, quality)
