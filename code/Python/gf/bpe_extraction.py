@@ -429,14 +429,18 @@ def extract_italian_cultural_facilities():
     # Building the query
     # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
-    limit = None
+    limit = 5
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
-
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
-    return df
+    df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
+    df["FacilityType"] = "F3"
+    df.rename(columns={"Latitudine":"Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
+    final_df = df[["Facility_ID", "Coord_X", "Coord_Y", "FacilityType"]]
+    print(final_df)
+    return final_df
 
 
 @task
@@ -587,16 +591,7 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        N = 100000
-        df = pd.DataFrame()
-        df["FACILITY"] = [f"FAC{x}" for x in range(N)]
-        df["FacilityType"] = [f"Facility type {x}" for x in range(N)]
-        df["Facility_ID"] = [x for x in range(N)]
-        from random import randint
-
-        df["Lambert_X"] = [randint(1, 150) for x in range(N)]
-        df["Lambert_Y"] = [randint(1, 150) for x in range(N)]
-        build_rdf_data(df)
+        extract_italian_cultural_facilities()
     return flow
 
 
