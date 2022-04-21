@@ -19,7 +19,7 @@ def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         a {subtype} ;
-        rdfs:label "Facility number {id}"{lang_tag} ;    
+        rdfs:label "Facility code {id}"{lang_tag} ;    
         dc:identifier "{id}" ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> ;
