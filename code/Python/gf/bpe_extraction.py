@@ -459,13 +459,13 @@ def extract_italian_cultural_events():
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
-    
+
     logger = prefect.context.get("logger")
     logger.info("Building a RDF file from the input data frame.")
 
     df["FACILITY_RDF"] = [
-        gen_rdf_facility(id, equ_type, lau)
-        for (id, equ_type, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["LAU"])
+        gen_rdf_facility(id, equ_type, sector, lau)
+        for (id, equ_type, sector, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"])
     ]   
     df["GEOMETRY_RDF"] = [
         gen_rdf_geometry(id, x, y)
