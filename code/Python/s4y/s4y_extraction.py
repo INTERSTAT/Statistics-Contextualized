@@ -77,7 +77,7 @@ def transform_schools_data(df_schools_data):
         The data transformed
     """
     # Recoding type of institution
-    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"})
+    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "PU", "Privé": "PR"})
     # TODO: Add nuts3 variable based on lau variable?
     return df_schools_data
 
