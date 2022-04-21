@@ -7,13 +7,14 @@ lang_en = "@en"
 lang_fr = "@fr"
 lang_it = "@it"
 
-def gen_rdf_facility(id, equipment_type, lang_tag=lang_en):
+def gen_rdf_facility(id, equipment_type, lau, lang_tag=lang_en):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         rdfs:label "Facility number {id}"{lang_tag} ;    
         dc:identifier "{id}" ;
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
+        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> ;
+        igf:inLAU "{lau}"^^xsd:token .
     """
 
 
