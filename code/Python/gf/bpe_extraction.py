@@ -455,16 +455,19 @@ def extract_italian_cultural_facilities():
 @task
 def extract_italian_cultural_events():
     logger = prefect.context.get("logger")
-    # FIXME duplicated code → apis module ?
+    # FIXME duplicated code → apis module?
     query = conf["sparql"]["italianCulturalEvents"]
     limit = 5
     query_with_limit = query + f"limit {limit}"
     quoted_query = quote(query_with_limit.strip())
+    # FIXME character encoding (ex: "Attivit\u00E0 Didattica")
+    # FIXME (query) LATITUDINE and LONGITUDINE are always empty
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
 
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural events grabbed.")
     return df
+
 
 @task(name="Create RDF data")
 def build_rdf_data(df):
@@ -473,8 +476,8 @@ def build_rdf_data(df):
     logger.info("Building a RDF file from the input data frame.")
 
     df["FACILITY_RDF"] = [
-        gen_rdf_facility(id, equ_type)
-        for (id, equ_type) in zip(df["Facility_ID"], df["Facility_Type"])
+        gen_rdf_facility(id, equ_type, sector, lau)
+        for (id, equ_type, sector, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"])
     ]   
     df["GEOMETRY_RDF"] = [
         gen_rdf_geometry(id, x, y)
@@ -535,6 +538,7 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
             sftp.put(csvw.name)
             for f in code_lists:
                 sftp.put(f.name)
+
 
 @task(name="Upload RDF data")
 def upload_rdf_data(rdf_data):

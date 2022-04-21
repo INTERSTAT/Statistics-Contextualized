@@ -264,12 +264,12 @@ igf:sector a owl:ObjectProperty ;
 	rdfs:label "Caractères d'équipement de sport et loisir"@fr ;
 	skos:hasTopLevel <http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> , <http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> .
 
-<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> a skos:Concept , igf:CaractereSportLoisir ;
+<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> a skos:Concept , igf:SportLeisureCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/sportLeisureCharacteristics> ;
 	skos:prefLabel "Couvert"@fr ;
 	skos:notation "COUVERT" .
 
-<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> a skos:Concept , igf:CaractereSportLoisir ;
+<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> a skos:Concept , igf:SportLeisureCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/sportLeisureCharacteristics> ;
 	skos:prefLabel "Éclairé"@fr ;
 	skos:notation "ECLAIRE" .
