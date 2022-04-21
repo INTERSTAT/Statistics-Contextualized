@@ -1,3 +1,5 @@
+import re
+import time
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
@@ -92,7 +94,7 @@ def flow_parameters(conf):
             "EP": "EP",
             "CL_PGE": "CL_PGE",
         },
-        "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv",
+        "italian_educational_data_url": "https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv",
     }
 
 
@@ -231,11 +233,55 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
     start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")
-    italian_educ_data["YEAR"] = [
-        "".join(start_end.match(str(year)).group(1, 2))
-        for year in italian_educ_data["AnnoScolastico"]
-    ]
+    italian_educ_data["Year"] = ["".join(start_end.match(str(year)).group(1, 2)) for year in
+                                 italian_educ_data["ANNOSCOLASTICO"]]
     return italian_educ_data
+
+
+@task
+def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
+    df_sample = df.sample(n=10)
+    df_sample["Coord_X"] = 0.0
+    df_sample["Coord_Y"] = 0.0
+    for index, row in df_sample.iterrows():
+        TipologiaIndirizzo = row["TIPOLOGIAINDIRIZZO"]
+        DenominazioneIndirizzo = row["DENOMINAZIONEINDIRIZZO"]
+        DescrizioneComune = row["DESCRIZIONECOMUNE"]
+        NumeroCivico = row["NUMEROCIVICO"]
+        # Incomplete names are not found by the server (for example "via G. SIANI" or "via G.Leopardi")
+        # so only the surname is taken (for example "via SIANI" or "via Leopardi)
+        if ("." in DenominazioneIndirizzo) and (" " in DenominazioneIndirizzo):
+            splitted = DenominazioneIndirizzo.split(" ")
+        else:
+            splitted = DenominazioneIndirizzo.split(".")
+        DenominazioneIndirizzo = splitted[len(splitted) - 1]
+        # If a comma is present, only the first part of the address or house number is considered
+        if "," in DenominazioneIndirizzo:
+            DenominazioneIndirizzo = DenominazioneIndirizzo.split(",")[0]
+        if "," in NumeroCivico:
+            NumeroCivico = NumeroCivico.split(",")[0]
+        apiService = "https://nominatim.openstreetmap.org/search?street="
+        url = quote(TipologiaIndirizzo.encode('utf-8')) + "%20" + \
+              quote(DenominazioneIndirizzo.encode('utf-8')) + "+&city=" + quote(
+            DescrizioneComune.encode('utf-8')) + \
+              "&format=json&limit=1"
+        NumeroCivico_is_a_digit = False
+        address_found = False
+        # It checks whether the house number is a numerical value
+        if (bool(re.search(re.compile("^\d+$"), NumeroCivico))):
+            NumeroCivico_is_a_digit = True
+            api = apiService + quote(NumeroCivico.encode('utf-8')) + "+" + url
+        else:
+            api = apiService + url
+        r = requests.get(api)
+        data = r.json()
+        if len(data) > 0:
+            address_found = True
+        if address_found:
+            df_sample.loc[index, "Coord_X"] = data[0]['lat']
+            df_sample.loc[index, "Coord_Y"] = data[0]['lon']
+        time.sleep(1.5)  # wait a bit before sending the next request
+
 
 
 @task
@@ -520,7 +566,7 @@ def build_flow(conf):
         csvw = transform_metadata_to_csvw(french_metadata, working_dir)
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
-        extract_italian_educational_data(italian_educational_data_url)
+        italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
 
         #italian_cultural_facilities = extract_italian_cultural_facilities()
         #italian_cultural_events = extract_italian_cultural_events()
