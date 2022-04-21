@@ -17,21 +17,21 @@
 * Italian data
   * pipeline operational
   * partly automated
-  * manual part needs documentation
+  * manual part documentation issue 9 https://github.com/INTERSTAT/Statistics-Contextualized/issues/9#issuecomment-968995758
 
 #### Air quality data
 
 * Models and metadata
-  * ontology defined, needs documentation
-  * connection to smart model not defined
-  * metadata not defined
+  * ontology to be updated, documentation in issue 21. Further documentation is to be updated shortly. 
+  * connection to smart model IS defined, as the ontology concepts come from Air Quality Model (EEA) but it needs further revision to include meta ontologies
+  * metadata are defined and codelists are taken from EEA and collected in tables on MySQL
 
 * Data (French and Italian)
   * pipeline partly operational
-  * extraction automated
-  * transform / load to implement
+  * extraction not automated
+  * transform implemented via SQL
   * use of Nominatis API problematic (bad or absent post code, API usage policy limitative)
-  * target RDF model to define
+  * target RDF model is being implemented
 
 ## GF
 
@@ -59,14 +59,17 @@
 
 * Models and metadata
   * list of variables has been identified [here](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281)
-  * no defined metadata model yet
-  * code lists to define (sex and institution_type variables)
+  * metadata model is defined in [Issue 14](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1095203474) 
+  * code lists are defined in [Issue 14](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1095203474)
+   * ISCED, Institution type are defined in the issue and loaded in the MySQL repository
+   * codelist like sex and age class can be inherited from census if needed
 
 * French data
-  * pipeline partly operational
+  * pipeline partly operational 
   * extraction automated
   * transform partly operational (retrieving "nuts3" and "sex" variables in progress)
   * target RDF model to define?
 
 * Italian data
-  * pipeline not implemented. First step is to have a look at italian [datasets](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1013005178) to get the same list of variables
+  * pipeline partly implemented (student attainment harmonization in relation to the common data model and ontology mapping to be completed) [Issue 14](https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1095203474)
+  
