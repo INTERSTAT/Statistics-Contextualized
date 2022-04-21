@@ -425,12 +425,12 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
 def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")
     # Building the query
-    # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
     limit = 5
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
+    # Requesting data
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
     df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
@@ -572,12 +572,12 @@ def build_flow(conf):
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
         italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
-
-        #italian_cultural_facilities = extract_italian_cultural_facilities()
+        italian_cultural_facilities = extract_italian_cultural_facilities()
+        
         #italian_cultural_events = extract_italian_cultural_events()
 
-        # WIP
         rdf_data = build_rdf_data(french_data)
+        # TODO rdf_it
         upload_rdf_data(rdf_data)
 
         load_files_to_ftp(
