@@ -15,16 +15,17 @@ def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
     subtype = "igf:EducationFacility" if equipment_type[0] == "C" else "igf:SportLeisureFacility"
     # Producing sector prop
     sector_prop = f"igf:sector {sectors_uri[sector]} ;" if str(sector) != "nan" else ""
+    lau_prop = f"igf:inLAU \"{lau}\"^^xsd:token ;" if str(lau) != "nan" else ""
     
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         a {subtype} ;
         rdfs:label "Facility code {id}"{lang_tag} ;    
         dc:identifier "{id}" ;
-        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> ;
         {sector_prop}
-        igf:inLAU "{lau}"^^xsd:token .
+        {lau_prop}
+        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
+        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
 
 

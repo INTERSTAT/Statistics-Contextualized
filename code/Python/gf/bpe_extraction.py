@@ -295,9 +295,14 @@ def transform_italian_educational_data(df):
 
 
 @task
-def concat_datasets(ds1, ds2):
+def concat_datasets(ds1, ds2, id_prefix=None):
+    """
+    Use pandas native function to concat two data frames, and generate ids
+    if asked.
+    """
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
-    df["Facility_ID"] = [ f"fr{i}" for i in range(1, len(df) + 1)]
+    if id_prefix is not None:
+        df["Facility_ID"] = [ f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
 
@@ -445,10 +450,15 @@ def extract_italian_cultural_facilities():
     # Requesting data
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
+    df["Year"] = "2022"
+    # For italian museums, the last part of `subject` uri is the id
     df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
     df["Facility_Type"] = "F3"
+    df["LAU"] = np.nan
+    df["Sector"] = np.nan
+    df["Quality_XY"] = "GOOD"
     df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
-    final_df = df[["Facility_ID", "Coord_X", "Coord_Y", "Facility_Type"]]
+    final_df = df[["Year","Facility_ID", "Coord_X", "Coord_Y", "Facility_Type", "LAU", "Sector", "Quality_XY"]]
     return final_df
 
 
@@ -577,7 +587,7 @@ def build_flow(conf):
             bpe_zip_url1, types1, facilities_filter, rename1
         )
         french_data2 = extract_french_data(bpe_zip_url2, types2, rename=rename2)
-        french_data = concat_datasets(french_data1, french_data2)
+        french_data = concat_datasets(french_data1, french_data2, id_prefix="fr")
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, rename1, facilities_filter
         )
@@ -589,11 +599,13 @@ def build_flow(conf):
         italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
 
         italian_educational_data_transformed = transform_italian_educational_data(italian_educational_data)
-        #italian_cultural_facilities = extract_italian_cultural_facilities()
+        italian_cultural_facilities = extract_italian_cultural_facilities()
         #italian_cultural_events = extract_italian_cultural_events()
 
+        italian_data = concat_datasets(italian_educational_data_transformed, italian_cultural_facilities)
+
         french_rdf_data = build_rdf_data(french_data)
-        it_rdf_data = build_rdf_data(italian_educational_data_transformed)
+        it_rdf_data = build_rdf_data(italian_data)
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
 
