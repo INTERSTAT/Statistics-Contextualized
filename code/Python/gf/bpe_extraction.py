@@ -1,5 +1,7 @@
 import re
 import time
+
+import numpy as np
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
@@ -226,8 +228,7 @@ def extract_french_metadata(url, rename={}, facilities_filter=()):
 @task
 def extract_italian_educational_data(url: str) -> pd.DataFrame:
     italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
-    import re
-
+    italian_educ_data.rename(columns={"CODICESCUOLA": "Facility_ID"}, inplace=True)
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
     start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")
@@ -236,7 +237,6 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
     return italian_educ_data
 
 
-@task
 def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
     df_sample = df.sample(n=10)
     df_sample["Coord_X"] = 0.0
@@ -279,7 +279,19 @@ def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
             df_sample.loc[index, "Coord_X"] = data[0]['lat']
             df_sample.loc[index, "Coord_Y"] = data[0]['lon']
         time.sleep(1.5)  # wait a bit before sending the next request
+    return df_sample
 
+@task
+def transform_italian_educational_data(df):
+    df_coordinates = add_coordinates_italian_educational_data(df)
+    url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    df_cadastral_lau = pd.read_excel(url, dtype=str, usecols=[4, 19], names=['LAU', 'CADASTRAL_CODE'])
+    df_merged = df_coordinates.merge(df_cadastral_lau, left_on="CODICECOMUNE", right_on="CADASTRAL_CODE", how="left")
+    df_merged["Facility_Type"] = "C"
+    df_merged["Sector"] = np.nan
+    df_merged_restriction = df_merged[["Year", "Facility_ID", "Facility_Type", "Coord_X", "Coord_Y", "LAU", "Sector"]]
+    df_merged_restriction.to_csv(get_working_directory() + "merge_italy.csv", index=False, header=True)
+    return df_merged_restriction
 
 
 @task
@@ -435,7 +447,7 @@ def extract_italian_cultural_facilities():
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
     df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
     df["Facility_Type"] = "F3"
-    df.rename(columns={"Latitudine":"Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
+    df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
     final_df = df[["Facility_ID", "Coord_X", "Coord_Y", "Facility_Type"]]
     return final_df
 
@@ -572,8 +584,9 @@ def build_flow(conf):
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
         italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
-        italian_cultural_facilities = extract_italian_cultural_facilities()
-        
+
+        italian_educational_data_transformed = transform_italian_educational_data(italian_educational_data)
+        #italian_cultural_facilities = extract_italian_cultural_facilities()
         #italian_cultural_events = extract_italian_cultural_events()
 
         rdf_data = build_rdf_data(french_data)
@@ -592,7 +605,8 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        extract_italian_cultural_facilities()
+        data = extract_italian_educational_data("https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv")
+        data_transformed = transform_italian_educational_data(data)
     return flow
 
 
