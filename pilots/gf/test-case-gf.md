@@ -19,10 +19,10 @@ The list of columns extracted is given in the following table.
 | Facility_ID | Facility identifier | String | Datasets 1 & 2 |
 | Year | Reference year | Year (always '2020') | Datasets 1 & 2 |
 | LAU | Municipality | Code list | Datasets 1 & 2 |
-| Lambert_X | Latitude | Float | Datasets 1 & 2 |
-| Lambert_Y | Longitude | Float | Datasets 1 & 2 |
+| Coord_X | Latitude | Float | Datasets 1 & 2 |
+| Coord_Y | Longitude | Float | Datasets 1 & 2 |
 | Quality_XY | Quality of geogoding | Code list | Datasets 1 & 2 |
-| FacilityType | Type of facility | Code list | Datasets 1 & 2 |
+| Facility_Type | Type of facility | Code list | Datasets 1 & 2 |
 | CL_PELEM | Presence or absence of a pre-elementary class in primary schools | Code list | Datasets 2 |
 | CL_PGE | Presence or absence of a preparatory class for the high schools in upper secondary | Code list | Datasets 2 |
 | EP | Membership or not in a priority education scheme | Code list | Datasets 2 |
@@ -35,7 +35,30 @@ In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentati
 
 ### Italian data
 
-(TODO)
+#### Musea
+
+
+#### Events
+
+The data on Italian cultural events is extracted by a query on the SPARQL endpoint at https://dati.cultura.gov.it/sparql. The columns extracted are:
+
+| Field name | Description | Data type |
+| --- | -- | --- |
+| EVENTO | Event identifier | URI |
+| NOME | Name of the event | String |
+| DATA_INIZIO_EVENTO | Starting date of the event | Datetime |
+| DATA_FINE_EVENTO | Ending date of the event | Datetime |
+| CATEGORIA | Type of event | Code list |
+| SITO_WEB | Web site | HTTP URI or domain name |
+| EMAIL | Email address | Mailto URI |
+| VIA | Street name | String |
+| NUMERO_CIVICO | Number in the street | String |
+| CAP | Postal code | String (5 digits) |
+| COMUNE | Municipality name | String |
+| PROVINCIA | Province name | String |
+| REGIONE | Region name | String |
+
+The RDF data is conformant to the [CIS ontology](https://dati.cultura.gov.it/cultural-ON/ENG.html).
 
 ## Model
 
@@ -58,7 +81,7 @@ An example of corresponding code is given below (prefix declarations are omitted
 
     <http://id.cef-interstat.eu/sc/gf/geometry/AJFQKT500> a geo:Geometry ;
         rdfs:label "Localization of Lycée Frédéric Mistral"@fr ;
-        geo:asWKT "POINT(841092.05,6545270.87)"^^geo:wktLiteral .
+        geo:asWKT "POINT(48.7613037,2.3277506,19)"^^geo:wktLiteral .
 
     <http://id.cef-interstat.eu/sc/gf/quality/AJFQKT500> a dqv:QualityAnnotation ;
         oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/GOOD> ;
