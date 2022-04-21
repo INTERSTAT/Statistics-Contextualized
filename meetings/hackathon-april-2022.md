@@ -65,6 +65,16 @@
   * Finalization in progress for Italian museum data
   * Major refactoring of client applications
 
+* Istat: SEP
+  * Cross domain SparQL query executed and output formatted in rdf.
+  * Rdf Output loaded on GraphDB
+
+* Istat: S4Y
+  * French and Italian data on student attendance have been normalized
+  * Italian Data ready to be merged with French Data (as soon as an updated version of French Student Attendance Data File is available)
+  * Started ontology mapping on school attendance (as the common data model is now defined)
+  * next steps: Define SparQL queries
+  * next steps: Output in rdf format, same as in the SEP pipeline
 
 ## Friday 21
 
