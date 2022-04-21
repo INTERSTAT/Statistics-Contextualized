@@ -597,12 +597,14 @@ def build_flow(conf):
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
 
+        """ This task doesn't work on some networks
         load_files_to_ftp(
             csvw,
             code_lists,
             working_dir,
             upstream_tasks=[transform_data_to_csv(french_data, working_dir)],
         )
+        """
 
     return flow
 
