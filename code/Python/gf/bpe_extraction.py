@@ -238,7 +238,7 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
 
 
 def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
-    df_sample = df.sample(n=10)
+    df_sample = df.sample(n=30) # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
     for index, row in df_sample.iterrows():
@@ -289,15 +289,15 @@ def transform_italian_educational_data(df):
     df_merged = df_coordinates.merge(df_cadastral_lau, left_on="CODICECOMUNE", right_on="CADASTRAL_CODE", how="left")
     df_merged["Facility_Type"] = "C"
     df_merged["Sector"] = np.nan
-    df_merged_restriction = df_merged[["Year", "Facility_ID", "Facility_Type", "Coord_X", "Coord_Y", "LAU", "Sector"]]
-    df_merged_restriction.to_csv(get_working_directory() + "merge_italy.csv", index=False, header=True)
+    df_merged["Quality_XY"] = "GOOD"
+    df_merged_restriction = df_merged[["Year", "Facility_ID", "Facility_Type", "Coord_X", "Coord_Y", "LAU", "Sector", "Quality_XY"]]
     return df_merged_restriction
 
 
 @task
 def concat_datasets(ds1, ds2):
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
-    df["Facility_ID"] = range(1, len(df) + 1)
+    df["Facility_ID"] = [ f"fr{i}" for i in range(1, len(df) + 1)]
     return df
 
 
@@ -437,12 +437,12 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
 def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")
     # Building the query
-    # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
     limit = 5
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
+    # Requesting data
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
     df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
@@ -539,6 +539,9 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
             for f in code_lists:
                 sftp.put(f.name)
 
+@task
+def concat_rdf_data(french_rdf: str, it_rdf: str):
+    return french_rdf + "\n" + it_rdf
 
 @task(name="Upload RDF data")
 def upload_rdf_data(rdf_data):
@@ -584,12 +587,14 @@ def build_flow(conf):
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
         italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
+
         italian_educational_data_transformed = transform_italian_educational_data(italian_educational_data)
         #italian_cultural_facilities = extract_italian_cultural_facilities()
         #italian_cultural_events = extract_italian_cultural_events()
 
-        # WIP
-        rdf_data = build_rdf_data(french_data)
+        french_rdf_data = build_rdf_data(french_data)
+        it_rdf_data = build_rdf_data(italian_educational_data_transformed)
+        rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
 
         load_files_to_ftp(
