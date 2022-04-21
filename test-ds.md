@@ -1,6 +1,6 @@
 # Test data for SDMX to NGSI-LD converter
 
-Different data structure definitions and corresponding data sets are provided in order to test the SDMX to NGSI-LD converter. These test data are taken from two French statistical domains:
+Different data structure definitions and corresponding data sets are provided in order to test the SDMX to NGSI-LD converter. These test data are taken from two statistical domains:
 
 * Capacities of tourist accomodations: number of accommodations, of bedrooms and of bed places from 2014 to 2022 for French NUTS3 areas
 * National accounts: data about GDP and its main components from 2012 to 2020 for a subset of UE countries.
