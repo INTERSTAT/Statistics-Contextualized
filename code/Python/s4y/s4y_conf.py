@@ -67,7 +67,7 @@ conf = {
             "types": {"Numéro du lycée": str, "Rentrée scolaire": str, "2ndes PRO": int, "CAP 1ère année": int, "CAP en 1 an": int, "BMA 1ère année": int, "BMA en 1 an": int, "CAP 2nde année": int, "1ères PRO": int, "Terminales PRO": int, "MC": int},
             "mapping_course_year": {"10": ["2ndes PRO", "CAP 1ère année", "CAP en 1 an", "BMA 1ère année", "BMA en 1 an"],
                                     "11": ["CAP 2nde année", "1ères PRO"],
-                                    "12": ["Terminales PRO", "MC"]}
+                                    "12": ["Terminales PRO"]}
         }
     ]
 }
@@ -121,7 +121,7 @@ conf = {
             "types": {"numero_lycee": str, "rentree_scolaire": str, "2ndes_pro": int, "cap_1ere_annee": int, "cap_en_1_an": int, "bma_1ere_annee": int, "bma_en_1_an": int, "cap_2nde_annee": int, "1eres_pro": int, "terminales_pro": int, "mc": int},
             "mapping_course_year": {"10": ["2ndes_pro", "cap_1ere_annee", "cap_en_1_an", "bma_1ere_annee", "bma_en_1_an"],
                         "11": ["cap_2nde_annee", "1eres_pro"],
-                        "12": ["terminales_pro", "mc"]}
+                        "12": ["terminales_pro"]}
         }
 '''
 
