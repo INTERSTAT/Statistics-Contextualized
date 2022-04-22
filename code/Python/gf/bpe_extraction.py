@@ -17,7 +17,12 @@ import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
 from common.apis import get_italian_cultural_data, load_turtle
-from common.rdf import gen_rdf_facility, gen_rdf_geometry, gen_rdf_quality, gen_rdf_french_facility
+from common.rdf import (
+    gen_rdf_facility,
+    gen_rdf_geometry,
+    gen_rdf_quality,
+    gen_rdf_french_facility,
+)
 
 # Constants ----
 
@@ -232,13 +237,15 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
     start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")
-    italian_educ_data["Year"] = ["".join(start_end.match(str(year)).group(1, 2)) for year in
-                                 italian_educ_data["ANNOSCOLASTICO"]]
+    italian_educ_data["Year"] = [
+        "".join(start_end.match(str(year)).group(1, 2))
+        for year in italian_educ_data["ANNOSCOLASTICO"]
+    ]
     return italian_educ_data
 
 
 def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
-    df_sample = df.sample(n=30) # Impact on duration, n x 1.5 seconds
+    df_sample = df.sample(n=30)  # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
     for index, row in df_sample.iterrows():
@@ -259,16 +266,20 @@ def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
         if "," in NumeroCivico:
             NumeroCivico = NumeroCivico.split(",")[0]
         apiService = "https://nominatim.openstreetmap.org/search?street="
-        url = quote(TipologiaIndirizzo.encode('utf-8')) + "%20" + \
-              quote(DenominazioneIndirizzo.encode('utf-8')) + "+&city=" + quote(
-            DescrizioneComune.encode('utf-8')) + \
-              "&format=json&limit=1"
+        url = (
+            quote(TipologiaIndirizzo.encode("utf-8"))
+            + "%20"
+            + quote(DenominazioneIndirizzo.encode("utf-8"))
+            + "+&city="
+            + quote(DescrizioneComune.encode("utf-8"))
+            + "&format=json&limit=1"
+        )
         NumeroCivico_is_a_digit = False
         address_found = False
         # It checks whether the house number is a numerical value
-        if (bool(re.search(re.compile("^\d+$"), NumeroCivico))):
+        if bool(re.search(re.compile("^\d+$"), NumeroCivico)):
             NumeroCivico_is_a_digit = True
-            api = apiService + quote(NumeroCivico.encode('utf-8')) + "+" + url
+            api = apiService + quote(NumeroCivico.encode("utf-8")) + "+" + url
         else:
             api = apiService + url
         r = requests.get(api)
@@ -276,21 +287,39 @@ def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
         if len(data) > 0:
             address_found = True
         if address_found:
-            df_sample.loc[index, "Coord_X"] = data[0]['lat']
-            df_sample.loc[index, "Coord_Y"] = data[0]['lon']
+            df_sample.loc[index, "Coord_X"] = data[0]["lat"]
+            df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
         time.sleep(1.5)  # wait a bit before sending the next request
     return df_sample
+
 
 @task
 def transform_italian_educational_data(df):
     df_coordinates = add_coordinates_italian_educational_data(df)
-    url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
-    df_cadastral_lau = pd.read_excel(url, dtype=str, usecols=[4, 19], names=['LAU', 'CADASTRAL_CODE'])
-    df_merged = df_coordinates.merge(df_cadastral_lau, left_on="CODICECOMUNE", right_on="CADASTRAL_CODE", how="left")
+    url = (
+        get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    )
+    df_cadastral_lau = pd.read_excel(
+        url, dtype=str, usecols=[4, 19], names=["LAU", "CADASTRAL_CODE"]
+    )
+    df_merged = df_coordinates.merge(
+        df_cadastral_lau, left_on="CODICECOMUNE", right_on="CADASTRAL_CODE", how="left"
+    )
     df_merged["Facility_Type"] = "C"
     df_merged["Sector"] = np.nan
     df_merged["Quality_XY"] = "GOOD"
-    df_merged_restriction = df_merged[["Year", "Facility_ID", "Facility_Type", "Coord_X", "Coord_Y", "LAU", "Sector", "Quality_XY"]]
+    df_merged_restriction = df_merged[
+        [
+            "Year",
+            "Facility_ID",
+            "Facility_Type",
+            "Coord_X",
+            "Coord_Y",
+            "LAU",
+            "Sector",
+            "Quality_XY",
+        ]
+    ]
     return df_merged_restriction
 
 
@@ -302,7 +331,7 @@ def concat_datasets(ds1, ds2, id_prefix=None):
     """
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
     if id_prefix is not None:
-        df["Facility_ID"] = [ f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
+        df["Facility_ID"] = [f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
 
@@ -458,7 +487,18 @@ def extract_italian_cultural_facilities():
     df["Sector"] = np.nan
     df["Quality_XY"] = "GOOD"
     df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
-    final_df = df[["Year","Facility_ID", "Coord_X", "Coord_Y", "Facility_Type", "LAU", "Sector", "Quality_XY"]]
+    final_df = df[
+        [
+            "Year",
+            "Facility_ID",
+            "Coord_X",
+            "Coord_Y",
+            "Facility_Type",
+            "LAU",
+            "Sector",
+            "Quality_XY",
+        ]
+    ]
     return final_df
 
 
@@ -489,12 +529,22 @@ def build_rdf_data(df):
         logger.debug("Generating RDF for french education facilities")
         df["FACILITY_RDF"] = [
             gen_rdf_french_facility(id, equ_type, sector, lau, pge, pelem, ep)
-            for (id, equ_type, sector, lau, pge, pelem, ep) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"], df["CL_PGE"], df["CL_PELEM"], df["EP"])
+            for (id, equ_type, sector, lau, pge, pelem, ep) in zip(
+                df["Facility_ID"],
+                df["Facility_Type"],
+                df["Sector"],
+                df["LAU"],
+                df["CL_PGE"],
+                df["CL_PELEM"],
+                df["EP"],
+            )
         ]
     else:
         df["FACILITY_RDF"] = [
             gen_rdf_facility(id, equ_type, sector, lau)
-            for (id, equ_type, sector, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"])
+            for (id, equ_type, sector, lau) in zip(
+                df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"]
+            )
         ]
 
     df["GEOMETRY_RDF"] = [
@@ -557,9 +607,11 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
             for f in code_lists:
                 sftp.put(f.name)
 
+
 @task
 def concat_rdf_data(french_rdf: str, it_rdf: str):
     return french_rdf + "\n" + it_rdf
+
 
 @task(name="Upload RDF data")
 def upload_rdf_data(rdf_data):
@@ -604,13 +656,19 @@ def build_flow(conf):
         csvw = transform_metadata_to_csvw(french_metadata, working_dir)
         code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
 
-        italian_educational_data = extract_italian_educational_data(italian_educational_data_url)
+        italian_educational_data = extract_italian_educational_data(
+            italian_educational_data_url
+        )
 
-        italian_educational_data_transformed = transform_italian_educational_data(italian_educational_data)
+        italian_educational_data_transformed = transform_italian_educational_data(
+            italian_educational_data
+        )
         italian_cultural_facilities = extract_italian_cultural_facilities()
-        #italian_cultural_events = extract_italian_cultural_events()
+        # italian_cultural_events = extract_italian_cultural_events()
 
-        italian_data = concat_datasets(italian_educational_data_transformed, italian_cultural_facilities)
+        italian_data = concat_datasets(
+            italian_educational_data_transformed, italian_cultural_facilities
+        )
 
         french_rdf_data = build_rdf_data(french_data)
         it_rdf_data = build_rdf_data(italian_data)
@@ -631,7 +689,9 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        data = extract_italian_educational_data("https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv")
+        data = extract_italian_educational_data(
+            "https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv"
+        )
         data_transformed = transform_italian_educational_data(data)
     return flow
 

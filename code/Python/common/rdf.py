@@ -8,15 +8,44 @@ lang_fr = "@fr"
 lang_it = "@it"
 
 # Educational sector URI
-sectors_uri = {"PU": "<http://id.insee.fr/interstat/gf/sector/public>", "PR": "<http://id.insee.fr/interstat/gf/sector/private>"}
+sectors_uri = {
+    "PU": "<http://id.insee.fr/interstat/gf/sector/public>",
+    "PR": "<http://id.insee.fr/interstat/gf/sector/private>",
+}
+
+# Types of school characteristics
+# See ontology here:https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-ontology.ttl#L235
+characteristic_types_uris = {
+    "pge": "<http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PGE>",
+    "pelem": "<http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PELEM>",
+    "ep": "<http://id.insee.fr/interstat/gf/EducationCharacteristic/EP>",
+}
+
+
+def igf_characteristic(type, value):
+    """
+    For education facilities, this function helps to choose if a characteristic is present or not, or not applicable.
+    """
+    if str(value) == "nan" or str(value) == "X":
+        return ""
+    else:
+        if value == "1":
+            return f"igf:characteristic {characteristic_types_uris[type]}"
+        else:
+            return f"igf:absentCharacteristic {characteristic_types_uris[type]}"
+
 
 def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
     # Handling facility subtype
-    subtype = "igf:EducationFacility" if equipment_type[0] == "C" else "igf:SportLeisureFacility"
+    subtype = (
+        "igf:EducationFacility"
+        if equipment_type[0] == "C"
+        else "igf:SportLeisureFacility"
+    )
     # Producing sector prop
     sector_prop = f"igf:sector {sectors_uri[sector]} ;" if str(sector) != "nan" else ""
-    lau_prop = f"igf:inLAU \"{lau}\"^^xsd:token ;" if str(lau) != "nan" else ""
-    
+    lau_prop = f'igf:inLAU "{lau}"^^xsd:token ;' if str(lau) != "nan" else ""
+
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         a {subtype} ;
@@ -28,31 +57,18 @@ def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
 
-# See ontology here:https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-ontology.ttl#L235
-characteristic_types_uris = {
-    "pge": "<http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PGE>",
-    "pelem" : "<http://id.insee.fr/interstat/gf/EducationCharacteristic/CL_PELEM>",
-    "ep" : "<http://id.insee.fr/interstat/gf/EducationCharacteristic/EP>"
-}
 
-def igf_characteristic(type, value):
-    if str(value) == "nan" or str(value) == "X":
-        return ""
-    else:
-        if value == "1":
-            return f"igf:characteristic {characteristic_types_uris[type]}"
-        else:
-            return f"igf:absentCharacteristic {characteristic_types_uris[type]}"
-
-def gen_rdf_french_facility(id, equipment_type, sector, lau, pge, pelem, ep, lang_tag=lang_en):
+def gen_rdf_french_facility(
+    id, equipment_type, sector, lau, pge, pelem, ep, lang_tag=lang_en
+):
     # Producing sector prop
     sector_prop = f"igf:sector {sectors_uri[sector]} ;" if str(sector) != "nan" else ""
-    lau_prop = f"igf:inLAU \"{lau}\"^^xsd:token ;" if str(lau) != "nan" else ""
-    
+    lau_prop = f'igf:inLAU "{lau}"^^xsd:token ;' if str(lau) != "nan" else ""
+
     pge_prop = igf_characteristic("pge", pge)
     pelem_prop = igf_characteristic("pelem", pelem)
     ep_prop = igf_characteristic("ep", ep)
-    
+
     return f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         a igf:EducationFacility ;
@@ -66,6 +82,7 @@ def gen_rdf_french_facility(id, equipment_type, sector, lau, pge, pelem, ep, lan
         dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
         geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
+
 
 def gen_rdf_geometry(id, x, y, lang_tag=lang_en):
     # Handling missing coordinates
