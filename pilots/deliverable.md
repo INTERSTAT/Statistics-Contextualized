@@ -1,18 +1,14 @@
 # Deliverable
 
-## Reminder on pilots
+## Introduction
 
-### SEP
+### Scope and objectives of deliverable
 
---> Istat
+### Short reminder of the pilots
 
-### GF
-
---> Insee
-
-### S4Y
-
---> Istat
+* SEP (--> Istat)
+* GF (--> Insee)
+* S4Y (--> Istat)
 
 ## Reminder on the production environment
 
@@ -40,6 +36,8 @@
 
 --> Istat
 
+#### Business case
+
 #### Models
 
 #### Data
@@ -54,6 +52,8 @@
 
 --> Insee
 
+#### Business case
+
 #### Models
 
 #### Data
@@ -67,6 +67,8 @@
 ### S4Y
 
 --> Istat
+
+#### Business case
 
 #### Models
 
