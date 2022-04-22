@@ -15,10 +15,14 @@ conf = {
     "env": {
         "workingDirectory": ""
     },
+    "graphdbRepositories": {
+        "test": "https://interstat.eng.it/graphdb/repositories/gf-test/",
+        "staging": "https://interstat.eng.it/graphdb/repositories/gf-staging/"
+    },
     "thresholds": {
-        "italianCulturalFacilities": 5,
-        "italianCulturalEvents": 5,
-        "italianEducationFacilitiesGeocoding": 30,
+        "italianCulturalFacilities": 5, # None for no limit
+        "italianCulturalEvents": 5, # None for no limit
+        "italianEducationFacilitiesGeocoding": 50,
     },
     "sparql": {
         "italianCulturalFacilities" : """

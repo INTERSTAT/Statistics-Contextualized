@@ -16,6 +16,7 @@ import os
 import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
+from common.geo_base import convert_coordinates_fn
 from common.apis import get_italian_cultural_data, load_turtle
 from common.rdf import (
     gen_rdf_facility,
@@ -334,6 +335,14 @@ def concat_datasets(ds1, ds2, id_prefix=None):
         df["Facility_ID"] = [f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
+@task(name="Transform french coordinates")
+def transform_french_coordinates(df):
+    tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
+    tdf.assign(
+        Coord_X=df["coord"][0], 
+        Coord_Y=df["coord"][1]
+        )
+    return tdf
 
 @task
 def concat_metadatasets(ds1, ds2):
@@ -617,7 +626,8 @@ def concat_rdf_data(french_rdf: str, it_rdf: str):
 def upload_rdf_data(rdf_data):
     logger = prefect.context.get("logger")
     # FIXME as a Prefect parameter ?
-    graph_url = "https://interstat.eng.it/graphdb/repositories/gf-test/statements?context=<http://www.interstat.org/graphs/gf>"
+    repo = conf["graphdbRepositories"]["test"]
+    graph_url = f'{repo}statements?context=<http://www.interstat.org/graphs/gf>'
     logger.info(f"Uploading RDF data to {graph_url}")
     load_turtle(graph_url, rdf_data)
 
@@ -648,6 +658,10 @@ def build_flow(conf):
         )
         french_data2 = extract_french_data(bpe_zip_url2, types2, rename=rename2)
         french_data = concat_datasets(french_data1, french_data2, id_prefix="fr")
+
+        # WIP - Transform Lambert to WGS84 
+        #french_data = transform_french_coordinates(french_data)
+
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, rename1, facilities_filter
         )

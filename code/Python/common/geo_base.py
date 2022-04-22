@@ -62,6 +62,31 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
 
     return frame
 
+def convert_coordinates_fn(frame, lon_column, lat_column, crs_from, crs_to):
+    """
+    Converts coordinates from on CRS to another.
+    See https://pyproj4.github.io/pyproj/stable/api/transformer.html for possible expressions of CRSs.
+    See https://spatialreference.org/ for reference naming of CRSs.
+
+    Args
+        frame (DataFrame): The data frame containing the coordinates.
+        lon_column (str): The name of the column containing the longitude.
+        lat_column (str): The name of the column containing the latitude.
+        crs_from (Any): The system to transform from.
+        crs_to (Any): The system to transform to.
+    Returns:
+        DataFrame: The input data frame with additional columns 'xy' and 'coord' containing original and converted coordinates.
+    """
+    transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    frame["xy"] = frame[[lat_column, lon_column]].apply(tuple, axis=1)
+    frame["coord"] = frame["xy"].apply(lambda s: transformer.transform(s[0], s[1]))
+    # TODO See possibility to apply directly on two columns, something like the following (which does not work)
+    # frame[[lat_column + '_r', lon_column + '_r']] =\
+    #     frame[[lat_column, lon_column]].apply(lambda x, y: transformer.transform(x, y), axis=1, result_type='expand')
+    # TODO See possibility to pass couples (source and target column names, coordinate systems)
+
+    return frame
+
 
 @task(name='Add NUTS3 from coordinates')
 def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs='epsg:4326'):

@@ -98,7 +98,7 @@ def gen_rdf_geometry(id, x, y, lang_tag=lang_en):
     return f"""
     <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
         rdfs:label "Geometry for facility {id}"{lang_tag} ;
-        geo:asWKT "POINT({x},{y})"^^geo:wktLiteral .
+        geo:asWKT "POINT({x} {y})"^^geo:wktLiteral .
     """
 
 
