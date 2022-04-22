@@ -81,6 +81,7 @@
 ### Objectives
 
 * Work on deliverable
+  * See [outline proposal](../pilots/deliverable.md)
 
 * Work on client applications
 
