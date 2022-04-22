@@ -49,14 +49,18 @@ def extract_students_data(url, types):
     DataFrame
         The data extracted
     """
+    print("URL", url)
     if not types:
-        df_students_data = pd.read_csv(url, sep=";")
+        df_students_data = pd.read_csv(url, sep=";", thousands=" ")
     else:
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
-                                       usecols=types.keys())
+                                       usecols=types.keys(), thousands=" ")
     # TODO: Improve renaming. Here the order of the columns in the file is kept and not in the order of types.keys()
     df_students_data.columns.values[0] = "scholastic_year"
     df_students_data.columns.values[1] = "school_id"
+    print("COURSE_YEAR", conf["course_year"])
+    if not conf["course_year"]:
+        df_students_data.columns.values[2] = "students_number"
     return df_students_data
 
 
@@ -102,19 +106,22 @@ def transform_students_data_to_df(df_students_data, mapping):
     DataFrame
         The data transformed
     """
-    # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
-    df_course_year = pd.DataFrame(list(mapping.keys()),
+    if conf["course_year"]:
+        # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
+        df_course_year = pd.DataFrame(list(mapping.keys()),
                                   columns=["course_year"])
-    # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
-    df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
-    # Create the new variable "students_number"
-    df_cartesian["students_number"] = -1
-    for key, value in mapping.items():
-        if len(value) == 1:
-            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
-        else:
-            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
-    return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
+        # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
+        df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
+        # Create the new variable "students_number"
+        df_cartesian["students_number"] = -1
+        for key, value in mapping.items():
+            if len(value) == 1:
+                df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
+            else:
+                df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
+        return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
+    else:
+        return df_students_data[["school_id", "scholastic_year", "students_number"]]
 
 
 @task
