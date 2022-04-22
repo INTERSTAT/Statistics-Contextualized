@@ -1,3 +1,4 @@
+from random import randint
 import re
 import time
 
@@ -699,9 +700,11 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
+        tx = [841092.05, 830000.00]
+        ty = [6545270.87, 6545270.87]
         points = pd.DataFrame({
-            "X": [841092.05, 830000.00],
-            "Y": [6545270.87, 6545270.87]
+            "X": [randint(830000, 840000) for x in range(10000)],
+            "Y": [randint(6500000, 6550000) for x in range(10000)]
         })
         transformed = convert_coordinates_fn(points, "X", "Y", "epsg:2154", "epsg:4326")
         print(transformed)
