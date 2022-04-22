@@ -42,8 +42,8 @@
 
 ### Objectives
 
- Istat SEP:
-  * Query output in rdf format 
+* Istat SEP:
+  * Query output in RDF format 
 
 * Istat S4Y:
   * 11 AM Work on student attendance harmonization with Thomas (to be confirmed)
@@ -51,24 +51,38 @@
   * Query / Integration to be produced
   * RDF output to be produced
 
-
-#### Work on Context Broker import
-
-* Metadata (including SDMX)
-* Data
-#### Work on data catalogue
-
-#### Work on client applications
-
+* Insee: GF
+  * French data finalized and published on GraphDB
+  * Italian educational data geolocalized, transformed to RDF and published on GraphDB
+  * Work with Francesca on client applications
 
 ### Report on work done
 
+* Insee: GF
+  * All objectives realized
+  * GF ontology documented and published on GraphDB, missing facility types for Italian facilities
+  * Test data and structures for SDMX to NGSI-LD converter created and published on GraphDB
+  * Finalization in progress for Italian museum data
+  * Major refactoring of client applications
+
+* Istat: SEP
+  * Cross domain SparQL query executed and output formatted in rdf.
+  * Rdf Output loaded on GraphDB
+
+* Istat: S4Y
+  * French and Italian data on student attendance have been normalized
+  * Italian Data ready to be merged with French Data (as soon as an updated version of French Student Attendance Data File is available)
+  * Started ontology mapping on school attendance (as the common data model is now defined)
+  * next steps: Define SparQL queries
+  * next steps: Output in rdf format, same as in the SEP pipeline
 
 ## Friday 21
 
 ### Objectives
 
 * Work on deliverable
+  * See [outline proposal](../pilots/deliverable.md)
+
 * Work on client applications
 
 
