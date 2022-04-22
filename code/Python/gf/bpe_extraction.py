@@ -290,6 +290,9 @@ def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
         if address_found:
             df_sample.loc[index, "Coord_X"] = data[0]["lat"]
             df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
+        else:
+            df_sample.loc[index, "Coord_X"] = np.nan
+            df_sample.loc[index, "Coord_Y"] = np.nan
         time.sleep(1.5)  # wait a bit before sending the next request
     return df_sample
 
