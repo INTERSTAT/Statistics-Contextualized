@@ -338,10 +338,6 @@ def concat_datasets(ds1, ds2, id_prefix=None):
 @task(name="Transform french coordinates")
 def transform_french_coordinates(df):
     tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
-    tdf.assign(
-        Coord_X=df["coord"][0], 
-        Coord_Y=df["coord"][1]
-        )
     return tdf
 
 @task
@@ -703,10 +699,12 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        data = extract_italian_educational_data(
-            "https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv"
-        )
-        data_transformed = transform_italian_educational_data(data)
+        points = pd.DataFrame({
+            "X": [841092.05, 830000.00],
+            "Y": [6545270.87, 6545270.87]
+        })
+        transformed = convert_coordinates_fn(points, "X", "Y", "epsg:2154", "epsg:4326")
+        print(transformed)
     return flow
 
 

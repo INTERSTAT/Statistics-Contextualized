@@ -62,7 +62,7 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
 
     return frame
 
-def convert_coordinates_fn(frame, lon_column, lat_column, crs_from, crs_to):
+def convert_coordinates_fn(frame, lat_column, lon_column, crs_from, crs_to):
     """
     Converts coordinates from on CRS to another.
     See https://pyproj4.github.io/pyproj/stable/api/transformer.html for possible expressions of CRSs.
@@ -75,15 +75,19 @@ def convert_coordinates_fn(frame, lon_column, lat_column, crs_from, crs_to):
         crs_from (Any): The system to transform from.
         crs_to (Any): The system to transform to.
     Returns:
-        DataFrame: The input data frame with additional columns 'xy' and 'coord' containing original and converted coordinates.
+        DataFrame: The input data frame with original columns containing the converted coords and copies of the original columns
+        - named `original_<lat or long given column names>`.
     """
-    transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
-    frame["xy"] = frame[[lat_column, lon_column]].apply(tuple, axis=1)
-    frame["coord"] = frame["xy"].apply(lambda s: transformer.transform(s[0], s[1]))
-    # TODO See possibility to apply directly on two columns, something like the following (which does not work)
-    # frame[[lat_column + '_r', lon_column + '_r']] =\
-    #     frame[[lat_column, lon_column]].apply(lambda x, y: transformer.transform(x, y), axis=1, result_type='expand')
     # TODO See possibility to pass couples (source and target column names, coordinate systems)
+
+    transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    xs, ys = transformer.transform(frame[lat_column], frame[lon_column])
+    # Keep but move the original coords columns
+    frame[f"original_{lat_column}"] = frame[lat_column]
+    frame[f"original_{lon_column}"] = frame[lon_column]
+    # Transformed coords are put into the original cols
+    frame[lat_column] = xs
+    frame[lon_column] = ys
 
     return frame
 
