@@ -20,15 +20,19 @@
 
 ## Pilot development
 
-### Approaches
+### Data pipelines
 
-#### ETL
+#### ETL approach
 
 --> Insee
 
-#### Ontological
+#### Ontological approach
 
 --> Istat
+
+### Client applications
+
+--> ENG
 
 ## Details by pilot
 
