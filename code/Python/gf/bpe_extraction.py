@@ -245,7 +245,7 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
 
 
 def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
-    df_sample = df.sample(n=30)  # Impact on duration, n x 1.5 seconds
+    df_sample = df.sample(n=conf["thresholds"]["italianEducationFacilitiesGeocoding"])  # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
     for index, row in df_sample.iterrows():
@@ -472,7 +472,7 @@ def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")
     # Building the query
     query = conf["sparql"]["italianCulturalFacilities"]
-    limit = 5
+    limit = conf["thresholds"]["italianCulturalFacilities"]
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
@@ -507,7 +507,7 @@ def extract_italian_cultural_events():
     logger = prefect.context.get("logger")
     # FIXME duplicated code → apis module?
     query = conf["sparql"]["italianCulturalEvents"]
-    limit = 5
+    limit = conf["thresholds"]["italianCulturalEvents"]
     query_with_limit = query + f"limit {limit}"
     quoted_query = quote(query_with_limit.strip())
     # FIXME character encoding (ex: "Attivit\u00E0 Didattica")

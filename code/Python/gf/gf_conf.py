@@ -15,6 +15,11 @@ conf = {
     "env": {
         "workingDirectory": ""
     },
+    "thresholds": {
+        "italianCulturalFacilities": 5,
+        "italianCulturalEvents": 5,
+        "italianEducationFacilitiesGeocoding": 30,
+    },
     "sparql": {
         "italianCulturalFacilities" : """
             select * {
