@@ -86,9 +86,6 @@ def load_turtle(url: str, ttl_data: str, compression=False):
     else:
         ttl_final_data = ttl_data
         headers = {"Content-Type": "text/turtle"}
-    
-    print("Target URL :")
-    print(f"  {url}")
 
     resp = post(url, data=ttl_final_data, headers=headers)
     

@@ -62,26 +62,33 @@ def gen_rdf_french_facility(
     id, equipment_type, sector, lau, pge, pelem, ep, lang_tag=lang_en
 ):
     # Producing sector prop
-    sector_prop = f"igf:sector {sectors_uri[sector]} ;" if str(sector) != "nan" else ""
-    lau_prop = f'igf:inLAU "{lau}"^^xsd:token ;' if str(lau) != "nan" else ""
+    sector_prop = f"igf:sector {sectors_uri[sector]}" if str(sector) != "nan" else ""
+    lau_prop = f'igf:inLAU "{lau}"^^xsd:token' if str(lau) != "nan" else ""
 
     pge_prop = igf_characteristic("pge", pge)
     pelem_prop = igf_characteristic("pelem", pelem)
     ep_prop = igf_characteristic("ep", ep)
 
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
-        a igf:EducationFacility ;
-        rdfs:label "Facility code {id}"{lang_tag} ;    
-        dc:identifier "{id}" ;
-        {pge_prop} ;
-        {pelem_prop} ;
-        {ep_prop} ;
-        {sector_prop}
-        {lau_prop}
-        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
-    """
+    all_props_raw = [
+        "a igf:Facility",
+        "a igf:EducationFacility",
+        f'rdfs:label "Facility code {id}"{lang_tag}',
+        f'dc:identifier "{id}"',
+        pge_prop,
+        pelem_prop,
+        ep_prop,
+        sector_prop,
+        lau_prop,
+        f"dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}>",
+        f"geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}>",
+    ]
+
+    # Filtering empty strings (they are related)
+    all_props_filtered = [prop for prop in all_props_raw if prop != ""]
+    all_props_str = " ;\n".join(all_props_filtered)
+    rdf = f"<http://id.cef-interstat.eu/sc/gf/facility/{id}>\n{all_props_str} ."
+
+    return rdf
 
 
 def gen_rdf_geometry(id, x, y, lang_tag=lang_en):
