@@ -30,7 +30,6 @@ def extract_schools_data():
     See specs here : https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281
     """
     df = get_french_schools_data()
-    print(df)
     return df
 
 
@@ -78,8 +77,12 @@ def transform_schools_data(df_schools_data):
     """
     # Recoding type of institution
     df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "PU", "Privé": "PR"})
+    # Add Isced code
+    url = get_working_directory() + "school-registry-mapping-nature-isced.csv"
+    df_mappping_nature_isced = pd.read_csv(url, sep=",", usecols=["code_nature", "ISCED_level"])
+    df_merged = df_schools_data.merge(df_mappping_nature_isced, left_on="code_nature", right_on="code_nature", how="left")
     # TODO: Add nuts3 variable based on lau variable?
-    return df_schools_data
+    return df_merged
 
 
 @task

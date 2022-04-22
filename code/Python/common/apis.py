@@ -28,6 +28,7 @@ def get_french_schools_data() -> pd.DataFrame:
         "longitude",
         "code_commune AS lau",
         "secteur_public_prive_libe AS institution_type",
+        "nature_uai AS code_nature",
     ]
     cols_request = quote(",".join(cols))
     target = (
