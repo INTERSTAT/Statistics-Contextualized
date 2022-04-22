@@ -660,7 +660,7 @@ def build_flow(conf):
         french_data = concat_datasets(french_data1, french_data2, id_prefix="fr")
 
         # WIP - Transform Lambert to WGS84 
-        #french_data = transform_french_coordinates(french_data)
+        french_data = transform_french_coordinates(french_data)
 
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, rename1, facilities_filter
