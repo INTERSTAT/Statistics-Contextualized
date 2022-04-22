@@ -17,7 +17,7 @@ import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
 from common.apis import get_italian_cultural_data, load_turtle
-from common.rdf import gen_rdf_facility, gen_rdf_geometry, gen_rdf_quality
+from common.rdf import gen_rdf_facility, gen_rdf_geometry, gen_rdf_quality, gen_rdf_french_facility
 
 # Constants ----
 
@@ -485,10 +485,18 @@ def build_rdf_data(df):
     logger = prefect.context.get("logger")
     logger.info("Building a RDF file from the input data frame.")
 
-    df["FACILITY_RDF"] = [
-        gen_rdf_facility(id, equ_type, sector, lau)
-        for (id, equ_type, sector, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"])
-    ]   
+    if all(col in df.columns for col in ["CL_PGE", "CL_PELEM", "EP"]):
+        logger.debug("Generating RDF for french education facilities")
+        df["FACILITY_RDF"] = [
+            gen_rdf_french_facility(id, equ_type, sector, lau, pge, pelem, ep)
+            for (id, equ_type, sector, lau, pge, pelem, ep) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"], df["CL_PGE"], df["CL_PELEM"], df["EP"])
+        ]
+    else:
+        df["FACILITY_RDF"] = [
+            gen_rdf_facility(id, equ_type, sector, lau)
+            for (id, equ_type, sector, lau) in zip(df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"])
+        ]
+
     df["GEOMETRY_RDF"] = [
         gen_rdf_geometry(id, x, y)
         for (id, x, y) in zip(df["Facility_ID"], df["Coord_X"], df["Coord_Y"])
