@@ -80,6 +80,8 @@
 
 ### Objectives
 
+* Final push on data pipelines
+
 * Work on deliverable
   * See [outline proposal](../pilots/deliverable.md)
 
@@ -93,4 +95,27 @@
 
 ### Work done
 
+* Data pipelines
+  * SEP: 
+  * GF: finished
+  * S4Y:
+
+* Publication in Context Broker
+  * No progress
+
+* Client applications
+  * SEP: 
+  * GF:
+  * S4Y:
+
 ### Next steps
+
+* Finalize the [deliverable](../pilots/deliverable.md)
+  * Expected length: 15-20 pages
+  * Work on GitHub until May 6
+  * Move to Word template and finalization: 9-20 May
+  * Send to external experts?
+  * Send to Project Officer: May 31
+
+* Assessment framework
+* Continuous improvement of pilots
