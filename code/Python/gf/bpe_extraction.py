@@ -183,7 +183,7 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
             "Acceptable": "ACCEPTABLE",
             "Bonne": "GOOD",
             "Mauvaise": "BAD",
-            "Non géolocalisé": "NO_GEOLOCALIZED",
+            "Non géolocalisé": "NOT_GEOLOCALIZED",
         },
         na_action="ignore",
     )
@@ -246,6 +246,7 @@ def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
     df_sample = df.sample(n=conf["thresholds"]["italianEducationFacilitiesGeocoding"])  # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
+    df_sample["Quality_XY"] = ""
     for index, row in df_sample.iterrows():
         TipologiaIndirizzo = row["TIPOLOGIAINDIRIZZO"]
         DenominazioneIndirizzo = row["DENOMINAZIONEINDIRIZZO"]
@@ -287,9 +288,11 @@ def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
         if address_found:
             df_sample.loc[index, "Coord_X"] = data[0]["lat"]
             df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
+            df_sample.loc[index, "Quality_XY"] = "GOOD"
         else:
             df_sample.loc[index, "Coord_X"] = np.nan
             df_sample.loc[index, "Coord_Y"] = np.nan
+            df_sample.loc[index, "Quality_XY"] = "NOT_GEOLOCALIZED"
         time.sleep(1.5)  # wait a bit before sending the next request
     return df_sample
 
@@ -308,7 +311,6 @@ def transform_italian_educational_facilities(df):
     )
     df_merged["Facility_Type"] = "C"
     df_merged["Sector"] = np.nan
-    df_merged["Quality_XY"] = "GOOD"
     df_merged_restriction = df_merged[
         [
             "Year",
@@ -684,12 +686,13 @@ def build_flow(conf):
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
 
-        # This task doesn't work on some networks
+        """ This task doesn't work on some networks
         load_files_to_ftp(
             csvw,
             code_lists,
             upstream_tasks=[transform_data_to_csv(french_data)],
         )
+        """
     return flow
 
 
