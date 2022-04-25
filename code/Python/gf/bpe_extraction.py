@@ -148,7 +148,7 @@ def get_json_datatype(var_type):
     return json_datatype
 
 
-@task
+@task(name="Extract French data")
 def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     """
     Extracts the French data about geolocalized facilities.
@@ -199,7 +199,7 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     return bpe_data
 
 
-@task
+@task(name="Extract French metadata")
 def extract_french_metadata(url, rename={}, facilities_filter=()):
     """
     Extracts the French metadata about geolocalized facilities.
@@ -230,8 +230,8 @@ def extract_french_metadata(url, rename={}, facilities_filter=()):
     return bpe_metadata
 
 
-@task
-def extract_italian_educational_data(url: str) -> pd.DataFrame:
+@task(name="Extract italian educational facilities")
+def extract_italian_educational_facilities(url: str) -> pd.DataFrame:
     italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
     italian_educ_data.rename(columns={"CODICESCUOLA": "Facility_ID"}, inplace=True)
     # Extract the 2019 from 201819
@@ -244,7 +244,7 @@ def extract_italian_educational_data(url: str) -> pd.DataFrame:
     return italian_educ_data
 
 
-def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
+def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
     df_sample = df.sample(n=conf["thresholds"]["italianEducationFacilitiesGeocoding"])  # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
@@ -296,9 +296,9 @@ def add_coordinates_italian_educational_data(df) -> pd.DataFrame:
     return df_sample
 
 
-@task
-def transform_italian_educational_data(df):
-    df_coordinates = add_coordinates_italian_educational_data(df)
+@task(name="Transform italian educational facilities")
+def transform_italian_educational_facilities(df):
+    df_coordinates = add_coordinates_italian_educational_facilities(df)
     url = (
         get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
     )
@@ -326,7 +326,7 @@ def transform_italian_educational_data(df):
     return df_merged_restriction
 
 
-@task
+@task(name="Concatenate datasets")
 def concat_datasets(ds1, ds2, id_prefix=None):
     """
     Use pandas native function to concat two data frames, and generate ids
@@ -337,22 +337,22 @@ def concat_datasets(ds1, ds2, id_prefix=None):
         df["Facility_ID"] = [f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
-@task(name="Transform french coordinates")
+@task(name="Transform French coordinates")
 def transform_french_coordinates(df):
     tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
     return tdf
 
-@task
+@task(name="Concatenate French metadata sets")
 def concat_metadatasets(ds1, ds2):
     return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
 
 
-@task
+@task(name="Transform French data to CSV")
 def transform_data_to_csv(df):
     return df.to_csv(get_working_directory() + DATA_FILE_NAME, index=False, header=True)
 
 
-@task
+@task(name="Transform metadata to CSVW file")
 def transform_metadata_to_csvw(bpe_metadata):
     """
     Transforms the French metadata to CSVW description.
@@ -426,7 +426,7 @@ def transform_metadata_to_csvw(bpe_metadata):
     return csvw_file
 
 
-@task
+@task(name="Transform French metadata to code list files")
 def transform_metadata_to_code_lists(bpe_metadata):
     """
     Transforms the French metadata to code list csv files.
@@ -474,7 +474,7 @@ def transform_metadata_to_code_lists(bpe_metadata):
     return files
 
 
-@task
+@task(name="Extract italian cultural facilities")
 def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")
     # Building the query
@@ -509,7 +509,7 @@ def extract_italian_cultural_facilities():
     return final_df
 
 
-@task
+@task(name="Extract italian cultural events")
 def extract_italian_cultural_events():
     logger = prefect.context.get("logger")
     # FIXME duplicated code → apis module?
@@ -533,7 +533,7 @@ def build_rdf_data(df):
     logger.info("Building a RDF file from the input data frame.")
 
     if all(col in df.columns for col in ["CL_PGE", "CL_PELEM", "EP"]):
-        logger.debug("Generating RDF for french education facilities")
+        logger.debug("Generating RDF for French education facilities")
         df["FACILITY_RDF"] = [
             gen_rdf_french_facility(id, equ_type, sector, lau, pge, pelem, ep)
             for (id, equ_type, sector, lau, pge, pelem, ep) in zip(
@@ -583,7 +583,7 @@ def build_rdf_data(df):
     return final_rdf
 
 
-@task
+@task(name="Load files to FTP")
 def load_files_to_ftp(csvw, code_lists):
     """
     Loads all files created to FTP
@@ -615,7 +615,7 @@ def load_files_to_ftp(csvw, code_lists):
                 sftp.put(f.name)
 
 
-@task
+@task(name="Concatenate RDF data")
 def concat_rdf_data(french_rdf: str, it_rdf: str):
     return french_rdf + "\n" + it_rdf
 
@@ -665,11 +665,11 @@ def build_flow(conf):
         csvw = transform_metadata_to_csvw(french_metadata)
         code_lists = transform_metadata_to_code_lists(french_metadata)
 
-        italian_educational_data = extract_italian_educational_data(
+        italian_educational_data = extract_italian_educational_facilities(
             italian_educational_data_url
         )
 
-        italian_educational_data_transformed = transform_italian_educational_data(
+        italian_educational_data_transformed = transform_italian_educational_facilities(
             italian_educational_data
         )
         italian_cultural_facilities = extract_italian_cultural_facilities()
