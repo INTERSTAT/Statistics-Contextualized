@@ -22,8 +22,9 @@ conf = {
     "thresholds": {
         "italianCulturalFacilities": 5, # None for no limit
         "italianCulturalEvents": 5, # None for no limit
-        "italianEducationFacilitiesGeocoding": 50,
+        "italianEducationFacilitiesGeocoding": 2 # Non-positive integer value or no Key for no limit
     },
+    "nominatisDelay": 1.5,
     "sparql": {
         "italianCulturalFacilities" : """
             select * {
