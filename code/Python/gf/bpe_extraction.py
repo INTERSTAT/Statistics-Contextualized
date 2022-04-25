@@ -55,11 +55,9 @@ WORK_DIRECTORY = "../../../work/"
 
 
 def flow_parameters(conf):
-    wd = get_working_directory(conf)
     return {
-        "working_dir": wd,
         "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-        "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
+        "bpe_metadata_url1": get_working_directory() + "bpe-cultural-places-variables.csv",
         "types1": {
             "AN": str,
             "DEPCOM": str,
@@ -78,7 +76,7 @@ def flow_parameters(conf):
         },
         "facilities_filter": ("F309",),
         "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-        "bpe_metadata_url2": wd + "bpe-education-variables.csv",
+        "bpe_metadata_url2": get_working_directory() + "bpe-education-variables.csv",
         "types2": {
             "AN": str,
             "CL_PELEM": str,
@@ -350,12 +348,12 @@ def concat_metadatasets(ds1, ds2):
 
 
 @task
-def transform_data_to_csv(df, working_dir):
-    return df.to_csv(working_dir + DATA_FILE_NAME, index=False, header=True)
+def transform_data_to_csv(df):
+    return df.to_csv(get_working_directory() + DATA_FILE_NAME, index=False, header=True)
 
 
 @task
-def transform_metadata_to_csvw(bpe_metadata, working_dir):
+def transform_metadata_to_csvw(bpe_metadata):
     """
     Transforms the French metadata to CSVW description.
 
@@ -422,14 +420,14 @@ def transform_metadata_to_csvw(bpe_metadata, working_dir):
         table_data["tableSchema"]["columns"].append(column)
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
-    json_file_name = working_dir + DATA_FILE_NAME + "-metadata.json"
+    json_file_name = get_working_directory() + DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, "w", encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
     return csvw_file
 
 
 @task
-def transform_metadata_to_code_lists(bpe_metadata, working_dir):
+def transform_metadata_to_code_lists(bpe_metadata):
     """
     Transforms the French metadata to code list csv files.
 
@@ -465,7 +463,7 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     files = []
     for x in dict_var_code_lists.get("variables"):
         cod_var = x["codVar"]
-        file_name = working_dir + x["codVar"].lower() + ".csv"
+        file_name = get_working_directory() + x["codVar"].lower() + ".csv"
         header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
         with open(file_name, "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
@@ -586,7 +584,7 @@ def build_rdf_data(df):
 
 
 @task
-def load_files_to_ftp(csvw, code_lists, working_dir):
+def load_files_to_ftp(csvw, code_lists):
     """
     Loads all files created to FTP
 
@@ -611,7 +609,7 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
     ) as sftp:
         sftp.makedirs(remote_path)  # Create remote path if needed
         with sftp.cd(remote_path):
-            sftp.put(working_dir + DATA_FILE_NAME)
+            sftp.put(get_working_directory() + DATA_FILE_NAME)
             sftp.put(csvw.name)
             for f in code_lists:
                 sftp.put(f.name)
@@ -636,9 +634,6 @@ def upload_rdf_data(rdf_data):
 def build_flow(conf):
     with Flow("GF-EF") as flow:
         # Flow parameters
-        working_dir = Parameter(
-            name="working_dir", default=get_working_directory(conf), required=True
-        )
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
@@ -667,8 +662,8 @@ def build_flow(conf):
         )
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, rename2)
         french_metadata = concat_metadatasets(french_metadata1, french_metadata2)
-        csvw = transform_metadata_to_csvw(french_metadata, working_dir)
-        code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
+        csvw = transform_metadata_to_csvw(french_metadata)
+        code_lists = transform_metadata_to_code_lists(french_metadata)
 
         italian_educational_data = extract_italian_educational_data(
             italian_educational_data_url
@@ -689,15 +684,12 @@ def build_flow(conf):
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
 
-        """ This task doesn't work on some networks
+        # This task doesn't work on some networks
         load_files_to_ftp(
             csvw,
             code_lists,
-            working_dir,
-            upstream_tasks=[transform_data_to_csv(french_data, working_dir)],
+            upstream_tasks=[transform_data_to_csv(french_data)],
         )
-        """
-
     return flow
 
 
