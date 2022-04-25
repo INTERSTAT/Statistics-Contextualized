@@ -49,9 +49,7 @@ CSVW_INTRO = {
     "dc:creator": "Interstat",
     "tables": list(),
 }
-
 DATA_FILE_NAME = "gf_data_fr.csv"
-WORK_DIRECTORY = "../../../work/"
 
 
 def flow_parameters(conf):
@@ -337,10 +335,12 @@ def concat_datasets(ds1, ds2, id_prefix=None):
         df["Facility_ID"] = [f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
+
 @task(name="Transform French coordinates")
 def transform_french_coordinates(df):
     tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
     return tdf
+
 
 @task(name="Concatenate French metadata sets")
 def concat_metadatasets(ds1, ds2):
@@ -718,7 +718,7 @@ def main():
         params = flow_parameters(conf)
 
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name="sample")
+        flow.register(project_name="gf")
     else:
         flow.run(parameters=params)
 
