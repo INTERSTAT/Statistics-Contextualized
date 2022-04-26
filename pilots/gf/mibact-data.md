@@ -7,7 +7,7 @@ Here are examples of SPARQL DESCRIBE queries and corresponding Turtle results. Q
 The following queries return information on one given museum and some linked resources. The following diagram represents the associations between the different individuals.
 
 ```mermaid
-  graph TD;
+  graph LR;
       M([museum])-- hasSite -->S([site]);
       S-- siteAddress -->A([adress]);
       S-- hasGeometry -->G([geometry]);
@@ -95,6 +95,8 @@ ns1:Sede_di_100000 rdf:type cis:Site
 
 ### Site address
 
+#### Query
+
 ```
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/Address/Indirizzo_della_sede_di_Museo_civico_aufidenate__Antonio_De_Nino__100000>
 ```
@@ -159,21 +161,21 @@ DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/City/Alfedena>
 #### Results
 
 ```
-@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
-@prefix owl:	<http://www.w3.org/2002/07/owl#> .
-@prefix clvapit:	<https://w3id.org/italia/onto/CLV/> .
-@prefix ns1:	<http://dati.beniculturali.it/mibact/luoghi/resource/Address/> .
-@prefix ns2:	<http://dati.beniculturali.it/mibact/luoghi/resource/City/> .
-@prefix ns4:	<https://w3id.org/arco/resource/City/> .
-@prefix ns5:	<http://dati.beniculturali.it/iccd/fotografico/resource/City/> .
-@prefix ns8:	<http://dati.beniculturali.it/mibact/luoghi/resource/Province/> .
-@prefix l0:	<https://w3id.org/italia/onto/l0/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix clvapit: <https://w3id.org/italia/onto/CLV/> .
+@prefix ns1: <http://dati.beniculturali.it/mibact/luoghi/resource/Address/> .
+@prefix ns2: <http://dati.beniculturali.it/mibact/luoghi/resource/City/> .
+@prefix ns4: <https://w3id.org/arco/resource/City/> .
+@prefix ns5: <http://dati.beniculturali.it/iccd/fotografico/resource/City/> .
+@prefix ns8: <http://dati.beniculturali.it/mibact/luoghi/resource/Province/> .
+@prefix l0: <https://w3id.org/italia/onto/l0/> .
 
-ns2:Alfedena	rdf:type	clvapit:City ,
+ns2:Alfedena rdf:type clvapit:City ,
     clvapit:Feature .
-    rdfs:label	"Alfedena" ;
-	owl:sameAs	ns4:alfedena , <http://dati.beniculturali.it/iccu/anagrafe/resource/City/066003> , ns5:alfedena .
-    clvapit:hasHigherRank	ns8:L_Aquila .
-    l0:name	"Alfedena" .
+    rdfs:label "Alfedena" ;
+    owl:sameAs ns4:alfedena , <http://dati.beniculturali.it/iccu/anagrafe/resource/City/066003> , ns5:alfedena .
+    clvapit:hasHigherRank ns8:L_Aquila .
+    l0:name "Alfedena" .
 ```
