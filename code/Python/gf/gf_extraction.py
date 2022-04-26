@@ -242,8 +242,19 @@ def extract_italian_educational_facilities(url: str) -> pd.DataFrame:
     return italian_educ_data
 
 
+def sample_italian_educational_facilities(complete_data):
+    try:
+        size = conf["thresholds"]["italianEducationFacilitiesGeocoding"]
+        try:
+            return complete_data.sample(size)
+        except ValueError:
+            return complete_data
+    except KeyError:
+        return complete_data
+
+
 def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
-    df_sample = df.sample(n=conf["thresholds"]["italianEducationFacilitiesGeocoding"])  # Impact on duration, n x 1.5 seconds
+    df_sample = sample_italian_educational_facilities(df)  # Impact on duration, n x 1.5 seconds
     df_sample["Coord_X"] = 0.0
     df_sample["Coord_Y"] = 0.0
     df_sample["Quality_XY"] = ""
@@ -293,7 +304,7 @@ def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
             df_sample.loc[index, "Coord_X"] = np.nan
             df_sample.loc[index, "Coord_Y"] = np.nan
             df_sample.loc[index, "Quality_XY"] = "NOT_GEOLOCALIZED"
-        time.sleep(1.5)  # wait a bit before sending the next request
+        time.sleep(float(conf["nominatisDelay"]))  # wait a bit before sending the next request
     return df_sample
 
 
