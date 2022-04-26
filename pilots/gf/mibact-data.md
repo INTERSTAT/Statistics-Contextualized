@@ -19,13 +19,13 @@ The following queries return information on one given museum and some linked res
 
 #### Query
 
-```
+```sparql
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/CulturalInstituteOrSite/100000>
 ```
 
 #### Results
 
-```
+```sparql
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix cis: <http://dati.beniculturali.it/cis/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
