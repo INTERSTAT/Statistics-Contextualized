@@ -70,13 +70,13 @@ DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/CulturalInstituteO
 
 #### Query
 
-```
+```sparql
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/Site/Sede_di_100000>
 ```
 
 #### Results
 
-```
+```sparql
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix ns1: <http://dati.beniculturali.it/mibact/luoghi/resource/Site/> .
 @prefix cis: <http://dati.beniculturali.it/cis/> .
@@ -97,13 +97,13 @@ ns1:Sede_di_100000 rdf:type cis:Site
 
 #### Query
 
-```
+```sparql
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/Address/Indirizzo_della_sede_di_Museo_civico_aufidenate__Antonio_De_Nino__100000>
 ```
 
 #### Results
 
-```
+```sparql
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ns1: <http://dati.beniculturali.it/mibact/luoghi/resource/Address/> .
@@ -128,13 +128,13 @@ ns1:Indirizzo_della_sede_di_Museo_civico_aufidenate__Antonio_De_Nino__100000 rdf
 
 #### Query
 
-```
+```sparql
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/Geometry/Coordinate_geografiche_della_sede_di_Museo_civico_aufidenate__Antonio_De_Nino__100000>
 ```
 
 #### Results
 
-```
+```sparql
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ns1: <http://dati.beniculturali.it/mibact/luoghi/resource/Geometry/> .
@@ -154,13 +154,13 @@ ns1:Coordinate_geografiche_della_sede_di_Museo_civico_aufidenate__Antonio_De_Nin
 
 #### Query
 
-```
+```sparql
 DESCRIBE <http://dati.beniculturali.it/mibact/luoghi/resource/City/Alfedena>
 ```
 
 #### Results
 
-```
+```sparql
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
