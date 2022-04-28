@@ -636,6 +636,10 @@ def concat_rdf_data(french_rdf: str, it_rdf: str):
 @task(name="Upload RDF data")
 def upload_rdf_data(rdf_data):
     logger = prefect.context.get("logger")
+    local_rdf_file = f"{get_working_directory()}gf.ttl"
+    with open(local_rdf_file, "w") as gf:
+        logger.info(f"Writing RDF data to disk at: {local_rdf_file}")   
+        gf.writelines(rdf_data)
     # FIXME as a Prefect parameter ?
     repo = conf["graphdbRepositories"]["test"]
     graph_url = f'{repo}statements?context=<http://www.interstat.org/graphs/gf>'
