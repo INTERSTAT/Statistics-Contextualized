@@ -35,7 +35,7 @@ def igf_characteristic(type, value):
             return f"igf:absentCharacteristic {characteristic_types_uris[type]}"
 
 
-def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
+def gen_rdf_facility(id, equipment_type, sector, lau, x, y, lang_tag=lang_en):
     # Handling facility subtype
     subtype = (
         "igf:EducationFacility"
@@ -45,21 +45,25 @@ def gen_rdf_facility(id, equipment_type, sector, lau, lang_tag=lang_en):
     # Producing sector prop
     sector_prop = f"igf:sector {sectors_uri[sector]} ;" if str(sector) != "nan" else ""
     lau_prop = f'igf:inLAU "{lau}"^^xsd:token ;' if str(lau) != "nan" else ""
-
-    return f"""
+    rdf_facility = f"""
     <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
         a {subtype} ;
         rdfs:label "Facility code {id}"{lang_tag} ;    
         dc:identifier "{id}" ;
         {sector_prop}
         {lau_prop}
-        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
     """
+    if str(x) == "nan" or str(y) == "nan":
+        return "\n".join(
+            [rdf_facility, f"""dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ."""])
+    else:
+        return "\n".join(
+            [rdf_facility, f"""dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;""",
+             f"""geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> ."""])
 
 
 def gen_rdf_french_facility(
-    id, equipment_type, sector, lau, pge, pelem, ep, lang_tag=lang_en
+        id, equipment_type, sector, lau, pge, pelem, ep, lang_tag=lang_en
 ):
     # Producing sector prop
     sector_prop = f"igf:sector {sectors_uri[sector]}" if str(sector) != "nan" else ""

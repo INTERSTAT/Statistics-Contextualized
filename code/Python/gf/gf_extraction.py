@@ -563,9 +563,9 @@ def build_rdf_data(df):
         ]
     else:
         df["FACILITY_RDF"] = [
-            gen_rdf_facility(id, equ_type, sector, lau)
-            for (id, equ_type, sector, lau) in zip(
-                df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"]
+            gen_rdf_facility(id, equ_type, sector, lau, x, y)
+            for (id, equ_type, sector, lau, x, y) in zip(
+                df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"], df["Coord_X"], df["Coord_Y"]
             )
         ]
 
