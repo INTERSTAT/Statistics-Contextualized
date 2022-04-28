@@ -505,8 +505,10 @@ def extract_italian_cultural_facilities():
     df["Facility_Type"] = "F3"
     df["LAU"] = np.nan
     df["Sector"] = np.nan
-    df["Quality_XY"] = "GOOD"
     df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
+    df["Coord_X"] = df["Coord_X"].astype(float)
+    df["Coord_Y"] = df["Coord_Y"].astype(float)
+    df['Quality_XY'] = ["NOT_GEOLOCALIZED" if pd.isna(c) else "GOOD" for c in df["Coord_X"]]
     final_df = df[
         [
             "Year",

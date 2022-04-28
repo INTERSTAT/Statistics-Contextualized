@@ -31,25 +31,25 @@ cdi:displayLabel "LAU"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
 cdi:identifier "LAU"^^xsd:anyURI .
 
-ex:Lambert_X a cdi:Concept ;
-cdi:displayLabel "Lambert X"@en ;
+ex:Coord_X a cdi:Concept ;
+cdi:displayLabel "Coordinate X"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "Lambert_X"^^xsd:anyURI .
+cdi:identifier "Coord_X"^^xsd:anyURI .
 
-ex:Lambert_Y a cdi:Concept ;
-cdi:displayLabel "Lambert Y"@en ;
+ex:Coord_Y a cdi:Concept ;
+cdi:displayLabel "Coordinate Y"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "Lambert_Y"^^xsd:anyURI .
+cdi:identifier "Coord_Y"^^xsd:anyURI .
 
 ex:Quality_XY a cdi:Concept ;
 cdi:displayLabel "Quality XY"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "Lambert_Y"^^xsd:anyURI .
+cdi:identifier "Coord_Y"^^xsd:anyURI .
 
-ex:FacilityType a cdi:Concept ;
+ex:Facility_Type a cdi:Concept ;
 cdi:displayLabel "Type of Facility"@en ;
 cdi:externalDefinition ex:INSEE_SKOS_def ;
-cdi:identifier "FacilityType"^^xsd:anyURI .
+cdi:identifier "Facility_Type"^^xsd:anyURI .
 
 ex:CL_PELEM a cdi:Concept ;
 cdi:displayLabel "Presence or absence of a pre-elementary class in primary schools"@en ;
@@ -90,37 +90,37 @@ cdi:hasIntendedDatatype xsd:gYear .
 ex:LAU a cdi:RepresentedVariable ;
 cdi:name "LAU" ;
 cdi:displayLabel "LAU"@en ;
-cdi:uses ex:C ;
+cdi:uses ex:LAU ;
 cdi:definition "Code of the Local Administrative Unit"@en ;
 cdi:takesSubstantiveValueFrom ex:codeListLAU .
 
-ex:RV_Lambert_X a cdi:RepresentedVariable ;
-cdi:name "Lambert X" ;
-cdi:displayLabel "Lambert X"@en , "Lambert X"@fr ;
-cdi:uses ex:Lambert_X ;
-cdi:definition "The Lambert X coordinate of the facility"@en ;
+ex:RV_Coord_X a cdi:RepresentedVariable ;
+cdi:name "Coord_X" ;
+cdi:displayLabel "Coordinate X"@en , "Coordonnée X"@fr ;
+cdi:uses ex:Coord_X ;
+cdi:definition "The X coordinate of the facility"@en ;
 cdi:hasIntendedDatatype xsd:float .
 
-ex:RV_Lambert_Y a cdi:RepresentedVariable ;
-cdi:name "Lambert_Y" ;
-cdi:displayLabel "Lambert Y"@en , "Lambert Y"@fr ;
-cdi:uses ex:Lambert_Y ;
-cdi:definition "The Lambert Y coordinate of the facility"@en ;
+ex:RV_Coord_Y a cdi:RepresentedVariable ;
+cdi:name "Coord_Y" ;
+cdi:displayLabel "Coordinate Y"@en , "Coordonnée Y"@fr ;
+cdi:uses ex:Coord_Y ;
+cdi:definition "The Y coordinate of the facility"@en ;
 cdi:hasIntendedDatatype xsd:float .
 
 ex:RV_Quality_XY a cdi:RepresentedVariable ;
-cdi:name "Quality" ;
+cdi:name "Quality_XY" ;
 cdi:displayLabel "Quality"@en  ;
 cdi:uses ex:Quality_XY ;
 cdi:definition "The quality of the geocoding"@en ;
 cdi:hasIntendedDatatype ex:codeListQuality .
 
-ex:RV_FacilityType a cdi:RepresentedVariable ;
-cdi:name "Type of facility" ;
+ex:RV_Facility_Type a cdi:RepresentedVariable ;
+cdi:name "Facility_Type" ;
 cdi:displayLabel "Type of facility"@en ;
-cdi:uses ex:FacilityType ;
+cdi:uses ex:Facility_Type ;
 cdi:definition "The type of facility"@en ;
-cdi:takesSubstantiveValueFrom ex:codeListFacilityType .
+cdi:takesSubstantiveValueFrom ex:codeListFacility_Type .
 
 ex:RV_CL_PELEM a cdi:RepresentedVariable ;
 cdi:name "CL_PELEM" ;
@@ -164,7 +164,7 @@ ex:codeListQuality a cdi:Codelist ;
 cdi:name "code list for quality levels"@en ;
 cdi:has  ex:c1, ex:c2, ex:c3, ex:c4 .
 
-ex:codeListFacilityType a cdi:Codelist ;
+ex:codeListFacility_Type a cdi:Codelist ;
 cdi:name "code list for types of facilities"@en .
 # TODO Add codes
 
