@@ -520,7 +520,7 @@ def extract_italian_cultural_facilities():
             "Sector",
             "Quality_XY",
         ]
-    ]
+    ].drop_duplicates("Facility_ID")
     return final_df
 
 
