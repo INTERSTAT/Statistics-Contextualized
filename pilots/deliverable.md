@@ -23,7 +23,7 @@ The document starts with a short recap about the different pilots and the techni
 
 ## Pilot development
 
-In this section, we decribe how the pilot services were developed
+In this section, we decribe how the pilot services were developed, with a specific focus on 
 
 ### Data pipelines
 
@@ -68,11 +68,13 @@ More details on the technical environment for the ETL Python implementation is a
 
 ## Details by pilot
 
-### SEP
+### Supporting environment policies (SEP)
 
 --> Istat
 
 #### Business case
+
+Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#support-for-environment-policies-sep
 
 #### Models
 
@@ -84,27 +86,45 @@ More details on the technical environment for the ETL Python implementation is a
 
 #### Client (--> ENG)
 
-### GF
+### Geolocalized facilities (GF)
 
 --> Insee
 
 #### Business case
 
+The main objective of this pilot is to disseminate information about facilities or equipments so that it can be contextualized in space and integrated with other sources of data.
+
+Two specific user stories are defined for the GF pilot:
+
+* In the “visitor” case, we consider a user visiting a place she does not know and wondering where the nearest facilities of different types are located. She also would like to know what events are programmed  in  the  nearby  stadiums,  theatres  of  cultural  venues.  From  the  description  of locations or events, it should be simple to navigate on the web for further detail (e.g. on artists or sport teams, history of places, links to the locations’ web sites, etc.).
+
+* The “local decider” story is about a person in charge of an investment decision at a local level. It can be the manager of a bus company wondering if he should replace an old vehicle, an employee of an educational public service assessing the creation of a new class in a community school, or a young couple thinking of moving to a rural place, etc. He needs information about the level and capacity of the equipment in the neighbourhood, linked with data on the demographic evolution at a fine level. He will probably need to combine that information with other sources more specifically relevant to his specific problem.
+
 #### Models
+
+Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#model
 
 #### Data
 
+Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#data
+
 #### Metadata
+
+Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#metadata
 
 #### Process
 
+Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#process
+
 #### Client (--> ENG)
 
-### S4Y
+### The school for you (S4Y)
 
 --> Istat
 
 #### Business case
+
+Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#the-school-for-you-s4y
 
 #### Models
 
@@ -130,6 +150,6 @@ More details on the technical environment for the ETL Python implementation is a
 
 ### Next steps
 
-* continuous improvement of pilots
+* continuous improvement of pilots (document, automate, add sources, pimp client)
 * assessment framework
-* work on CB
+* work on the context broker, especially at the model level (mention work on SDMX/NGSI-LD)
