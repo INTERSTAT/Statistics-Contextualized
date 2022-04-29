@@ -2,25 +2,16 @@
 
 ## Introduction
 
-This document is part of the Milestone 6 (M6) of the Interstat project, which consists in having the "pilot services deployed and working in real environments", and in particular in the availability of the pilot services applications. M6 pertains to Activity 3 of the project ("Pilot services execution and assessment"), which extends until the end of the project with additional milestones dedicated to the monitoring and assessment of the pilots. Therefore, the services and applications will continue to evolve by continuous improvement in the future. It was thus decided to keep this accompanying document relatively short and high-level and to reference where appropriate to the [online resources](https://github.com/INTERSTAT/), much more detailed and which will be kept up to date as the project cotinues to evolve.
+### Scope and objectives of the document
+
+This document describes the Interstat pilot services, how they were built and how they can be used. It is part of the Milestone 6 (M6) of the project, which consists in having the "pilot services deployed and working in real environments", and in particular in the availability of the pilot services applications. M6 pertains to Activity 3 of the project ("Pilot services execution and assessment"), which extends until the end of the project with additional milestones dedicated to the monitoring and assessment of the pilots. Therefore, the services and applications will continue to evolve by continuous improvement in the future. It was thus decided to keep this accompanying document relatively short and high-level and to reference where appropriate to the [online resources](https://github.com/INTERSTAT/), much more detailed and which will be kept up to date as the project cotinues to evolve.
 
 The document starts with a short recap about the different pilots and the technical production environment set up for Interstat. General considerations on the development of pilots are then exposed, with a particular focus on the approaches followed for creating the data pipelines and on the technical stack used for the client applications. More detail is then provided for each of the three pilots, including a reminder of the business case, the description of the relevant models and of the data, metadata, pipeline process and client application. A summary of the lessons learned, the remaining problems and the next steps is given in conclusion.
 
-#### Models
+*Should we say something about the difficulties due to Covid?*
 
-#### Data
 
-#### Metadata
-
-#### Process
-
-#### Client (--> ENG)
-
-### Scope and objectives of deliverable
-
-This short document describes the pilot services, how they were built and how they can be used.
-
-### Short reminder of the pilots
+### Short reminder about the pilots
 
 * SEP (--> Istat)
 * GF (--> Insee)
@@ -31,6 +22,8 @@ This short document describes the pilot services, how they were built and how th
 --> ENG
 
 ## Pilot development
+
+In this section, we decribe how the pilot services were developed
 
 ### Data pipelines
 
@@ -127,8 +120,16 @@ More details on the technical environment for the ETL Python implementation is a
 
 ### Lessons learned
 
+* Most of the time on data cleaning (common finding)
+* Some important data are still not easily accessible (-> link to EC data strategy, HVD...)
+* Importance of metadata
+
 ### Remaining problems
 
 * difficulties with the Context Broker (*do we want to mention that?*) 
 
 ### Next steps
+
+* continuous improvement of pilots
+* assessment framework
+* work on CB
