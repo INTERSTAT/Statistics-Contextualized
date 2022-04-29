@@ -26,17 +26,21 @@ def get_dep_to_nuts3():
         dict: A dictionary where keys are department codes and values are corresponding NUTS3 codes.
     """
     # Read the correspondance between departments and NUTS3 and transform it into a dictionary (easier for lookup)
-    dep_to_nuts_file = get_resources_directory() + 'dep-nuts3-fr.csv'
-    logging.info(f'Loading correspondance between départements and NUTS3 from {dep_to_nuts_file}')
-    dep_to_nuts_df = pd.read_csv(dep_to_nuts_file, header=0, dtype='string', usecols=[0, 1], index_col=0)
-    temp_dict = dep_to_nuts_df.to_dict('index')
+    dep_to_nuts_file = get_resources_directory() + "dep-nuts3-fr.csv"
+    logging.info(
+        f"Loading correspondance between départements and NUTS3 from {dep_to_nuts_file}"
+    )
+    dep_to_nuts_df = pd.read_csv(
+        dep_to_nuts_file, header=0, dtype="string", usecols=[0, 1], index_col=0
+    )
+    temp_dict = dep_to_nuts_df.to_dict("index")
     # temp_dict will be of the form {'01': {'nuts3': 'FRK21'}, '02': {'nuts3': 'FRE21'}, ...}
 
-    return {key: value['nuts3'] for (key, value) in temp_dict.items()}
+    return {key: value["nuts3"] for (key, value) in temp_dict.items()}
 
 
 # Tasks ----
-@task(name='Convert coordinates')
+@task(name="Convert coordinates")
 def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     """
     Converts coordinates from on CRS to another.
@@ -63,8 +67,47 @@ def convert_coordinates(frame, lon_column, lat_column, crs_from, crs_to):
     return frame
 
 
-@task(name='Add NUTS3 from coordinates')
-def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs='epsg:4326'):
+def convert_coordinates_fn(
+    frame: pd.DataFrame,
+    lat_column: str,
+    lon_column: str,
+    crs_from: str,
+    crs_to: str,
+    keep_original: bool = False,
+) -> pd.DataFrame:
+    """
+    Converts coordinates from on CRS to another.
+    See https://pyproj4.github.io/pyproj/stable/api/transformer.html for possible expressions of CRSs.
+    See https://spatialreference.org/ for reference naming of CRSs.
+
+    Args
+        frame (DataFrame): The data frame containing the coordinates.
+        lon_column (str): The name of the column containing the longitude.
+        lat_column (str): The name of the column containing the latitude.
+        crs_from (str): The system to transform from.
+        crs_to (str): The system to transform to.
+        keep_original (bool): keep the original values in renamed columns, default to False.
+    Returns:
+        DataFrame: The input data frame with original columns containing the converted coords and, if asked, copies of the original columns
+        - named `original_<lat or long given column names>`.
+    """
+    transformer = Transformer.from_crs(crs_from, crs_to, always_xy=True)
+    xs, ys = transformer.transform(frame[lat_column], frame[lon_column])
+    # Keep but move the original coords columns
+    if keep_original:
+        frame[f"original_{lat_column}"] = frame[lat_column]
+        frame[f"original_{lon_column}"] = frame[lon_column]
+    # Transformed coords are put into the original cols
+    frame[lat_column] = xs
+    frame[lon_column] = ys
+
+    return frame
+
+
+@task(name="Add NUTS3 from coordinates")
+def add_nuts3_from_coordinates(
+    frame, nuts3_column, lat_column, lon_column, crs="epsg:4326"
+):
     """Adds in a DataFrame a column with the LAU calculated from existing coordinates.
     The Nominatim API provided by OpenStreetMap (https://nominatim.org) is used
 
@@ -77,13 +120,17 @@ def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs=
     Returns:
         DataFrame: The input data frame with an additional nuts3_column containing the NUTS3 code or 'None'.
     """
-    url_pattern = 'https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2'
+    url_pattern = (
+        "https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2"
+    )
 
-    logging.info(f'Enrichment of data frame using Nominatim API with cols {lat_column} and {lon_column}')
+    logging.info(
+        f"Enrichment of data frame using Nominatim API with cols {lat_column} and {lon_column}"
+    )
     # Get column indexes
     idx_lat = frame.columns.get_loc(lat_column)
     idx_lon = frame.columns.get_loc(lon_column)
-    delay = float(conf['nominatisDelay'])
+    delay = float(conf["nominatisDelay"])
 
     # Get the dictionary giving the correspondance between départements and NUTS3
     dep_to_nuts3_dict = get_dep_to_nuts3()
@@ -92,14 +139,14 @@ def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs=
         query_url = url_pattern.format(lat=row[idx_lat], lon=row[idx_lon])
         response = requests.get(query_url).json()
         try:
-            postcode = response['address']['postcode']
+            postcode = response["address"]["postcode"]
         except KeyError:
-            logging.error(f'No postal code in response to query {query_url}')
+            logging.error(f"No postal code in response to query {query_url}")
             frame.loc[index, nuts3_column] = None
             continue
-        dep_code = response['address']['postcode'][0:2]
-        if dep_code == '97':
-            dep_code = response['address']['postcode'][0:3]
+        dep_code = response["address"]["postcode"][0:2]
+        if dep_code == "97":
+            dep_code = response["address"]["postcode"][0:3]
         try:
             frame.loc[index, nuts3_column] = dep_to_nuts3_dict[dep_code]
         except KeyError:
@@ -107,14 +154,14 @@ def add_nuts3_from_coordinates(frame, nuts3_column, lat_column, lon_column, crs=
             frame.loc[index, nuts3_column] = None
         time.sleep(delay)  # wait a bit before sending the next request
 
-    logging.info('Data with NUTS3 added:')
-    logging.info('\n' + str(frame.head(3)))
+    logging.info("Data with NUTS3 added:")
+    logging.info("\n" + str(frame.head(3)))
 
     return frame
 
 
-@task(name='Add OSM info')
-def add_osm_info(frame, add_column, lat_column, lon_column, crs='epsg:4326'):
+@task(name="Add OSM info")
+def add_osm_info(frame, add_column, lat_column, lon_column, crs="epsg:4326"):
     """Adds to a DataFrame a column with OSM information for existing coordinates.
     The Nominatim API provided by OpenStreetMap (https://nominatim.org) is used. See example of information
     returned at https://nominatim.openstreetmap.org/reverse?lat=48.99083&lon=2.444722&format=jsonv2.
@@ -129,9 +176,13 @@ def add_osm_info(frame, add_column, lat_column, lon_column, crs='epsg:4326'):
     Returns:
         DataFrame: The input data frame with an additional add_column containing the OSM info.
     """
-    url_pattern = 'https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2'
+    url_pattern = (
+        "https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2"
+    )
 
-    logging.info(f'Enrichment of a data frame using Nominatim API with cols {lat_column} and {lon_column}')
+    logging.info(
+        f"Enrichment of a data frame using Nominatim API with cols {lat_column} and {lon_column}"
+    )
     # Get column indexes
     idx_lat = frame.columns.get_loc(lat_column)
     idx_lon = frame.columns.get_loc(lon_column)
@@ -145,7 +196,7 @@ def add_osm_info(frame, add_column, lat_column, lon_column, crs='epsg:4326'):
     return frame
 
 
-@task(name='Create LAU-NUTS table')
+@task(name="Create LAU-NUTS table")
 def get_lau_nuts(ref_year):
     """Creates the LAU-NUTS3 correspondence for a given reference year.
 
@@ -156,35 +207,43 @@ def get_lau_nuts(ref_year):
     Raises:
         AssertionError: If duplicate values of LAU are found in the concatenated table.
     """
-    logging.info(f'Creating the LAU-NUTS3 correspondence for year {ref_year}')
-    lau_nuts_file_name = conf['nuts_file_names'][str(ref_year)]
-    remote_file_url = conf['nuts-ref-base-url'] + lau_nuts_file_name
+    logging.info(f"Creating the LAU-NUTS3 correspondence for year {ref_year}")
+    lau_nuts_file_name = conf["nuts_file_names"][str(ref_year)]
+    remote_file_url = conf["nuts-ref-base-url"] + lau_nuts_file_name
     local_file_name = working_dir + lau_nuts_file_name
 
     if not USE_LOCAL_FILES:
-        logging.info(f'Downloading from {remote_file_url} and saving to {local_file_name}')
+        logging.info(
+            f"Downloading from {remote_file_url} and saving to {local_file_name}"
+        )
         data = requests.get(remote_file_url)
-        with open(local_file_name, 'wb') as file:
+        with open(local_file_name, "wb") as file:
             file.write(data.content)
 
     # NUTS3 is in the first column and LAU in the second
-    geo_dfs = pd.read_excel(local_file_name, sheet_name=['FR', 'IT'], dtype=str, usecols=[0, 1], names=['NUTS3', 'LAU'])
+    geo_dfs = pd.read_excel(
+        local_file_name,
+        sheet_name=["FR", "IT"],
+        dtype=str,
+        usecols=[0, 1],
+        names=["NUTS3", "LAU"],
+    )
 
     # Merge French and Italian data
     geo_df = pd.concat(geo_dfs)
     # Check uniqueness of LAU values and index the data frame
-    assert geo_df['LAU'].is_unique, 'There are duplicate values for the LAU'
-    geo_df.set_index('LAU', inplace=True)
-    logging.info(f'LAU-NUTS3 correspondence created, {geo_df.shape[0]} LAU found')
+    assert geo_df["LAU"].is_unique, "There are duplicate values for the LAU"
+    geo_df.set_index("LAU", inplace=True)
+    logging.info(f"LAU-NUTS3 correspondence created, {geo_df.shape[0]} LAU found")
 
     local_csv = working_dir + f'lau-nuts3-{conf["ref-year"]}.csv'
     geo_df.to_csv(local_csv)
-    logging.info(f'LAU-NUTS3 correspondence saved to {local_csv}')
+    logging.info(f"LAU-NUTS3 correspondence saved to {local_csv}")
 
     return geo_df
 
 
-@task(name='Get Italian geography')
+@task(name="Get Italian geography")
 def get_lau_nuts_it(url):
     """Creates the LAU-NUTS correspondence for Italy.
     (storing that function in common module but probably useless now)
@@ -196,34 +255,50 @@ def get_lau_nuts_it(url):
     Raises:
         AssertionError: If duplicate values of LAU are found in the source.
     """
-    logging.info(f'Reading LAU-NUTS3 correspondence from {url}')
+    logging.info(f"Reading LAU-NUTS3 correspondence from {url}")
     # LAU expected in column 5, NUTS3 201O in column 23 and NUTS3 2021 in column 26
-    geo_it = pd.read_csv(url, encoding='ANSI', sep=';', dtype=str, usecols=[4, 22, 25])
+    geo_it = pd.read_csv(url, encoding="ANSI", sep=";", dtype=str, usecols=[4, 22, 25])
     # Rename columns
-    rename_dict = {geo_it.columns[0]: 'LAU', geo_it.columns[1]: 'NUTS3-2010', geo_it.columns[2]: 'NUTS3-2021'}
+    rename_dict = {
+        geo_it.columns[0]: "LAU",
+        geo_it.columns[1]: "NUTS3-2010",
+        geo_it.columns[2]: "NUTS3-2021",
+    }
     # geo_it.rename(columns=rename_dict, inplace=True)
-    geo_it.columns = ['LAU', 'NUTS3 2010', 'NUTS3 2021']
+    geo_it.columns = ["LAU", "NUTS3 2010", "NUTS3 2021"]
 
     # Check uniqueness of LAU values and index the data frame
-    assert geo_it['LAU'].is_unique, 'There are duplicate values for the LAU'
-    geo_it.set_index('LAU', inplace=True)
-    logging.info(f'LAU-NUTS3 correspondence created, {geo_it.shape[0]} LAU found')
+    assert geo_it["LAU"].is_unique, "There are duplicate values for the LAU"
+    geo_it.set_index("LAU", inplace=True)
+    logging.info(f"LAU-NUTS3 correspondence created, {geo_it.shape[0]} LAU found")
 
     return geo_it
 
 
 # Flow and main ----
-with Flow('geo_flow') as flow:
+with Flow("geo_flow") as flow:
 
-    df = pd.DataFrame([[48.862120000000004, 2.3446159999999998], [48.902503999999993, 2.4525000000000001]], columns=['lat', 'lon'])
-    df_with_nuts3 = add_nuts3_from_coordinates(frame=df, nuts3_column='nuts3', lat_column='lat', lon_column='lon')
+    df = pd.DataFrame(
+        [
+            [48.862120000000004, 2.3446159999999998],
+            [48.902503999999993, 2.4525000000000001],
+        ],
+        columns=["lat", "lon"],
+    )
+    df_with_nuts3 = add_nuts3_from_coordinates(
+        frame=df, nuts3_column="nuts3", lat_column="lat", lon_column="lon"
+    )
 
 
 def main():
-    logging.basicConfig(filename=get_working_directory() + 'geo-base.log', encoding='utf-8', level=logging.DEBUG)
-    logging.info(f'Starting geo_base module, working directory is {working_dir}')
+    logging.basicConfig(
+        filename=get_working_directory() + "geo-base.log",
+        encoding="utf-8",
+        level=logging.DEBUG,
+    )
+    logging.info(f"Starting geo_base module, working directory is {working_dir}")
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name='geo_base')
+        flow.register(project_name="geo_base")
     else:
         flow.run()
 

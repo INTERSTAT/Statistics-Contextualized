@@ -15,6 +15,16 @@ conf = {
     "env": {
         "workingDirectory": ""
     },
+    "graphdbRepositories": {
+        "test": "https://interstat.eng.it/graphdb/repositories/gf-test/",
+        "staging": "https://interstat.eng.it/graphdb/repositories/gf-staging/"
+    },
+    "thresholds": {
+        "italianCulturalFacilities": 5, # None for no limit
+        "italianCulturalEvents": 5, # None for no limit
+        "italianEducationFacilitiesGeocoding": 2 # Non-positive integer value or no Key for no limit
+    },
+    "nominatisDelay": 1.5,
     "sparql": {
         "italianCulturalFacilities" : """
             select * {

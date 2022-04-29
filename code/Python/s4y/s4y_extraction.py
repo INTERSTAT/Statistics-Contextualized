@@ -30,7 +30,6 @@ def extract_schools_data():
     See specs here : https://github.com/INTERSTAT/Statistics-Contextualized/issues/14#issuecomment-1071249281
     """
     df = get_french_schools_data()
-    print(df)
     return df
 
 
@@ -50,14 +49,18 @@ def extract_students_data(url, types):
     DataFrame
         The data extracted
     """
+    print("URL", url)
     if not types:
-        df_students_data = pd.read_csv(url, sep=";")
+        df_students_data = pd.read_csv(url, sep=";", thousands=" ")
     else:
         df_students_data = pd.read_csv(url, sep=";", dtype=types,
-                                       usecols=types.keys())
+                                       usecols=types.keys(), thousands=" ")
     # TODO: Improve renaming. Here the order of the columns in the file is kept and not in the order of types.keys()
     df_students_data.columns.values[0] = "scholastic_year"
     df_students_data.columns.values[1] = "school_id"
+    print("COURSE_YEAR", conf["course_year"])
+    if not conf["course_year"]:
+        df_students_data.columns.values[2] = "students_number"
     return df_students_data
 
 
@@ -77,9 +80,13 @@ def transform_schools_data(df_schools_data):
         The data transformed
     """
     # Recoding type of institution
-    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "0", "Privé": "1"})
+    df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "PU", "Privé": "PR"})
+    # Add Isced code
+    url = get_working_directory() + "school-registry-mapping-nature-isced.csv"
+    df_mappping_nature_isced = pd.read_csv(url, sep=",", usecols=["code_nature", "ISCED_level"])
+    df_merged = df_schools_data.merge(df_mappping_nature_isced, left_on="code_nature", right_on="code_nature", how="left")
     # TODO: Add nuts3 variable based on lau variable?
-    return df_schools_data
+    return df_merged
 
 
 @task
@@ -99,19 +106,22 @@ def transform_students_data_to_df(df_students_data, mapping):
     DataFrame
         The data transformed
     """
-    # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
-    df_course_year = pd.DataFrame(list(mapping.keys()),
+    if conf["course_year"]:
+        # Transform mapping dictionary to dataframe. Get the column name from TARGET_STRUCTURE (course_year)
+        df_course_year = pd.DataFrame(list(mapping.keys()),
                                   columns=["course_year"])
-    # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
-    df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
-    # Create the new variable "students_number"
-    df_cartesian["students_number"] = -1
-    for key, value in mapping.items():
-        if len(value) == 1:
-            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
-        else:
-            df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
-    return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
+        # Cartesian product between data and course_year dataframe. Allows us to get all breakdowns
+        df_cartesian = pd.merge(df_students_data, df_course_year, how="cross")
+        # Create the new variable "students_number"
+        df_cartesian["students_number"] = -1
+        for key, value in mapping.items():
+            if len(value) == 1:
+                df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian[value[0]]
+            else:
+                df_cartesian.loc[(df_cartesian["course_year"] == key), "students_number"] = df_cartesian.loc[:, value].sum(axis=1)
+        return df_cartesian[["school_id", "scholastic_year", "course_year", "students_number"]]
+    else:
+        return df_students_data[["school_id", "scholastic_year", "students_number"]]
 
 
 @task

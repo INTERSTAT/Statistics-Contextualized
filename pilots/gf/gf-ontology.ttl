@@ -264,12 +264,12 @@ igf:sector a owl:ObjectProperty ;
 	rdfs:label "Caractères d'équipement de sport et loisir"@fr ;
 	skos:hasTopLevel <http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> , <http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> .
 
-<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> a skos:Concept , igf:CaractereSportLoisir ;
+<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/COUVERT> a skos:Concept , igf:SportLeisureCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/sportLeisureCharacteristics> ;
 	skos:prefLabel "Couvert"@fr ;
 	skos:notation "COUVERT" .
 
-<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> a skos:Concept , igf:CaractereSportLoisir ;
+<http://id.insee.fr/interstat/gf/SportLeisureCharacteristic/ECLAIRE> a skos:Concept , igf:SportLeisureCharacteristic ;
 	skos:inScheme <http://id.insee.fr/interstat/gf/sportLeisureCharacteristics> ;
 	skos:prefLabel "Éclairé"@fr ;
 	skos:notation "ECLAIRE" .
@@ -279,7 +279,16 @@ igf:sector a owl:ObjectProperty ;
 
 <http://id.insee.fr/interstat/gf/educationFacilityTypes> a skos:ConceptScheme ;
 	rdfs:label "Types d'équipements scolaires"@fr ;
-	skos:hasTopLevel <http://id.insee.fr/interstat/gf/FacilityType/C101> , <http://id.insee.fr/interstat/gf/FacilityType/C102> , <http://id.insee.fr/interstat/gf/FacilityType/C104> , <http://id.insee.fr/interstat/gf/FacilityType/C105> , <http://id.insee.fr/interstat/gf/FacilityType/C201> , <http://id.insee.fr/interstat/gf/FacilityType/C203> , <http://id.insee.fr/interstat/gf/FacilityType/C301> , <http://id.insee.fr/interstat/gf/FacilityType/C302> , <http://id.insee.fr/interstat/gf/FacilityType/C303> , <http://id.insee.fr/interstat/gf/FacilityType/C304> , <http://id.insee.fr/interstat/gf/FacilityType/C305> , <http://id.insee.fr/interstat/gf/FacilityType/C401> , <http://id.insee.fr/interstat/gf/FacilityType/C402> , <http://id.insee.fr/interstat/gf/FacilityType/C403> , <http://id.insee.fr/interstat/gf/FacilityType/C409> , <http://id.insee.fr/interstat/gf/FacilityType/C501> , <http://id.insee.fr/interstat/gf/FacilityType/C502> , <http://id.insee.fr/interstat/gf/FacilityType/C503> , <http://id.insee.fr/interstat/gf/FacilityType/C504> , <http://id.insee.fr/interstat/gf/FacilityType/C505> , <http://id.insee.fr/interstat/gf/FacilityType/C509> , <http://id.insee.fr/interstat/gf/FacilityType/C601> , <http://id.insee.fr/interstat/gf/FacilityType/C602> , <http://id.insee.fr/interstat/gf/FacilityType/C603> , <http://id.insee.fr/interstat/gf/FacilityType/C604> , <http://id.insee.fr/interstat/gf/FacilityType/C605> , <http://id.insee.fr/interstat/gf/FacilityType/C609> , <http://id.insee.fr/interstat/gf/FacilityType/C701> , <http://id.insee.fr/interstat/gf/FacilityType/C702> .
+	skos:hasTopLevel <http://id.insee.fr/interstat/gf/FacilityType/C> , <http://id.insee.fr/interstat/gf/FacilityType/C101> , <http://id.insee.fr/interstat/gf/FacilityType/C102> , <http://id.insee.fr/interstat/gf/FacilityType/C104> , <http://id.insee.fr/interstat/gf/FacilityType/C105> , <http://id.insee.fr/interstat/gf/FacilityType/C201> , <http://id.insee.fr/interstat/gf/FacilityType/C203> , <http://id.insee.fr/interstat/gf/FacilityType/C301> , <http://id.insee.fr/interstat/gf/FacilityType/C302> , <http://id.insee.fr/interstat/gf/FacilityType/C303> , <http://id.insee.fr/interstat/gf/FacilityType/C304> , <http://id.insee.fr/interstat/gf/FacilityType/C305> , <http://id.insee.fr/interstat/gf/FacilityType/C401> , <http://id.insee.fr/interstat/gf/FacilityType/C402> , <http://id.insee.fr/interstat/gf/FacilityType/C403> , <http://id.insee.fr/interstat/gf/FacilityType/C409> , <http://id.insee.fr/interstat/gf/FacilityType/C501> , <http://id.insee.fr/interstat/gf/FacilityType/C502> , <http://id.insee.fr/interstat/gf/FacilityType/C503> , <http://id.insee.fr/interstat/gf/FacilityType/C504> , <http://id.insee.fr/interstat/gf/FacilityType/C505> , <http://id.insee.fr/interstat/gf/FacilityType/C509> , <http://id.insee.fr/interstat/gf/FacilityType/C601> , <http://id.insee.fr/interstat/gf/FacilityType/C602> , <http://id.insee.fr/interstat/gf/FacilityType/C603> , <http://id.insee.fr/interstat/gf/FacilityType/C604> , <http://id.insee.fr/interstat/gf/FacilityType/C605> , <http://id.insee.fr/interstat/gf/FacilityType/C609> , <http://id.insee.fr/interstat/gf/FacilityType/C701> , <http://id.insee.fr/interstat/gf/FacilityType/C702> .
+
+<http://id.insee.fr/interstat/gf/FacilityType/C> a skos:Concept , igf:EducationFacilityType ;
+	skos:notation "C" ;
+	skos:prefLabel "Enseignement"@fr , "Education"@en , "Formazione scolastica"@it ;                                             
+	skos:inScheme <http://id.insee.fr/interstat/gf/educationFacilityTypes> ;
+	igf:applicableCharacteristic <http://id.insee.fr/interstat/gf/educationtCharacteristic/CANT> ;
+	igf:applicableCharacteristic <http://id.insee.fr/interstat/gf/educationtCharacteristic/CL_ELEM> ;
+	igf:applicableCharacteristic <http://id.insee.fr/interstat/gf/educationtCharacteristic/REP> ;
+	igf:applicableCharacteristic <http://id.insee.fr/interstat/gf/educationtCharacteristic/RPIC> .
 
 <http://id.insee.fr/interstat/gf/FacilityType/C101> a skos:Concept , igf:EducationFacilityType ;
 	skos:notation "C101" ;
@@ -455,7 +464,12 @@ igf:sector a owl:ObjectProperty ;
 
 <http://id.insee.fr/interstat/gf/sportLeisureFacilityTypes> a skos:ConceptScheme ;
 	rdfs:label "Types d'équipements de sport et loisir"@fr ;
-	skos:hasTopLevel <http://id.insee.fr/interstat/gf/FacilityType/F309> .
+	skos:hasTopLevel <http://id.insee.fr/interstat/gf/FacilityType/F3> , <http://id.insee.fr/interstat/gf/FacilityType/F309> .
+
+<http://id.insee.fr/interstat/gf/FacilityType/F3> a skos:Concept , igf:SportLeisureFacilityType ;
+	skos:prefLabel "Équipements culturels et socioculturels"@fr , "Cultural and socio-cultural facilities"@en , "Strutture culturali e socio-culturali"@it ;
+	skos:notation "F3" ;
+	skos:inScheme <http://id.insee.fr/interstat/gf/sportLeisureFacilityTypes> .
 
 <http://id.insee.fr/interstat/gf/FacilityType/F309> a skos:Concept , igf:SportLeisureFacilityType ;
 	skos:prefLabel "Lieux d'exposition et patrimoine"@fr ;

@@ -15,11 +15,12 @@ conf = {
     "env": {
         "workingDirectory": ""
     },
+    "course_year": False,
     "students_datasets": [
         {
             "id": "fr-en-ecoles-effectifs-nb_classes",
             "csv_url": "https://data.education.gouv.fr/explore/dataset/fr-en-ecoles-effectifs-nb_classes/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B",
-            "types": {"Numéro de l'école": str, "Rentrée scolaire": str,
+            "types": {"Numéro de l'école": str, "Rentrée scolaire": str, "Nombre total d'élèves": int,
                       "Nombre d'élèves en pré-élémentaire hors ULIS": int,
                       "Nombre d'élèves en CP hors ULIS": int, "Nombre d'élèves en CE1 hors ULIS": int,
                       "Nombre d'élèves en CE2 hors ULIS": int, "Nombre d'élèves en CM1 hors ULIS": int,
@@ -36,7 +37,9 @@ conf = {
             "csv_url": "https://data.education.gouv.fr/explore/dataset/fr-en-college-effectifs-niveau-sexe"
                        "-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true"
                        "&csv_separator=%3B",
-            "types": {"Numéro du collège": str, "Rentrée scolaire": str, "Nombre total de 6èmes": int,
+            "types": {"Numéro du collège": str, "Rentrée scolaire": str,
+                      "Nombre d'élèves total (nombre d'élèves dans les formations du 1er cycle du 2nd degré et non du nombre total d'élèves inscrits dans l'établissement, les DIMA et les dispositifs-relais sont exclus)": int,
+                      "Nombre total de 6èmes": int,
                       "Nombre total de 5èmes": int, "Nombre total de 4èmes": int,
                       "Nombre total de 3èmes": int},
             "mapping_course_year": {"6": ["Nombre total de 6èmes"], "7": ["Nombre total de 5èmes"],
@@ -47,7 +50,7 @@ conf = {
             "csv_url": "https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau"
                        "-sexe-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header"
                        "=true&csv_separator=%3B",
-            "types": {"Numéro du lycée": str, "Rentrée scolaire": str, "2ndes GT": int,
+            "types": {"Numéro du lycée": str, "Rentrée scolaire": str, "Nombre d'élèves": int,  "2ndes GT": int,
                       "2ndes STHR": int, "2ndes TMD": int, "2ndes BT": int, "1ères G": int,
                       "1ères STI2D": int, "1ères STL": int, "1ères STMG": int, "1ères ST2S": int,
                       "1ères STD2A": int, "1ères STHR": int, "1ères TMD": int, "1ères BT": int,
@@ -64,10 +67,10 @@ conf = {
         {
             "id": "fr-en-lycee_pro-effectifs-niveau-sexe-lv",
             "csv_url": "https://data.education.gouv.fr/explore/dataset/fr-en-lycee_pro-effectifs-niveau-sexe-lv/download/?format=csv&timezone=Europe/Berlin&lang=fr&use_labels_for_header=true&csv_separator=%3B",
-            "types": {"Numéro du lycée": str, "Rentrée scolaire": str, "2ndes PRO": int, "CAP 1ère année": int, "CAP en 1 an": int, "BMA 1ère année": int, "BMA en 1 an": int, "CAP 2nde année": int, "1ères PRO": int, "Terminales PRO": int, "MC": int},
+            "types": {"Numéro du lycée": str, "Rentrée scolaire": str, "Nombre d'élèves": int, "2ndes PRO": int, "CAP 1ère année": int, "CAP en 1 an": int, "BMA 1ère année": int, "BMA en 1 an": int, "CAP 2nde année": int, "1ères PRO": int, "Terminales PRO": int, "MC": int},
             "mapping_course_year": {"10": ["2ndes PRO", "CAP 1ère année", "CAP en 1 an", "BMA 1ère année", "BMA en 1 an"],
                                     "11": ["CAP 2nde année", "1ères PRO"],
-                                    "12": ["Terminales PRO", "MC"]}
+                                    "12": ["Terminales PRO"]}
         }
     ]
 }
@@ -121,7 +124,7 @@ conf = {
             "types": {"numero_lycee": str, "rentree_scolaire": str, "2ndes_pro": int, "cap_1ere_annee": int, "cap_en_1_an": int, "bma_1ere_annee": int, "bma_en_1_an": int, "cap_2nde_annee": int, "1eres_pro": int, "terminales_pro": int, "mc": int},
             "mapping_course_year": {"10": ["2ndes_pro", "cap_1ere_annee", "cap_en_1_an", "bma_1ere_annee", "bma_en_1_an"],
                         "11": ["cap_2nde_annee", "1eres_pro"],
-                        "12": ["terminales_pro", "mc"]}
+                        "12": ["terminales_pro"]}
         }
 '''
 

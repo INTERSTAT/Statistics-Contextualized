@@ -1,10 +1,14 @@
+from random import randint
+import re
+import time
+
+import numpy as np
 import requests
 import pandas as pd
 from prefect import task, Flow, Parameter
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
-from rdflib import Graph, Namespace, RDF, Literal, RDFS, SKOS
 import pysftp
 import json
 import csv
@@ -13,7 +17,14 @@ import os
 import logging
 from urllib.parse import quote
 from gf.gf_conf import conf
-from common.apis import get_italian_cultural_data
+from common.geo_base import convert_coordinates_fn
+from common.apis import get_italian_cultural_data, load_turtle
+from common.rdf import (
+    gen_rdf_facility,
+    gen_rdf_geometry,
+    gen_rdf_quality,
+    gen_rdf_french_facility,
+)
 
 # Constants ----
 
@@ -38,17 +49,13 @@ CSVW_INTRO = {
     "dc:creator": "Interstat",
     "tables": list(),
 }
-
 DATA_FILE_NAME = "gf_data_fr.csv"
-WORK_DIRECTORY = "../../../work/"
 
 
 def flow_parameters(conf):
-    wd = get_working_directory(conf)
     return {
-        "working_dir": wd,
         "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
-        "bpe_metadata_url1": wd + "bpe-cultural-places-variables.csv",
+        "bpe_metadata_url1": get_working_directory() + "bpe-cultural-places-variables.csv",
         "types1": {
             "AN": str,
             "DEPCOM": str,
@@ -60,14 +67,14 @@ def flow_parameters(conf):
         "rename1": {
             "AN": "Year",
             "DEPCOM": "LAU",
-            "LAMBERT_X": "Lambert_X",
-            "LAMBERT_Y": "Lambert_Y",
+            "LAMBERT_X": "Coord_X",
+            "LAMBERT_Y": "Coord_Y",
             "QUALITE_XY": "Quality_XY",
-            "TYPEQU": "FacilityType",
+            "TYPEQU": "Facility_Type",
         },
         "facilities_filter": ("F309",),
         "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
-        "bpe_metadata_url2": wd + "bpe-education-variables.csv",
+        "bpe_metadata_url2": get_working_directory() + "bpe-education-variables.csv",
         "types2": {
             "AN": str,
             "CL_PELEM": str,
@@ -83,16 +90,16 @@ def flow_parameters(conf):
         "rename2": {
             "AN": "Year",
             "DEPCOM": "LAU",
-            "LAMBERT_X": "Lambert_X",
-            "LAMBERT_Y": "Lambert_Y",
+            "LAMBERT_X": "Coord_X",
+            "LAMBERT_Y": "Coord_Y",
             "QUALITE_XY": "Quality_XY",
             "SECT": "Sector",
-            "TYPEQU": "FacilityType",
+            "TYPEQU": "Facility_Type",
             "CL_PELEM": "CL_PELEM",
             "EP": "EP",
             "CL_PGE": "CL_PGE",
         },
-        "italian_educational_data_url": "https://interstat.eng.it/files/gf/input/it/MIUR_Schools_with_coordinates.csv",
+        "italian_educational_data_url": "https://dati.istruzione.it/opendata/opendata/catalogo/elements1/leaf/EDIANAGRAFESTA20181920180901.csv",
     }
 
 
@@ -139,7 +146,7 @@ def get_json_datatype(var_type):
     return json_datatype
 
 
-@task
+@task(name="Extract French data")
 def extract_french_data(url, types={}, facilities_filter=(), rename={}):
     """
     Extracts the French data about geolocalized facilities.
@@ -171,27 +178,26 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
             archive.open(data_zip), sep=";", dtype=types, usecols=types.keys()
         )
     bpe_data.rename(columns=rename, inplace=True)
-    print(bpe_data.columns)
     bpe_data["Quality_XY"] = bpe_data["Quality_XY"].map(
         {
             "Acceptable": "ACCEPTABLE",
             "Bonne": "GOOD",
             "Mauvaise": "BAD",
-            "Non géolocalisé": "NO_GEOLOCALIZED",
+            "Non géolocalisé": "NOT_GEOLOCALIZED",
         },
         na_action="ignore",
     )
     # if facilities_filter is not empty, select only type of facilities starting with list of facility types
     if facilities_filter:
         bpe_data_filtered = bpe_data.loc[
-            (bpe_data["FacilityType"].str.startswith(facilities_filter))
+            (bpe_data["Facility_Type"].str.startswith(facilities_filter))
         ]
         return bpe_data_filtered
 
     return bpe_data
 
 
-@task
+@task(name="Extract French metadata")
 def extract_french_metadata(url, rename={}, facilities_filter=()):
     """
     Extracts the French metadata about geolocalized facilities.
@@ -211,52 +217,156 @@ def extract_french_metadata(url, rename={}, facilities_filter=()):
         The metadata extracted
     """
     bpe_metadata = pd.read_csv(url, sep=",", usecols=types_var_mod.keys())
-    print("RENAME VALUES", rename.values())
     if rename:
         bpe_metadata = bpe_metadata.loc[bpe_metadata["COD_VAR"].isin(rename.values())]
     if facilities_filter:
         indexes = bpe_metadata[
-            (bpe_metadata["COD_VAR"] == "FacilityType")
+            (bpe_metadata["COD_VAR"] == "Facility_Type")
             & ~(bpe_metadata["COD_MOD"].isin(facilities_filter))
         ].index
         bpe_metadata = bpe_metadata.drop(indexes)
     return bpe_metadata
 
 
-@task
-def extract_italian_educational_data(url: str) -> pd.DataFrame:
+@task(name="Extract italian educational facilities")
+def extract_italian_educational_facilities(url: str) -> pd.DataFrame:
     italian_educ_data: pd.DataFrame = pd.read_csv(url, sep=",")
-    import re
-
+    italian_educ_data.rename(columns={"CODICESCUOLA": "Facility_ID"}, inplace=True)
     # Extract the 2019 from 201819
     # see https://regex101.com/r/3S04We/1
     start_end = re.compile(r"([0-9]{2}?)[0-9]{2}([0-9]{2}?)")
-    italian_educ_data["YEAR"] = [
+    italian_educ_data["Year"] = [
         "".join(start_end.match(str(year)).group(1, 2))
-        for year in italian_educ_data["AnnoScolastico"]
+        for year in italian_educ_data["ANNOSCOLASTICO"]
     ]
     return italian_educ_data
 
 
-@task
-def concat_datasets(ds1, ds2):
+def sample_italian_educational_facilities(complete_data):
+    try:
+        size = conf["thresholds"]["italianEducationFacilitiesGeocoding"]
+        try:
+            return complete_data.sample(size)
+        except ValueError:
+            return complete_data
+    except KeyError:
+        return complete_data
+
+
+def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
+    df_sample = sample_italian_educational_facilities(df)  # Impact on duration, n x 1.5 seconds
+    df_sample["Coord_X"] = 0.0
+    df_sample["Coord_Y"] = 0.0
+    df_sample["Quality_XY"] = ""
+    for index, row in df_sample.iterrows():
+        TipologiaIndirizzo = row["TIPOLOGIAINDIRIZZO"]
+        DenominazioneIndirizzo = row["DENOMINAZIONEINDIRIZZO"]
+        DescrizioneComune = row["DESCRIZIONECOMUNE"]
+        NumeroCivico = row["NUMEROCIVICO"]
+        # Incomplete names are not found by the server (for example "via G. SIANI" or "via G.Leopardi")
+        # so only the surname is taken (for example "via SIANI" or "via Leopardi)
+        if ("." in DenominazioneIndirizzo) and (" " in DenominazioneIndirizzo):
+            splitted = DenominazioneIndirizzo.split(" ")
+        else:
+            splitted = DenominazioneIndirizzo.split(".")
+        DenominazioneIndirizzo = splitted[len(splitted) - 1]
+        # If a comma is present, only the first part of the address or house number is considered
+        if "," in DenominazioneIndirizzo:
+            DenominazioneIndirizzo = DenominazioneIndirizzo.split(",")[0]
+        if "," in NumeroCivico:
+            NumeroCivico = NumeroCivico.split(",")[0]
+        apiService = "https://nominatim.openstreetmap.org/search?street="
+        url = (
+            quote(TipologiaIndirizzo.encode("utf-8"))
+            + "%20"
+            + quote(DenominazioneIndirizzo.encode("utf-8"))
+            + "+&city="
+            + quote(DescrizioneComune.encode("utf-8"))
+            + "&format=json&limit=1"
+        )
+        NumeroCivico_is_a_digit = False
+        address_found = False
+        # It checks whether the house number is a numerical value
+        if bool(re.search(re.compile("^\d+$"), NumeroCivico)):
+            NumeroCivico_is_a_digit = True
+            api = apiService + quote(NumeroCivico.encode("utf-8")) + "+" + url
+        else:
+            api = apiService + url
+        r = requests.get(api)
+        data = r.json()
+        if len(data) > 0:
+            address_found = True
+        if address_found:
+            df_sample.loc[index, "Coord_X"] = data[0]["lat"]
+            df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
+            df_sample.loc[index, "Quality_XY"] = "GOOD"
+        else:
+            df_sample.loc[index, "Coord_X"] = np.nan
+            df_sample.loc[index, "Coord_Y"] = np.nan
+            df_sample.loc[index, "Quality_XY"] = "NOT_GEOLOCALIZED"
+        time.sleep(float(conf["nominatisDelay"]))  # wait a bit before sending the next request
+    return df_sample
+
+
+@task(name="Transform italian educational facilities")
+def transform_italian_educational_facilities(df):
+    df_coordinates = add_coordinates_italian_educational_facilities(df)
+    url = (
+        get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    )
+    df_cadastral_lau = pd.read_excel(
+        url, dtype=str, usecols=[4, 19], names=["LAU", "CADASTRAL_CODE"]
+    )
+    df_merged = df_coordinates.merge(
+        df_cadastral_lau, left_on="CODICECOMUNE", right_on="CADASTRAL_CODE", how="left"
+    )
+    df_merged["Facility_Type"] = "C"
+    df_merged["Sector"] = np.nan
+    df_merged_restriction = df_merged[
+        [
+            "Year",
+            "Facility_ID",
+            "Facility_Type",
+            "Coord_X",
+            "Coord_Y",
+            "LAU",
+            "Sector",
+            "Quality_XY",
+        ]
+    ]
+    return df_merged_restriction
+
+
+@task(name="Concatenate datasets")
+def concat_datasets(ds1, ds2, id_prefix=None):
+    """
+    Use pandas native function to concat two data frames, and generate ids
+    if asked.
+    """
     df = pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
-    df["Facility_ID"] = range(1, len(df) + 1)
+    if id_prefix is not None:
+        df["Facility_ID"] = [f"{id_prefix}{i}" for i in range(1, len(df) + 1)]
     return df
 
 
-@task
+@task(name="Transform French coordinates")
+def transform_french_coordinates(df):
+    tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
+    return tdf
+
+
+@task(name="Concatenate French metadata sets")
 def concat_metadatasets(ds1, ds2):
     return pd.concat([ds1, ds2], ignore_index=True).drop_duplicates()
 
 
-@task
-def transform_data_to_csv(df, working_dir):
-    return df.to_csv(working_dir + DATA_FILE_NAME, index=False, header=True)
+@task(name="Transform French data to CSV")
+def transform_data_to_csv(df):
+    return df.to_csv(get_working_directory() + DATA_FILE_NAME, index=False, header=True)
 
 
-@task
-def transform_metadata_to_csvw(bpe_metadata, working_dir):
+@task(name="Transform metadata to CSVW file")
+def transform_metadata_to_csvw(bpe_metadata):
     """
     Transforms the French metadata to CSVW description.
 
@@ -323,14 +433,14 @@ def transform_metadata_to_csvw(bpe_metadata, working_dir):
         table_data["tableSchema"]["columns"].append(column)
     # Insert description of data table data to CSVW description
     csvw["tables"].insert(0, table_data)
-    json_file_name = working_dir + DATA_FILE_NAME + "-metadata.json"
+    json_file_name = get_working_directory() + DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, "w", encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
     return csvw_file
 
 
-@task
-def transform_metadata_to_code_lists(bpe_metadata, working_dir):
+@task(name="Transform French metadata to code list files")
+def transform_metadata_to_code_lists(bpe_metadata):
     """
     Transforms the French metadata to code list csv files.
 
@@ -366,7 +476,7 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     files = []
     for x in dict_var_code_lists.get("variables"):
         cod_var = x["codVar"]
-        file_name = working_dir + x["codVar"].lower() + ".csv"
+        file_name = get_working_directory() + x["codVar"].lower() + ".csv"
         header_list = {"codMod": cod_var + "_CODE", "libMod": cod_var + "_LABEL"}
         with open(file_name, "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["codMod", "libMod"])
@@ -377,30 +487,53 @@ def transform_metadata_to_code_lists(bpe_metadata, working_dir):
     return files
 
 
-@task
+@task(name="Extract italian cultural facilities")
 def extract_italian_cultural_facilities():
     logger = prefect.context.get("logger")
     # Building the query
-    # FIXME use a class here to materialise the query ?
     query = conf["sparql"]["italianCulturalFacilities"]
-    limit = None
+    limit = conf["thresholds"]["italianCulturalFacilities"]
     query_with_limit = query + f"limit {limit}" if limit is not None else query
     quoted_query = quote(query_with_limit.strip())
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
-
+    # Requesting data
     df = get_italian_cultural_data(target_url)
     logger.info(f"{len(df)} italian cultural facilities grabbed.")
-    return df
+    df["Year"] = "2022"
+    # For italian museums, the last part of `subject` uri is the id
+    df["Facility_ID"] = [subject.split("/")[-1] for subject in df["subject"]]
+    df["Facility_Type"] = "F3"
+    df["LAU"] = np.nan
+    df["Sector"] = np.nan
+    df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
+    df["Coord_X"] = df["Coord_X"].astype(float)
+    df["Coord_Y"] = df["Coord_Y"].astype(float)
+    df['Quality_XY'] = ["NOT_GEOLOCALIZED" if pd.isna(c) else "GOOD" for c in df["Coord_X"]]
+    final_df = df[
+        [
+            "Year",
+            "Facility_ID",
+            "Coord_X",
+            "Coord_Y",
+            "Facility_Type",
+            "LAU",
+            "Sector",
+            "Quality_XY",
+        ]
+    ]
+    return final_df
 
 
-@task
+@task(name="Extract italian cultural events")
 def extract_italian_cultural_events():
     logger = prefect.context.get("logger")
-    # FIXME duplicated code → apis module ?
+    # FIXME duplicated code → apis module?
     query = conf["sparql"]["italianCulturalEvents"]
-    limit = 5
+    limit = conf["thresholds"]["italianCulturalEvents"]
     query_with_limit = query + f"limit {limit}"
     quoted_query = quote(query_with_limit.strip())
+    # FIXME character encoding (ex: "Attivit\u00E0 Didattica")
+    # FIXME (query) LATITUDINE and LONGITUDINE are always empty
     target_url = f"https://dati.beniculturali.it/sparql?default-graph-uri=&query={quoted_query}&format=application%2Fjson"
 
     df = get_italian_cultural_data(target_url)
@@ -408,44 +541,37 @@ def extract_italian_cultural_events():
     return df
 
 
-def gen_rdf_facility(id, equipment_type):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a <http://rdf.insee.fr/def/interstat/gf#Facility> .
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> rdfs:label "Facility number {id}"@en .
-    <http://id.cef-interstat.eu/sc/gf/facility/{id}> a igf:Facility ;
-        dc:identifier {id} ;
-        rdfs:label "Facility number {id}"@en ;
-        dcterms:type <http://id.insee.fr/interstat/gf/FacilityType/{equipment_type}> ;
-        geo:hasGeometry <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
-    """
-
-
-def gen_rdf_geometry(id, x, y):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/geometry/{id}> a geo:Geometry ;
-        rdfs:label "Geometry for facility {id}" ;
-        geo:asWKT "POINT({x},{y})"^^geo:wktLiteral .
-    """
-
-
-def gen_rdf_quality(id, quality):
-    return f"""
-    <http://id.cef-interstat.eu/sc/gf/quality/{id}> dqw:QualityAnnotation ;
-        oa:hasBody <http://id.insee.fr/interstat/gf/QualityLevel/{quality}> ;
-        oa:hasTarget <http://id.cef-interstat.eu/sc/gf/geometry/{id}> .
-    """
-
-
 @task(name="Create RDF data")
 def build_rdf_data(df):
 
-    df["FACILITY_RDF"] = [
-        gen_rdf_facility(id, equ_type)
-        for (id, equ_type) in zip(df["Facility_ID"], df["FacilityType"])
-    ]
+    logger = prefect.context.get("logger")
+    logger.info("Building a RDF file from the input data frame.")
+
+    if all(col in df.columns for col in ["CL_PGE", "CL_PELEM", "EP"]):
+        logger.debug("Generating RDF for French education facilities")
+        df["FACILITY_RDF"] = [
+            gen_rdf_french_facility(id, equ_type, sector, lau, pge, pelem, ep)
+            for (id, equ_type, sector, lau, pge, pelem, ep) in zip(
+                df["Facility_ID"],
+                df["Facility_Type"],
+                df["Sector"],
+                df["LAU"],
+                df["CL_PGE"],
+                df["CL_PELEM"],
+                df["EP"],
+            )
+        ]
+    else:
+        df["FACILITY_RDF"] = [
+            gen_rdf_facility(id, equ_type, sector, lau, x, y)
+            for (id, equ_type, sector, lau, x, y) in zip(
+                df["Facility_ID"], df["Facility_Type"], df["Sector"], df["LAU"], df["Coord_X"], df["Coord_Y"]
+            )
+        ]
+
     df["GEOMETRY_RDF"] = [
         gen_rdf_geometry(id, x, y)
-        for (id, x, y) in zip(df["Facility_ID"], df["Lambert_X"], df["Lambert_Y"])
+        for (id, x, y) in zip(df["Facility_ID"], df["Coord_X"], df["Coord_Y"])
     ]
     df["QUALITY_RDF"] = [
         gen_rdf_quality(id, quality)
@@ -460,6 +586,7 @@ def build_rdf_data(df):
     @prefix dc:      <http://purl.org/dc/elements/1.1/> .
     @prefix dcterms: <http://purl.org/dc/terms/> .
     @prefix oa:      <http://www.w3.org/ns/oa#> .
+    @prefix dqv:     <http://www.w3.org/ns/dqv#> .
     """
     raw_facility_rdf = "\n".join(df["FACILITY_RDF"])
     raw_geometry_rdf = "\n".join(df["GEOMETRY_RDF"])
@@ -467,11 +594,12 @@ def build_rdf_data(df):
     final_rdf = "\n".join(
         [namespaces, raw_facility_rdf, raw_geometry_rdf, raw_quality_rdf]
     )
+
     return final_rdf
 
 
-@task
-def load_files_to_ftp(csvw, code_lists, working_dir):
+@task(name="Load files to FTP")
+def load_files_to_ftp(csvw, code_lists):
     """
     Loads all files created to FTP
 
@@ -496,19 +624,35 @@ def load_files_to_ftp(csvw, code_lists, working_dir):
     ) as sftp:
         sftp.makedirs(remote_path)  # Create remote path if needed
         with sftp.cd(remote_path):
-            sftp.put(working_dir + DATA_FILE_NAME)
+            sftp.put(get_working_directory() + DATA_FILE_NAME)
             sftp.put(csvw.name)
             for f in code_lists:
                 sftp.put(f.name)
+
+
+@task(name="Concatenate RDF data")
+def concat_rdf_data(french_rdf: str, it_rdf: str):
+    return french_rdf + "\n" + it_rdf
+
+
+@task(name="Upload RDF data")
+def upload_rdf_data(rdf_data):
+    logger = prefect.context.get("logger")
+    local_rdf_file = f"{get_working_directory()}gf.ttl"
+    with open(local_rdf_file, "w") as gf:
+        logger.info(f"Writing RDF data to disk at: {local_rdf_file}")   
+        gf.writelines(rdf_data)
+    # FIXME as a Prefect parameter ?
+    repo = conf["graphdbRepositories"]["test"]
+    graph_url = f'{repo}statements?context=<http://www.interstat.org/graphs/gf>'
+    logger.info(f"Uploading RDF data to {graph_url}")
+    load_turtle(graph_url, rdf_data)
 
 
 # Build flow
 def build_flow(conf):
     with Flow("GF-EF") as flow:
         # Flow parameters
-        working_dir = Parameter(
-            name="working_dir", default=get_working_directory(conf), required=True
-        )
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
@@ -527,45 +671,58 @@ def build_flow(conf):
             bpe_zip_url1, types1, facilities_filter, rename1
         )
         french_data2 = extract_french_data(bpe_zip_url2, types2, rename=rename2)
-        french_data = concat_datasets(french_data1, french_data2)
+        french_data = concat_datasets(french_data1, french_data2, id_prefix="fr")
+
+        # WIP - Transform Lambert to WGS84 
+        french_data = transform_french_coordinates(french_data)
+
         french_metadata1 = extract_french_metadata(
             bpe_metadata_url1, rename1, facilities_filter
         )
         french_metadata2 = extract_french_metadata(bpe_metadata_url2, rename2)
         french_metadata = concat_metadatasets(french_metadata1, french_metadata2)
-        csvw = transform_metadata_to_csvw(french_metadata, working_dir)
-        code_lists = transform_metadata_to_code_lists(french_metadata, working_dir)
+        csvw = transform_metadata_to_csvw(french_metadata)
+        code_lists = transform_metadata_to_code_lists(french_metadata)
 
-        extract_italian_educational_data(italian_educational_data_url)
+        italian_educational_data = extract_italian_educational_facilities(
+            italian_educational_data_url
+        )
 
+        italian_educational_data_transformed = transform_italian_educational_facilities(
+            italian_educational_data
+        )
         italian_cultural_facilities = extract_italian_cultural_facilities()
-        italian_cultural_events = extract_italian_cultural_events()
+        # italian_cultural_events = extract_italian_cultural_events()
 
-        # WIP
-        build_rdf_data(french_data)
+        italian_data = concat_datasets(
+            italian_educational_data_transformed, italian_cultural_facilities
+        )
 
+        french_rdf_data = build_rdf_data(french_data)
+        it_rdf_data = build_rdf_data(italian_data)
+        rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
+        upload_rdf_data(rdf_data)
+
+        """ This task doesn't work on some networks
         load_files_to_ftp(
             csvw,
             code_lists,
-            working_dir,
-            upstream_tasks=[transform_data_to_csv(french_data, working_dir)],
+            upstream_tasks=[transform_data_to_csv(french_data)],
         )
-
+        """
     return flow
 
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        N = 100000
-        df = pd.DataFrame()
-        df["FACILITY"] = [f"FAC{x}" for x in range(N)]
-        df["FacilityType"] = [f"Facility type {x}" for x in range(N)]
-        df["Facility_ID"] = [x for x in range(N)]
-        from random import randint
-
-        df["Lambert_X"] = [randint(1, 150) for x in range(N)]
-        df["Lambert_Y"] = [randint(1, 150) for x in range(N)]
-        build_rdf_data(df)
+        tx = [841092.05, 830000.00]
+        ty = [6545270.87, 6545270.87]
+        points = pd.DataFrame({
+            "X": [randint(830000, 840000) for x in range(10000)],
+            "Y": [randint(6500000, 6550000) for x in range(10000)]
+        })
+        transformed = convert_coordinates_fn(points, "X", "Y", "epsg:2154", "epsg:4326")
+        print(transformed)
     return flow
 
 
@@ -581,7 +738,7 @@ def main():
         params = flow_parameters(conf)
 
     if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name="sample")
+        flow.register(project_name="gf")
     else:
         flow.run(parameters=params)
 
