@@ -11,10 +11,10 @@ The document starts with a short recap about the different pilots and the techni
 *Should we say something about the difficulties due to Covid?*
 
 
-### Short reminder about the pilots
+### One-liners on the pilots
 
 * SEP (--> Istat)
-* GF (--> Insee)
+* Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
 * S4Y (--> Istat)
 
 ## Reminder on the production environment
@@ -23,11 +23,11 @@ The document starts with a short recap about the different pilots and the techni
 
 ## Pilot development
 
-In this section, we decribe how the pilot services were developed, with a specific focus on 
+In this section, we decribe how the pilot services were created, with a specific focus on the development of the data pipelines and on the client applications.
 
 ### Data pipelines
 
-Two different approaches were used for the implementation of the data pipelines: a classical ETL ([Extract, transform, load](https://en.wikipedia.org/wiki/Extract,_transform,_load) pattern for the GF pilot, and an approach based on ontological aggregation for SEP and S4Y.
+Two different approaches were used for the implementation of the data pipelines: a classical ETL ([Extract, transform, load](https://en.wikipedia.org/wiki/Extract,_transform,_load) pattern for the GF pilot, and an approach based on ontological integration for SEP and S4Y.
 
 #### ETL approach
 
@@ -40,15 +40,15 @@ The GF ETL process was designed with the following principles in mind:
 * reproduciblity
 * efficiency
 
-Openness leads to developping all code on [GitHub](https://github.com/INTERSTAT/Statistics-Contextualized/tree/main/code/Python/gf) starting from the first line and to using only open source tools.
+Openness leads to developping all code on [GitHub](https://github.com/INTERSTAT/Statistics-Contextualized/tree/main/code/Python/gf) starting from the first line, and to using only open source tools.
 
 Maximal automation avoids manual treatments, which saves time and improves traceability. It is often a difficult principle to follow, in particular with messy data, since it requires rigour and a bigger development effort, but it largely pays off in the end, especially if source data changes frequently.
 
 Reproducibility results from automation and from detailed documentation inside and outside code.
 
-Efficiency is ensured by the choice of a technical framework that provides for execution of the pipeline in a distributed environment.
+Efficiency is ensured by the selection of a technical framework that provides for execution of the pipeline in a distributed environment.
 
-Regarding tooling, the following choices were made:
+Regarding the tooling, the following choices were made:
 
 * use of [Python 3](https://www.python.org/) as a programming language
 * use of [Prefect](https://www.prefect.io/) as a build, run, and monitor framework
