@@ -107,4 +107,14 @@ An example of corresponding code is given below (prefix declarations are omitted
 
 ## Metadata
 
-In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentative [DDI-CDI description](gf-cdi.ttl) of the BPE file is provided. A [CSV on the web description](https://interstat.eng.it/files/gf/output/gf_data_fr.csv-metadata.json) is also available.
+Apart from the ontology describing the data, metadata about the data is available in different forms:
+
+* The CSV data extracted from the BPE is described using the [CSV on the web](https://www.w3.org/TR/tabular-data-primer/) (CSVW) vocabulary. CSV is a notoriously sloppy standard, and CSVW is a powerful way to discribe tabular data available online so that they can be understood easily by humans and machines, thus dramatically improving its usability. A CSV on the web [description](https://interstat.eng.it/files/gf/output/gf_data_fr.csv-metadata.json) of the CSV distribution of GF data is produced semi-automatically by the ETL pipeline.
+
+* The Cross-Domain Integration ([DDI-CDI](https://ddialliance.org/Specification/ddi-cdi)) model is a development of the DDI Alliance aiming at improving coherence and interoperability of metadata. In particular, DDI-CDI allows the description of a wide range of data structures. In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentative [DDI-CDI description](gf-cdi.ttl) of the BPE file is provided with the GF data.
+
+* Finally, descriptive metadata using the DCAT standard are provided for the [source data](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/gf-dcat.ttl).
+
+## Process
+
+The ETL process of the Geolocalized Facilities pilot is described [here](https://app.diagrams.net/#HINTERSTAT%2FStatistics-Contextualized%2Fmain%2Fimg%2Fgf-flow.drawio).

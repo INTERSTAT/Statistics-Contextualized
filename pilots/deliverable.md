@@ -13,9 +13,7 @@ The document starts with a short recap about the different pilots and the techni
 
 ### One-liners on the pilots
 
-*     SEP - Support for Environmental Policies
-One of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies. 
-
+* Support for Environmental Policies (SEP): one of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies. 
 * Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
 * S4Y (--> Istat)
 
