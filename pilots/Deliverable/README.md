@@ -19,7 +19,30 @@ _Should we say something about the difficulties due to Covid?_
 ## Reminder on the production environment
 
 --> ENG
-[add short description of the environment and language used]
+[add short description of the environment]
+
+The client applications developed are one for each pilot service; they are web applications that consume and display SPARQL data.
+This section briefly describes the information relating to the production environment, the programming language used for the implementation and the type of repository used to collect the data.
+
+## Programming language adopted for development: ReactJS
+
+React is a JavaScript library for building user interfaces.
+The key features are mainly two: the first, is the concept of UI components. The React code is composed of entities called components that are reusable; this means that it is necessary to simply define a component only once, and it can be used multiple times. This makes it much quicker, convenient, and easier to handle the production of a large-scale website. This allows the ability to breakdown complex UI and allow to work on individual components.
+
+The other key feature is that React finds out what changes have been made, and changes only what needs to be changed.
+It creates an in-memory data-structure cache, computes the resulting differences, and then updates the browser's displayed DOM (Document Object Model) efficiently. This selective rendering provides a major performance boost. It saves the effort of recalculating the CSS style, layout for the page and rendering for the entire page.
+
+## Type of repository to collect data: GraphDB
+
+GraphDB is a highly efficient and robust graph database with RDF and SPARQL support. In particular, it is an enterprise ready Semantic Graph Database, compliant with W3C Standards. Semantic graph databases (also called RDF triplestores) provide the core infrastructure for solutions where modeling agility, data integration, relationship exploration and cross-enterprise data publishing and consumption are important.
+
+This scalable RDF database, streamlines the load and use of linked data cloud datasets, as well as the own resources. For easy use and compatibility with the industry standards, GraphDB implements the RDF4J framework interfaces, the W3C SPARQL Protocol specification, and supports all RDF serialization formats.
+It is one of the few triplestores that can perform semantic inferencing at scale, allowing users to derive new semantic facts from existing facts. It handles massive loads, queries, and inferencing in real time.
+
+In GraphDB data is organized in repositories; once the one of interest has been selected, the data is extracted through the SPARQL query language.
+GraphDB also supports SPARQL Federated Query which is an extension of the basic Query Language. Using it, it is possibile to combine a query on a repository in the current instance with a remote call to a different SPARQL endpoint.
+
+The strength of GraphDB is that it is also an HTTP service endpoint that can receive requests and can process SPARQL queries; this service is queried directly by client applications and the requests results are displayed in them.
 
 ## Pilot development
 
