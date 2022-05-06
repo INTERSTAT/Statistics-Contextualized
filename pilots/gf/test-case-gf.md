@@ -117,4 +117,12 @@ Apart from the ontology describing the data, metadata about the data is availabl
 
 ## Process
 
-The ETL process of the Geolocalized Facilities pilot is described [here](https://app.diagrams.net/#HINTERSTAT%2FStatistics-Contextualized%2Fmain%2Fimg%2Fgf-flow.drawio).
+The ETL process of the Geolocalized Facilities pilot is described in detail [here](https://app.diagrams.net/#HINTERSTAT%2FStatistics-Contextualized%2Fmain%2Fimg%2Fgf-flow.drawio). The process is organized according to the usual steps:
+
+* Extraction is performed on data which are all available on line, in various formats: CSV for French facilities and Italian schools, and RDF for Italian musea (MIBACT data available via SPARQL). Note that the latter also contains information about cultural events for Italy: those are not extracted, but they might be queried directly from the client application.
+
+* The main transformation steps are made on French metadata in order to transform them into CSV on the Web. Regarding data, the main steps are conversion of the coordinates from Lambert 93 to WGS 84 for the French facilities. For the Italian ones, addresses are geocoded using the Nominatim API provided by Openstreemap (with application of the usage policy). Both sources are then converted to RDF and merged.
+
+* CSV files are finally uploaded to the Interstat FTP server and the RDF/Turtle files to the GraphDB triple store. Note that uploading the French facilities to FTP is not useful for the pipeline itself, but it gives the possibility to describe two different distribution in the DCAT metadata.
+
+It should be noted that the data part of the process is fully automated and reproductible at will. Regarding the metadata, the part concerning structural metadata (specifically code lists) is aslo automated, but some aspects of the production of descriptive metadata still require manual intervention.
