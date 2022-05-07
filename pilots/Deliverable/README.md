@@ -8,7 +8,6 @@ This document describes the Interstat pilot services, how they were built and ho
 
 The document starts with a short recap about the different pilots and the technical production environment set up for Interstat. General considerations on the development of pilots are then exposed, with a particular focus on the approaches followed for creating the data pipelines and on the technical stack used for the client applications. More detail is then provided for each of the three pilots, including a reminder of the business case, the description of the relevant models and of the data, metadata, pipeline process and client application. A summary of the lessons learned, the remaining problems and the next steps is given in conclusion.
 
-_Should we say something about the difficulties due to Covid?_
 
 ### One-liners on the pilots
 
@@ -76,7 +75,7 @@ Regarding the tooling, the following choices were made:
 - use of [Python 3](https://www.python.org/) as a programming language
 - use of [Prefect](https://www.prefect.io/) as a build, run, and monitor framework
 
-Prefect allows for good modularity and readability of the code, and provides process visualisation tools for the conception and execution stages. Prefect pipelines can be executed locally, for example for test purposes, or on a [cloud platform](https://www.prefect.io/cloud/) (which can be installed on premises).
+Prefect allows for good modularity and readability of the code, and provides process visualisation tools for the conception and execution stages (see the [example](https://github.com/INTERSTAT/Statistics-Contextualized/raw/main/img/gf-flow-design.png) of the "Geolocalized Facilities" pilot). Prefect pipelines can be executed locally, for example for test purposes, or on a [cloud platform](https://www.prefect.io/cloud/) (which can be installed on premises).
 
 More details on the technical environment for the ETL Python implementation is available [here](https://interstat.github.io/Statistics-Contextualized/code/Python/).
 
