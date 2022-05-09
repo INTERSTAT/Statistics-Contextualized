@@ -109,7 +109,7 @@ An example of corresponding code is given below (prefix declarations are omitted
 
 Apart from the ontology describing the data, metadata about the data is available in different forms:
 
-* The CSV data extracted from the BPE is described using the [CSV on the web](https://www.w3.org/TR/tabular-data-primer/) (CSVW) vocabulary. CSV is a notoriously sloppy standard, and CSVW is a powerful way to discribe tabular data available online so that they can be understood easily by humans and machines, thus dramatically improving its usability. A CSV on the web [description](https://interstat.eng.it/files/gf/output/gf_data_fr.csv-metadata.json) of the CSV distribution of GF data is produced semi-automatically by the ETL pipeline.
+* The CSV data extracted from the BPE is described using the [CSV on the web](https://www.w3.org/TR/tabular-data-primer/) (CSVW) vocabulary. CSV is a notoriously sloppy standard, and CSVW is a powerful way to describe tabular data available online so that they can be understood easily by humans and machines, thus dramatically improving its usability. A CSV on the web [description](https://interstat.eng.it/files/gf/output/gf_data_fr.csv-metadata.json) of the CSV distribution of GF data is produced semi-automatically by the ETL pipeline.
 
 * The Cross-Domain Integration ([DDI-CDI](https://ddialliance.org/Specification/ddi-cdi)) model is a development of the DDI Alliance aiming at improving coherence and interoperability of metadata. In particular, DDI-CDI allows the description of a wide range of data structures. In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentative [DDI-CDI description](gf-cdi.ttl) of the BPE file is provided with the GF data.
 
@@ -119,10 +119,10 @@ Apart from the ontology describing the data, metadata about the data is availabl
 
 The ETL process of the Geolocalized Facilities pilot is described in detail [here](https://app.diagrams.net/#HINTERSTAT%2FStatistics-Contextualized%2Fmain%2Fimg%2Fgf-flow.drawio). The process is organized according to the usual steps:
 
-* Extraction is performed on data which are all available on line, in various formats: CSV for French facilities and Italian schools, and RDF for Italian musea (MIBACT data available via SPARQL). Note that the latter also contains information about cultural events for Italy: those are not extracted, but they might be queried directly from the client application.
+* Extraction is performed on data which are all available online, in various formats: CSV for French facilities and Italian schools, and RDF for Italian musea (MIBACT data available via SPARQL). Note that the latter also contains information about cultural events for Italy: those are not extracted, but they might be queried directly from the client application.
 
-* The main transformation steps are made on French metadata in order to transform them into CSV on the Web. Regarding data, the main steps are conversion of the coordinates from Lambert 93 to WGS 84 for the French facilities. For the Italian ones, addresses are geocoded using the Nominatim API provided by Openstreemap (with application of the usage policy). Both sources are then converted to RDF and merged.
+* The main transformation steps are made on French metadata in order to transform them into CSV on the Web. Regarding data, the main steps are conversion of the coordinates from Lambert 93 to WGS 84 for the French facilities. For Italian schools, addresses are geocoded using the Nominatim API provided by OpenStreetMap (with application of the usage policy). Both sources are then converted to RDF and merged.
 
 * CSV files are finally uploaded to the Interstat FTP server and the RDF/Turtle files to the GraphDB triple store. Note that uploading the French facilities to FTP is not useful for the pipeline itself, but it gives the possibility to describe two different distribution in the DCAT metadata.
 
-It should be noted that the data part of the process is fully automated and reproductible at will. Regarding the metadata, the part concerning structural metadata (specifically code lists) is aslo automated, but some aspects of the production of descriptive metadata still require manual intervention.
+It should be noted that the data part of the process is fully automated and reproducible at will. Regarding the metadata, the part concerning structural metadata (specifically code lists) is also automated, but some aspects of the production of descriptive metadata still require manual intervention.
