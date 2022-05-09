@@ -22,6 +22,7 @@
  - Install [pysftp](https://pypi.org/project/pysftp/): `conda install -c conda-forge pysftp`
  - Install [RDFLib](https://rdflib.readthedocs.io/en/stable/): `pip install rdflib`
  - Install [pyproj](https://github.com/pyproj4/pyproj): `conda install -c conda-forge pyproj`
+ - Install [xlrd](https://pypi.org/project/xlrd/): `conda install -c conda-forge xlrd`
 
 Notes:
  - the flow visualization tools rely on [Graphviz](https://graphviz.org/)
