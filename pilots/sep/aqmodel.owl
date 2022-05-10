@@ -1,19 +1,19 @@
-Prefix(:=<https://urldefense.com/v3/__http://www.interstat.it/air_pollution**A__;IyM!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6SpMIlNaQ$ >)
-Prefix(qb:=<https://urldefense.com/v3/__http://purl.org/linked-data/cube*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6Snj3Lieg$ >)
-Prefix(iap:=<https://urldefense.com/v3/__http://www.interstat.it/air_pollution*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6QOZVfH0g$ >)
-Prefix(owl:=<https://urldefense.com/v3/__http://www.w3.org/2002/07/owl*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6RIftKgMQ$ >)
-Prefix(rdf:=<https://urldefense.com/v3/__http://www.w3.org/1999/02/22-rdf-syntax-ns*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6RSVvXLbA$ >)
-Prefix(xml:=<https://urldefense.com/v3/__http://www.w3.org/XML/1998/namespace__;!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6QjpP-M-Q$ >)
-Prefix(xsd:=<https://urldefense.com/v3/__http://www.w3.org/2001/XMLSchema*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6TMtpj3bg$ >)
-Prefix(rdfs:=<https://urldefense.com/v3/__http://www.w3.org/2000/01/rdf-schema*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6RXndSmdg$ >)
-Prefix(sdmx:=<https://urldefense.com/v3/__http://purl.org/linked-data/sdmx/2009/measure*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6R5cBukPA$ >)
-Prefix(skos:=<https://urldefense.com/v3/__http://www.w3.org/2004/02/skos/core*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6T01hjDcQ$ >)
-Prefix(sdmx-concept:=<https://urldefense.com/v3/__http://purl.org/linked-data/sdmx/2009/concept*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6R15xiQcg$ >)
-Prefix(sdmx-measure:=<https://urldefense.com/v3/__http://purl.org/linked-data/sdmx/2009/measure*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6R5cBukPA$ >)
+Prefix(:=<http://www.interstat.it/air_pollution##>)
+Prefix(qb:=<http://purl.org/linked-data/cube#>)
+Prefix(iap:=<http://www.interstat.it/air_pollution#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(sdmx:=<http://purl.org/linked-data/sdmx/2009/measure#>)
+Prefix(skos:=<http://www.w3.org/2004/02/skos/core#>)
+Prefix(sdmx-concept:=<http://purl.org/linked-data/sdmx/2009/concept#>)
+Prefix(sdmx-measure:=<http://purl.org/linked-data/sdmx/2009/measure#>)
 
-Ontology(<https://urldefense.com/v3/__http://www.interstat.it/air_pollution*__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6QOZVfH0g$ >
+Ontology(<http://www.interstat.it/air_pollution#>
 
-<https://urldefense.com/v3/__http://www.interstat.it/air_pollution*1.11__;Iw!!LQkDIss!SnDzlaBSGo_AVgwTQUn1gHqnqBq8gpOYjV3y3wJilkXPK8HU9017cOsMTIxPmmZ9b5RydHKvusf3i6Qxgs540Q$ >
+<http://www.interstat.it/air_pollution#1.11>
 Declaration(Class(qb:CodedProperty))
 Declaration(Class(qb:DataSet))
 Declaration(Class(qb:Observation))
