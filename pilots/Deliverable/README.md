@@ -8,10 +8,9 @@ This document describes the Interstat pilot services, how they were built and ho
 
 The document starts with a short recap about the different pilots and the technical production environment set up for Interstat. General considerations on the development of pilots are then exposed, with a particular focus on the approaches followed for creating the data pipelines and on the technical stack used for the client applications. More detail is then provided for each of the three pilots, including a reminder of the business case, the description of the relevant models and of the data, metadata, pipeline process and client application. A summary of the lessons learned, the remaining problems and the next steps is given in conclusion.
 
-
 ### One-liners on the pilots
 
-- Support for Environmental Policies (SEP): one of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies.
+- Support for Environmental Policies (SEP): One of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies.
 - Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
 - S4Y (--> Istat)
 
@@ -81,15 +80,15 @@ More details on the technical environment for the ETL Python implementation is a
 
 #### Domain knowledge approach
 
-The unique pipeline, designed for both pilots and based on Ontology, is described in the following picture. This methodology is generalized and applicable to other use cases, as well as the mixed approach based on both ETLs and Ontology mappings.
+The unique pipeline, designed for both pilots and based on Ontology, is described in the following picture. This methodology is generalized and applicable to other use cases, as well as the mixed approach based on both ETLs and data integration through domain ontology (Ontology Based Data Management – OBDM approach).
 
 <span><img title="Istat Data Pipeline" alt="Istat Data Pipeline" src="./img/dataPipeline_istat.png" style="width:80%;"></span>
 
-Main steps of the pipeline to be implemented for SEP and S4Y pilot:
+**Main steps of the pipeline to be implemented for SEP and S4Y pilot:**
 
 1. Data Acquisition - Input Data are downloaded from the source websites into a staging area.
    1.1. Input Data Acquisition - Data are downloaded from the web sources either by procedure or manually
-   1.2. DB Upload – Data are uploaded into a relational database for reprocessing.
+   1.2. DB Upload – Data are uploaded into a relational database for data processing.
 
 2. Data Processing - Data are harmonized to a common data model through ETL, or transformed to create new variables required for data matching. Several transformations are performed on uploaded data at this stage.
    2.1. Harmonization - Data are harmonized to a common data model through ETL.
@@ -97,7 +96,7 @@ Main steps of the pipeline to be implemented for SEP and S4Y pilot:
    Queries and views implement ETL Logical level Processes in the underlying host MYSQL database.
    Harmonization and Transformation processes can be run in parallel and the result is stored into harmonized datasets.
 
-3. Conceptual INTEGRATION – Once data are harmonized, they can be integrated. Data are integrated on a conceptual level by mapping onto ontology. Data are not linked physically but through a sparQL query, thus the integration is virtual.
+3. Conceptual Integration – Once data are harmonized, they can be integrated. Data are integrated on a conceptual level through the domain ontology. Data are not linked physically but through a SPARQL query, thus the integration is virtual.
    3.1. Mapping – Virtualization process associating physical data to ontology concepts.
    3.2. Quering - Virtual integration by SparQL queries. Results can be exported into the desired format. Data are federated, that is to say, they can be viewed as a single coherent set, even when actual data sources vary in format and storage technology.
    The components implementing the mapper and the reasoner are submodules of an Ontology Based Management System (OBDA System).
@@ -113,8 +112,8 @@ Main steps of the pipeline to be implemented for SEP and S4Y pilot:
 
 Computing Management and Optimization
 Tasks can be managed and executed either physically or virtually, to balance the resources for data processing. While physical elaboration is quicker but static, the virtualization is more dynamic but more complex. One example is the conversion of the Geo coordinates in Administrative Units (LAU).
-If Virtualization is chosen, GEO SparQL queries can be integrated into the Ontological framework, and the corresponding LAU can be derived virtually, but this is rather heavy on the reasoner because it must be calculated on the fly at each query. So, one can just statically convert the coordinates through a dedicated service and create a materialized new variable to store LAU and then virtualize it without the need to reference GEO SparQL.
-The main differences between the two approaches concern the different tools used for data harmonization and the methodology applied to obtain and convert integrated data in rdf format. More in detail, in the first approach ETL procedures have been developed in Python, while in the second approach in SqL. In relation to data integration through ontologies, the first approach generates RDF triples from a CSV dataset through Python procedures, while the second approach uses relational DB and Monolith.
+If Virtualization is chosen, GEO SPARQL queries can be integrated into the Ontological framework, and the corresponding LAU can be derived virtually, but this is rather heavy on the reasoner because it must be calculated on the fly at each query. So, one can just statically convert the coordinates through a dedicated service and create a materialized new variable to store LAU and then virtualize it without the need to reference GEO SPARQL.
+The main differences between the two approaches concern the different tools used for data harmonization and the methodology applied to obtain and convert integrated data in rdf format. More in detail, in the first approach ETL procedures have been developed in Python, while in the second approach in SqL. In relation to data integration through ontologies, the first approach generates RDF triples from a CSV dataset through Python procedures, while the second approach uses relational DB and Monolith. In addition, while the first approach uses metaontologies (e. g.: SKOS, Data Cube vocabulary), the second approach is based on domain ontologies and then links the concepts of the domain ontology to metaontologies concepts.
 
 ### Client applications
 
@@ -139,6 +138,9 @@ Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualize
 #### Models
 
 The target data model for census and air quality data, exported in OWL format, combines several existing vocabularies, such as SOSA for sensor description and AQD model for Air pollution. An overview of the ontology structure of census and air quality data is depicted in the following figure:
+
+ONTOLOGY FIGURE
+
 In the modelled ontology, the information objects are colour-coded as follows:
 
 <span><img title="AQ ontologies" alt="AQ ontologies" src="./img/ontologiesAQ_istat.png" style="width:40%; margin-left:20%"></span>
@@ -148,8 +150,14 @@ The updated version of the ontology will contain to some metamodels, such as Dat
 #### Data
 
 This paragraph provides an overview of structural metadata describing the different data sources to be linked.
-Census data
+
+##### Census data
+
+The SEP pilot plans to combine air quality data with demographic data from the French and Italian censuses. Census data whose metadata are defined by European legislation have been selected in order to minimize interoperability questions and ensure reproductibility at the European level. The explanatory notes for the 2021 census round give details on this subject. In particular, they present a new feature of the 2021 round: the dissemination of population data at the 1 km² grid level, for which Eurostat will provide Inspire metadata and which will be particularly interesting to combine with air quality data.
+
+For testing purposes, it is easier to start with simple data, for example the breakdown of population by age range, sex and geographic local administrative unit. In DDI-CDI terms, census data corresponds to a "Dimensional" (actually "Cube") data structure. The definition of this data structure according to the SDMX model is described [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/sep/sep-dsd.md).
 Italian census data have been extracted from the section of Istat website disseminating the main results of permanent censuses, based on the integration of administrative sources and data collected on a representative sample of municipalities and households (see [here](http://dati-censimentipermanenti.istat.it/?lang=en&SubSessionId=e260034c-92f8-438f-b9f7-737286737689)).
+
 The following table reports the list and the description of the fields extracted and transformed in the data processing step.
 
 | Field name | Description                                              | Data type            |
@@ -162,9 +170,9 @@ The following table reports the list and the description of the fields extracted
 | TIME       | Reference year                                           | Year (always ‘2019’) |
 | Value      | Value of the resident population in the reference period | Float                |
 
-Description of French census data???
+For France, the data is taken from [here](https://www.insee.fr/fr/statistiques/5395878?sommaire=5395927). The reference year is 2018 for the population counts and 2020 for the reference geography.
 
-#### Italian Air pollution data
+##### Italian Air pollution data
 
 The data related to air pollutants have been extracted from the annual reports published by ISPRA, the reference authority for monitoring and assessing air quality in Italy. More in detail, [here](https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/TABELLA%201_PM10_2019_rev.xlsx) is the endpoint to extract data concerning PM10 pollutant.
 
@@ -178,9 +186,9 @@ The subset of fields extracted from the original data source are described below
 | Nome della stazione         | Name of the Sensor station | Text      |
 | Valore medio annuo³ [µg/m³] | Average annual value       | Float     |
 
-#### French Air pollution data
+##### French Air pollution data
 
-French data concerning PM10 pollutant, collected in 2019 as reference year, are available from the following [link](<http://aidef.apps.eea.europa.eu/?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22term%22%3A%7B%22CountryOrTerritory%22%3A%22France%22%7D%7D%2C%7B%22term%22%3A%7B%22ReportingYear%22%3A%222019%22%7D%7D%2C%7B%22term%22%3A%7B%22Pollutant%22%3A%22Particulate%20matter%20%3C%2010%20%C2%B5m%20(aerosol)%22%7D%7D%5D%7D%7D%2C%22display_type%22%3A%22tabular%22%7D>).
+French data concerning PM10 pollutant, collected in 2019 as reference year, are available from the following [link](<http://aidef.apps.eea.europa.eu/?source=%7B%22query%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22term%22%3A%7B%22CountryOrTerritory%22%3A%22France%22%7D%7D%2C%7B%22term%22%3A%7B%22ReportingYear%22%3A%222019%22%7D%7D%2C%7B%22term%22%3A%7B%22Pollutant%22%3A%22Particulate%20matter%20%3C%2010%20%C2%B5m%20(aerosol)%22%7D%7D%5D%7D%7D%2C%22display_type%22%3A%22tabular%22%7D>). Air quality data is available from the European Environment Agency (EEA) at the Air Quality e-Reporting web page. More precisely, the "AIDE F" data flow seems in first approach to be the most relevant for the SEP pilot. The data corresponding to this flow can be General information about the Air Quality e-Reporting products is available in this document. In particular, the description of variables for AIDE F is reproduced below.
 
 The table below lists the fields extracted from the original data source to be transformed in the following steps.
 
@@ -200,32 +208,38 @@ The table below lists the fields extracted from the original data source to be t
 
 Concerning geographic location codes, the classification of Local Administrative Units (LAUs) and European regions according to NUTS (Nomenclature of territorial units for statistics) system is published in Eurostat website, at the following [link](https://ec.europa.eu/eurostat/web/nuts/local-administrative-units).
 The description of the code lists of categorical variables extracted from the original data sources are available at the following [link](https://github.com/INTERSTAT/Statistics-Contextualized/tree/main/pilots/sep/sep-dsd-1.ttl).
-Most of these code lists are based or compliant with the official statistical classifications available in RAMON, the Eurostat's metadata server.
+Most of these code lists are based or compliant with the official statistical classifications available in [RAMON](hhttps://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_NOM&StrGroupCode=CLASSIFIC&StrLanguageCode=EN), the Eurostat's metadata server.
+The code lists used for Air quality data are documented in the Eionet Data Dictionary. They are available in SKOS form, with additional information. For example the AQD - Air Quality Pollutants scheme contains also data on recommended unit or measurement equipment for the pollutant.
 
 #### Process
 
 The main steps of the data pipeline of the SEP pilot are:
-Step 1: Data acquisition
+
+_**Step 1: Data acquisition**_
+
 Italian and French Air quality data have been extracted from the websites mentioned above. The extracted datasets were uploaded to the FTP area of the project.
 
-Step2: Data processing
-Census data
-Italian census data have been transformed according to the requested Data Structure through a script in R language, available [here](https://github.com/INTERSTAT/Statistics-Contextualized/files/7539489/Pilot.A.-.census.data.processing.txt).
+_**Step2: Data processing**_
 
-More in detail, data have been filtered and NUTS3 variable has been added using data LAUs codes published on Eurostat website.
+**Census data**
 
-Air quality data
+Italian census data have been transformed according to the requested Data Structure through a script in R language, available [here](https://github.com/INTERSTAT/Statistics-Contextualized/files/7539489/Pilot.A.-.census.data.processing.txt). More in detail, data have been filtered and NUTS3 variable has been added using data LAUs codes published on Eurostat website.
+Concerning French census data, an R script allows to obtain the CSV file directly from the data published on Insee's web site. The script uses auxiliary CSV files containing reference data about age groups (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/age-groups.csv)) and French LAU/NUTS (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/nuts3-fr.csv)) which are also described in the CSVW metadata, available [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/sep/sep-census.csv-metadata.json).
+
+**Air quality data**
+
 The Data transformation phase was applied only to the dataset related to the PM10 pollutant.
-The French dataset about the PM10 taken from the European Environmental Agency and uploaded to the FTP server, in its initial version contains the geographic coordinates; it has been enriched with the Municipality code through a script in java using the specific service/API.
-NUTS3 codes have been added to classify both Italian and French territories, while metadata regarding pollutant type, data reference time and aggregation type have been added in the Italian dataset.
-Transformation script in R language: processing_ETL_AIR.R.txt
+The French dataset about the PM10 taken from the European Environmental Agency and uploaded to the FTP server, in its initial version contains the geographic coordinates; it has been enriched with the Municipality codes through a script in java using the specific service/API.
+NUTS3 codes have been added to classify both Italian and French territories, while metadata regarding pollutant type, data reference time and aggregation type have been added in the Italian dataset. Transformation script in R language: processing_ETL_AIR.R.txt
 Input files have been uploaded from ftp source as is. Harmonization has been done via SQL union queries wrapped in a single view.
 
-Step3: Conceptual integration
-Data integration is realized on a conceptual level through an Ontology Base Data Access (OBDA) architecture. MySQL is used as data repository for Monolith, the tool implementing this approach and used for data mappings. Specifically, Monolith associates mappings with SQL queries on MySQL database, so that SparQL queries can be rewritten automatically into SQL queries.
+_**Step3: Conceptual integration**_
 
-Step4: Direct dissemination
-The tool Monolith can export the queries based on the ontology concepts in XML format. The SparQL resultset can be formatted in csv, json and rdf and sent to the subsequent stages of the pipeline. Rdf triples can be uploaded to INTERSTAT GraphDB for data querying through the client application.
+Data integration is realized on a conceptual level through an Ontology Base Data Access (OBDA) architecture. MySQL is used as data repository for Monolith, the tool implementing this approach and used for data mappings. Specifically, Monolith associates mappings with SQL queries on MySQL database, so that SPARQL queries can be rewritten automatically into SQL queries.
+
+_**Step4: Direct dissemination**_
+
+The tool Monolith can export the queries based on the ontology concepts in XML format. The SPARQL resultset can be formatted in csv, json and rdf and sent to the subsequent stages of the pipeline. RDF triples can be uploaded to INTERSTAT GraphDB for data querying through the client application.
 
 #### SEP Client application (--> ENG)
 
