@@ -86,27 +86,27 @@ The unique pipeline, designed for both pilots and based on Ontology, is describe
 
 **Main steps of the pipeline to be implemented for SEP and S4Y pilot:**
 
-1. Data Acquisition - Input Data are downloaded from the source websites into a staging area.
-   1.1. Input Data Acquisition - Data are downloaded from the web sources either by procedure or manually
-   1.2. DB Upload – Data are uploaded into a relational database for data processing.
+1. **Data Acquisition** - Input Data are downloaded from the source websites into a staging area.
+   1.1. _Input Data Acquisition_ - Data are downloaded from the web sources either by procedure or manually
+   1.2. _DB Upload_ – Data are uploaded into a relational database for data processing.
 
-2. Data Processing - Data are harmonized to a common data model through ETL, or transformed to create new variables required for data matching. Several transformations are performed on uploaded data at this stage.
-   2.1. Harmonization - Data are harmonized to a common data model through ETL.
-   2.2. Transformation - Data aggregation and standardization, unit identification, common variables creation according to target data models, creation of new variables.
-   Queries and views implement ETL Logical level Processes in the underlying host MYSQL database.
-   Harmonization and Transformation processes can be run in parallel and the result is stored into harmonized datasets.
+2. **Data Processing** - Data are harmonized to a common data model through ETL, or transformed to create new variables required for data matching. Several transformations are performed on uploaded data at this stage.
+   2.1. _Harmonization_ - Data are harmonized to a common data model through ETL.
+   2.2. _Transformation_ - Data aggregation and standardization, unit identification, common variables creation according to target data models, creation of new variables.
+   Queries and views implement **ETL Logical level Processes** in the underlying host **MYSQL database**.
+   Harmonization and Transformation processes can be run in parallel and the result is stored into **harmonized datasets**.
 
-3. Conceptual Integration – Once data are harmonized, they can be integrated. Data are integrated on a conceptual level through the domain ontology. Data are not linked physically but through a SPARQL query, thus the integration is virtual.
-   3.1. Mapping – Virtualization process associating physical data to ontology concepts.
-   3.2. Quering - Virtual integration by SparQL queries. Results can be exported into the desired format. Data are federated, that is to say, they can be viewed as a single coherent set, even when actual data sources vary in format and storage technology.
-   The components implementing the mapper and the reasoner are submodules of an Ontology Based Management System (OBDA System).
+3. **Conceptual Integration** – Once data are harmonized, they can be integrated. Data are integrated on a conceptual level through the domain ontology. Data are not linked physically but through a SPARQL query, thus the integration is virtual.
+   3.1. _Mapping_ – Virtualization process associating physical data to ontology concepts.
+   3.2. _Quering_ - Virtual integration by SparQL queries. Results can be exported into the desired format. Data are **federated**, that is to say, they can be viewed as a single coherent set, even when actual data sources vary in format and storage technology.
+   The components implementing the **mapper** and the **reasoner** are submodules of an Ontology Based Management System (**OBDA System**).
 
-4. Direct dissemination – End point can be used to query and disseminate data in table format or send data to specific applications. They represent the communication interface with the external world.
+4. **Direct dissemination** – End point can be used to query and disseminate data in table format or send data to specific applications. They represent the communication interface with the external world.
    End users can query linked data through predefined queries, or by writing new queries, or by selecting the concepts of interest modelled in the ontology, realizing conceptual integration by design (through the Sparqling tool to be integrated in the framework).
-   4.1. SparQL – Queries are provided as input to the system through the endpoint interface
-   4.2. SparQL result – Results are provided as output through the endpoint interface.
+   4.1. _SparQL_ – Queries are provided as input to the system through the endpoint interface
+   4.2. _SparQL result_ – Results are provided as output through the endpoint interface.
 
-5. Context Broker Ingestion – Data exported in JSON can be sent to context broker via a converter module into NGSI-LD format.
+5. **Context Broker Ingestion** – Data exported in JSON can be sent to context broker via a converter module into NGSI-LD format.
    5.1. Queries are provided at design time by the designer when using this endpoint.
    5.2. Resultset must be converted into a specified format JSON NGSI-LD through a dedicated converter module.
 
