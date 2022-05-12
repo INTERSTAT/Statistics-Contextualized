@@ -436,17 +436,17 @@ On a conceptual level, Italian and French data have been integrated through onto
 The common logical model has the following structure:
 
 | Table                 | Field              | Is part of key | Description                                                                                                                     |
-| --------------------- | ------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------- | --- |
+| --------------------- | ------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | V_school_unit         | school_id          | True           | Code to identify one school unit. The code is unique on different countries                                                     |
 | V_school_unit         | school_name        |                |                                                                                                                                 |
 | V_school_unit         | In_lau             |                | Municipality (LAU code) of school. The code is unique on different countries                                                    |
 | V_school_unit         | Institution_type   |                | For public schools is 1, otherwise 0                                                                                            |
 | V_school_unit         | ISCED_school_code  |                | ISCED code of prevalent Education level provided by the school. Prevalent because a school could provide many education levels. |
-| V_students_attendance | school_id          | True           | Identifier of School unit. Attendances of students for one School unit and for one scolastic year                               |     |
+| V_students_attendance | school_id          | True           | Identifier of School unit. Attendances of students for one School unit and for one scolastic year                               |
 | V_students_attendance | scholastic_year    | True           | Identifier of sclolastic year (first of year couple)                                                                            |
 | V_students_attendance | number_of_students |                | Number of students attending                                                                                                    |
 
-Data from the original data sources have been transformed and harmonized according to the common logical model. The diagram below describes how data have been transformed and loaded in the following objects: V_school_unit, V_students_attendance and V_group_attendance, which is the information object resulting from the conceptual integration.
+Data from the original data sources have been transformed and harmonized according to the common logical model. The diagram below describes how data have been transformed and loaded in the following objects: **V_school_unit**, **V_students_attendance** and **V_group_attendance**, which is the information object resulting from the conceptual integration.
 
 <span><img title="data transformation dependencies s4y" alt="data transformation dependencies s4y" src="./img/data_transformation_dependencies_s4y.png" style="width:70%;"></span>
 
