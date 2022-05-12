@@ -12,7 +12,7 @@ The document starts with a short recap about the different pilots and the techni
 
 - Support for Environmental Policies (SEP): One of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies.
 - Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
-- S4Y (--> Istat)
+- School for You (S4Y): This pilot allows users such as citizens and political decision-makers to discover aggregated data resulting from the integration of several sources about school attendance and the distribution of students in Italy and France.
 
 ## Reminder on the production environment
 
@@ -310,11 +310,149 @@ Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualize
 
 #### Models
 
+The domain concepts about school attendance and school units, are reported in the following ontology, exported as owl and as image.
+
+<span><img title="Ontology sfy" alt="Ontology sfy" src="./img/ontology_s4y.png" style="width:80%;"></span>
+
+This ontology contains the class V_group_attendance as istance of metaclass View. An ontological view on the domain allows to aggregate data about the domain for the following measures: number of students, number of schools and by the following dimensions: Isced school level, Scholastic year, Public school, Municipality (Lau).
+
 #### Data
+
+The following paragraph provides an overview of Italian and French data sources linked to test cross-border and cross-domain interoperability. Data extracted for the pilot focus mainly on students enrollment and school location.
+
+##### Italian School data
+
+The Italian data used for the pilot belong to the [MIUR (The Ministry for Education) catalogue](https://dati.istruzione.it/opendata/). The datasets, extracted in RDF format and concerning both public and private schools, provide the following information:
+
+- [Registry information on schools](https://dati.istruzione.it/opendata/ricerca/?searchinput=SCUANAGRAFE&lg=%24lang) (Informazioni anagrafiche scuole statali, Informazioni anagrafiche scuole paritarie);
+- [Students by course year and age group](https://dati.istruzione.it/opendata/ricerca/?searchinput=ALUCORSOETA&lg=%24lang) (Studenti per anno di corso e fascia di eta'. Scuola statale, Studenti per anno di corso e fascia di età. Scuola paritaria);
+  The reference dataset for the list and location of schools of all levels is available [here](https://dati.istruzione.it/opendata/ricerca/?searchinput=EDIANAGRAFESTA&lg=) and is also considered for the GF pilot. The coordinates of the schools have been added to this dataset and the output file is present in the [FTP area of the project](https://interstat.eng.it/files/gf/).
+
+The following table reports the subset of fields extracted from the [Registry information on schools](https://dati.istruzione.it/opendata/ricerca/?searchinput=SCUANAGRAFE&lg=%24lang).
+
+| Field name                                | Description                     | Data type |
+| ----------------------------------------- | ------------------------------- | --------- |
+| ANNOSCOLASTICO                            | Scholastic year                 | Numeric   |
+| CODICESCUOLA                              | School identifier               | Text      |
+| DENOMINAZIONESCUOLA                       | School name                     | Text      |
+| INDIRIZZOSCUOLA                           | School address                  | Text      |
+| CODICECOMUNESCUOLA                        | School cadastral code           | Text      |
+| DESCRIZIONETIPOLOGIAGRADOISTRUZIONESCUOLA | Level of educational attainment | Text      |
+
+For the available scholastic years, the number of students has been extracted from the following dataset:
+
+- [Students by course year and age group](https://dati.istruzione.it/opendata/ricerca/?searchinput=ALUCORSOETA&lg=%24lang).
+
+The variables extracted for data integration are reported in the table below.
+
+| Field name  | Description        | Data type |
+| ----------- | ------------------ | --------- |
+| ANN_SCO_RIF | Scholastic year    | Numeric   |
+| COD_PLE_UTE | School identifier  | Text      |
+| QTY_NUM_ALU | Number of students | Text      |
+
+##### French School data
+
+The following fields have been extracted from the school registry [dataset](https://data.education.gouv.fr/explore/dataset/fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre/table/?disjunctive.nature_uai&disjunctive.nature_uai_libe&disjunctive.code_departement&disjunctive.code_region&disjunctive.code_academie&disjunctive.secteur_prive_code_type_contrat&disjunctive.secteur_prive_libelle_type_contrat&disjunctive.code_ministere&disjunctive.libelle_ministere) (called "Address and geolocalization of primary and secondary educational institutions"). Data extraction is performed using the API to retrieve a CSV file.
+
+The number of students for the three last scholastic year (2019, 2020 and 2021) has been extracted from four datasets:
+
+- [Student enrollment by grade and number of classes per school](https://data.education.gouv.fr/explore/dataset/fr-en-ecoles-effectifs-nb_classes/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_ecole&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur&disjunctive.code_postal&sort=tri) (only primary and nursery school).
+- [Number of students by grade, gender, most frequent modern languages 1 and 2, by lower secondary school](https://data.education.gouv.fr/explore/dataset/fr-en-college-effectifs-niveau-sexe-lv/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_college&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur&disjunctive.rep&disjunctive.rep_plus).
+- [Number of students by grade, gender, most frequent modern languages 1 and 2, by upper secondary school](https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau-sexe-lv/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_lycee&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur) (school of general and technological education).
+- [Number of students by grade, gender, most frequent modern languages 1 and 2, by upper secondary school](https://data.education.gouv.fr/explore/dataset/fr-en-lycee_pro-effectifs-niveau-sexe-lv/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_lycee&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur) (vocational school).
+
+Data extraction is performed based CSV files directly available online. Variables finally extracted are:
+
+| Field name       | Description                                      | Data type                                                     |
+| ---------------- | ------------------------------------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| school_id        | Unique school identifier                         | String                                                        | variable "numero_uai" in the dataset n°1                                                        |
+| name             | Official name of the school                      | String                                                        | variable "appellation_officielle in the dataset n°1                                             |
+| latitude         | Latitude of the school (WGS84)                   | Float                                                         | variable "latitude" in the dataset n°1                                                          |
+| longitude        | Longitude of the school (WGS84)                  | Float                                                         | variable "longitude" in the dataset n°1                                                         |
+| lau              | Lau code                                         | Code list                                                     | variable "code_commune" in the dataset n°1                                                      |
+| institution_type | Type of institution                              | Code list (Coded as "PR" for "Private" and "PU" for "Public") | variable "secteur_public_prive_libe" in the dataset n°1                                         |
+| code_nature      | Nature code                                      | Code list                                                     | variable "nature_uai" in the dataset n°1                                                        |
+| ISCED_level      | Level of ISCED classification                    | Code list                                                     | coded based on code_nature (see mapping file [here](https://interstat.eng.it/files/s4y/input/)) |
+| scholastic_year  | Scholastic year                                  | Year                                                          | Datasets n°2 to n°5                                                                             |
+| students_number  | Number of students (measure) per scholastic year | Integer                                                       | Datasets n°2 to n°5                                                                             |
 
 #### Metadata
 
+ISCED (International Standard Classification of Education) refers to the national (and sub-national) education programme and the related recognised educational qualification.
+
+[Link to map the classifications of different countries](http://uis.unesco.org/en/isced-mappings)
+[Mapping ISCED (CITE) – French data](http://uis.unesco.org/sites/default/files/documents/isced-2011-fr.pdf)
+
+**Educational attainment level**: low education, medium education, high education
+**ISCED attainment level**
+_Low education_
+
+- ISCED 0: Early childhood education (‘less than primary’ for educational attainment)
+- ISCED 1: Primary education
+- ISCED 2: Lower secondary education
+  _Medium education_
+- ISCED 3: Upper secondary education
+- ISCED 4: Post-secondary non-tertiary educ
+  _High education_
+- ISCED 5: Short-cycle tertiary education
+- ISCED 6: Bachelor’s or equivalent level
+- ISCED 7: Master’s or equivalent level
+- ISCED 8: Doctoral or equivalent level
+
+Institution type { public = 1, private = 0 }
+
+Metadata and harmonization outline are provided in the excel file [S4Y-SchoolRegistry.meta.xlsx](https://github.com/INTERSTAT/Statistics-Contextualized/files/8471721/S4Y-SchoolRegistry.meta.xlsx).
+
 #### Process
+
+The main steps of the data pipeline are:
+
+_**Step 1: Data acquisition**_
+
+Italian and French data have been extracted from the websites mentioned above. The extracted datasets were uploaded to the FTP area of the project.
+At the moment the datasets referring to the year 2019 have been loaded, but all the school years could be considered and added in order to allow the user to make an analysis of the data over time.
+The ETL process producing French data file is organized according to the usual steps:
+Extraction is performed on data which are all available online: CSV retrived using API for school registry and CSV directly downloaded for four other datasets.
+
+The main transformation steps are:
+
+- recoding institution type and coding ISCED level based on a mapping file
+- merging school registry dataset and students number datasets
+- producing CSV file
+  CSV data file is finally uploaded to the Interstat [FTP server](https://interstat.eng.it/files/s4y/output/).
+
+_**Step2: Data processing**_
+
+Some variables have been created or extracted by ad-hoc services/API. More in detail:
+
+- IT coordinates have been processed through a geo converter service from Address and LAU or ZIP-CODE
+- IT School Year has been converted to a standard format
+- IT information about the school being public or private has been added
+- FR School Year has been extracted from other sources.
+
+_**Step3: Conceptual and logical integration**_
+On a conceptual level, Italian and French data have been integrated through ontology concepts. Starting from the conceptual integration achieved through ontology, the main goal of the common logical model is to harmonize cross domain and cross border data sources.
+The common logical model has the following structure:
+
+| Table                 | Field              | Is part of key | Description                                                                  |
+| --------------------- | ------------------ | -------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| V_school_unit         | school_id          | True           | Code to identify one school unit. The code is unique on different countries  |
+| V_school_unit         | school_name        |                |                                                                              |
+| V_school_unit         | In_lau             |                | Municipality (LAU code) of school. The code is unique on different countries |
+| V_school_unit         | Institution_type   |                | For public schools is 1, otherwise 0                                         |
+| V_school_unit         | ISCED_school_code  |                | ISCED code of prevalent Education level provided by the school               |
+| V_students_attendance | school_id          | True           | True                                                                         | Prevalent because a school could provide many education levels |
+| V_students_attendance | scholastic_year    | True           | Identifier of sclolastic year (first of year couple)                         |
+| V_students_attendance | number_of_students |                | Number of students attending                                                 |
+
+Data from the original data sources have been transformed and harmonized according to the common logical model. The diagram below describes how data have been transformed and loaded in the following objects: V_school_unit, V_students_attendance and V_group_attendance, which is the information object resulting from the conceptual integration.
+
+<span><img title="data transformation dependencies s4y" alt="data transformation dependencies s4y" src="./img/data_transformation_dependencies_s4y.png" style="width:70%;"></span>
+
+_**Step4: Direct dissemination**_
+
+See the description of SEP data pipeline.
 
 #### SFY client application (--> ENG)
 
