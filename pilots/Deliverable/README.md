@@ -364,7 +364,7 @@ The number of students for the three last scholastic year (2019, 2020 and 2021) 
 
 Data extraction is performed based CSV files directly available online. Variables finally extracted are:
 
-| Field name       | Description                                      | Data type                                                     |
+| Field name       | Description                                      | Data type                                                     | Comment                                                                                         |
 | ---------------- | ------------------------------------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | school_id        | Unique school identifier                         | String                                                        | variable "numero_uai" in the dataset n°1                                                        |
 | name             | Official name of the school                      | String                                                        | variable "appellation_officielle in the dataset n°1                                             |
@@ -435,16 +435,16 @@ _**Step3: Conceptual and logical integration**_
 On a conceptual level, Italian and French data have been integrated through ontology concepts. Starting from the conceptual integration achieved through ontology, the main goal of the common logical model is to harmonize cross domain and cross border data sources.
 The common logical model has the following structure:
 
-| Table                 | Field              | Is part of key | Description                                                                  |
-| --------------------- | ------------------ | -------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| V_school_unit         | school_id          | True           | Code to identify one school unit. The code is unique on different countries  |
-| V_school_unit         | school_name        |                |                                                                              |
-| V_school_unit         | In_lau             |                | Municipality (LAU code) of school. The code is unique on different countries |
-| V_school_unit         | Institution_type   |                | For public schools is 1, otherwise 0                                         |
-| V_school_unit         | ISCED_school_code  |                | ISCED code of prevalent Education level provided by the school               |
-| V_students_attendance | school_id          | True           | True                                                                         | Prevalent because a school could provide many education levels |
-| V_students_attendance | scholastic_year    | True           | Identifier of sclolastic year (first of year couple)                         |
-| V_students_attendance | number_of_students |                | Number of students attending                                                 |
+| Table                 | Field              | Is part of key | Description                                                                                                                     |
+| --------------------- | ------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------- | --- |
+| V_school_unit         | school_id          | True           | Code to identify one school unit. The code is unique on different countries                                                     |
+| V_school_unit         | school_name        |                |                                                                                                                                 |
+| V_school_unit         | In_lau             |                | Municipality (LAU code) of school. The code is unique on different countries                                                    |
+| V_school_unit         | Institution_type   |                | For public schools is 1, otherwise 0                                                                                            |
+| V_school_unit         | ISCED_school_code  |                | ISCED code of prevalent Education level provided by the school. Prevalent because a school could provide many education levels. |
+| V_students_attendance | school_id          | True           | Identifier of School unit. Attendances of students for one School unit and for one scolastic year                               |     |
+| V_students_attendance | scholastic_year    | True           | Identifier of sclolastic year (first of year couple)                                                                            |
+| V_students_attendance | number_of_students |                | Number of students attending                                                                                                    |
 
 Data from the original data sources have been transformed and harmonized according to the common logical model. The diagram below describes how data have been transformed and loaded in the following objects: V_school_unit, V_students_attendance and V_group_attendance, which is the information object resulting from the conceptual integration.
 
