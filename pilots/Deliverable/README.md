@@ -467,9 +467,20 @@ This pilot allows users such as citizens and political decision-makers to discov
 
 ### Lessons learned
 
-- Most of the time on data cleaning (common finding)
-- Some important data are still not easily accessible (-> link to EC data strategy, HVD...)
-- Importance of metadata
+It is common to say that data harvesting and cleaning is the biggest part of the job when building data pipelines. Estimates of the effort spent on these preliminary phases typically vary between 50% and 80%, or even more. The work carried out on the Interstat pilots can only confirm this fact, and it appears that we are rather at the top of the range. Several comments can be made about this:
+
+* Some important data are still not easily accessible. For example, a manual action is still required to obtain the results of the Italian census, and it is probably the case in other countries as well. This means of course that it is not possible to fully automate processes using these data: for each update, a human intervention is necessary. This also means that traceability and reproducibility of the processes are greatly impaired.
+
+* When available online, data are published in a great variety of formats: different versions of Excel, different flavours of CSV, XML, etc. It is rare to find data at the four- or five-star level of the [Berners-Lee scheme](https://5stardata.info/en/). Even at the two-star level, data structures are ad hoc, poorly documented and, non-interoperable. A blatant example is provided by the air quality measures from Ispra, which use a different Excel structure for each pollutant (see [details](https://github.com/INTERSTAT/Statistics-Contextualized/issues/17#issuecomment-1029201619)), whereas the European Environment Agency does a great job of harmonizing and lifting the data to RDF.
+
+* Even at the very lowest level, technical standardization is not assured: it is really deplorable to see that some data publishers still use local character sets instead of UTF-8.
+
+* It is still extremely rare to see usage licenses attached to data, not to mention standard or machine-understandable licenses.
+
+* The cross-border dimension of the Interstat pilots adds of course to the complexity. Whereas in some domains like the population census, interoperability exist up to the semantic or even legal level, it is not the case for others. For example, a lot of exchanges between Istat and Insee were needed in order to come up with a common content for the data on schools. In view of this observation, we can only hope for a rapid deployment of the strategy proposed by the European Commission in terms of open data, and in particular with regard to high value datasets. It should be remembered, however, that even at the best level of automatable access, the data will remain unusable until interoperable, accessible and coherent metadata are linked to them.
+
+In comparison to the creation of the data pipelines, the development of client applications greatly benefited from previous investments made by certain members of the consortium and went rather smoothly.
+
 
 ### Remaining problems
 
