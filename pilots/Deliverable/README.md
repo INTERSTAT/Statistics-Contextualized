@@ -482,12 +482,10 @@ It is common to say that data harvesting and cleaning is the biggest part of the
 In comparison to the creation of the data pipelines, the development of client applications greatly benefited from previous investments made by certain members of the consortium and went rather smoothly.
 
 
-### Remaining problems
-
-- difficulties with the Context Broker (_do we want to mention that?_)
-
 ### Next steps
 
-- continuous improvement of pilots (document, automate, add sources, pimp client)
-- assessment framework
-- work on the context broker, especially at the model level (mention work on SDMX/NGSI-LD)
+The work will continue in Activity 3 until the end of the project, along several axes:
+
+* Continuous improvement of the pilots: enhancement of the documentation, better automation, continued effort on metadata harmonization and standardization, etc. The integration of new data in some pilots will also be studied, for example [income and poverty indicators](https://www.insee.fr/fr/statistiques/4507225) for the SEP pilot. Development of the client applications will also be pursued.
+* The bulk of the work will now shift to the assessment framework, which constitutes the next milestone. This will in particular give the opportunity to compare the two approaches used for the development of the pilots, which are based on different technical paradigms and also different guiding principles.
+* Finally more resources will be dedicated to a better integration of the Context Broker in the pilots, especially at the model level with more effort on achieving interoperability between the SDMX and NGSI-LD data and metadata models.
