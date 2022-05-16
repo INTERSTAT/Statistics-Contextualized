@@ -42,6 +42,11 @@ GraphDB also supports SPARQL Federated Query which is an extension of the basic 
 
 The strength of GraphDB is that it is also an HTTP service endpoint that can receive requests and can process SPARQL queries; this service is queried directly by client applications and the requests results are displayed in them.
 
+### Sharing and exchange of project files: SFTP server
+
+As part of the INTERSTAT project, within the different project activities, an SFTP (SSH File Transfer Protocol) server was used to exchange data, transfer, share and manage files produced by the intermediate stages of the development pipeline. Transferring files through an SFTP server is a secure way to transmit data; the data to establish the connection and finalize the authentication and also the data transmitted are encrypted. With an SSH FTP server, it was possible to transfer files securely over an encrypted SSH connection.
+The SFTP server of the project contains both the files used as input to some phases of the pipeline, and also the output files resulting from the activities.
+
 ## Pilot development
 
 In this section, we decribe how the pilot services were created, with a specific focus on the development of the data pipelines and on the client applications.
@@ -117,15 +122,14 @@ The main differences between the two approaches concern the different tools used
 
 ### Client applications
 
-The following section describes the services implemented and exposed by the client applications of the three pilots.
-The description of them is inserted in tables in which, in particular, they are classified into:
+At the end of the development of the data pipelines, the data produced is suitably consumed by _client applications_, which are web applications exposing services in which the information obtainable from the underlying data is suitably organized and displayed.
+Three applications have been developed, one for each pilot, and the related services are described in detail in the next chapter.
+The description of the exposed services will be inserted into tables in which, in particular, they are classified into:
 
-- _Cross-border service_: it compares to a specific indicator or a specific variable in selected Italian and French areas.
+- _Cross-border service_: it compares a specific indicator or a specific variable in selected Italian and French areas.
 - _Cross-domain service_: it allows to link different domains (such as Census and Air Quality) in order to produce new useful information from their combination.
 
 A service can also be both cross-border and cross-domain.
-
-[add screenshots with short description]
 
 ## Details by pilot
 
