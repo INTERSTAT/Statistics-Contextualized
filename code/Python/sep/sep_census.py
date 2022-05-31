@@ -53,7 +53,7 @@ def raw_italian_to_standard(df, age_classes, nuts3):
     df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | (df_reduced['ITTER107'].str.strip().str[0:1] != 'IT')]
 
     # Age & sex range have to be recoded to be mapped with the reference code list
-    df_filtered['ETA1'] = df_filtered.apply(lambda row: row.ETA1 if row.ETA1 == 'Y_UN4' else 'Y_LT5', axis=1)
+    df_filtered['ETA1'] = df_filtered['ETA1'].replace('Y_UN4', 'Y_LT5')
     df_filtered['SEXISTAT1'] = df_filtered.apply(lambda row: "1" if row.SEXISTAT1 == 'M' else '2', axis=1)
 
     df_final = df_filtered.rename(columns={'ITTER107': 'lau', 'SEXISTAT1': 'sex', 'ETA1': 'age', 'Value': 'population'})
@@ -84,7 +84,7 @@ def get_age_class_data(url):
 def get_nuts3_fr(url):
     resp = get(url)
     data = BytesIO(resp.content)
-    df = pd.read_csv(data)
+    df = pd.read_csv(data)    
     return df
 
 
@@ -222,7 +222,7 @@ def write_csv_on_ftp(df):
     # TODO: Use temporary file
     csv = df.to_csv(r'census_fr_it.csv', index=False, header=True)
 
-    with open("../secrets.json") as sf:
+    with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         FTP_URL = secrets["ftp"]["url"]
         FTP_USER = secrets["ftp"]["user"]
@@ -234,7 +234,7 @@ def write_csv_on_ftp(df):
 
 with Flow('census_csv_to_rdf') as flow:
 
-    with open("/home/coder/work/Statistics-Contextualized/code/Python/secrets.json") as sf:
+    with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         GRAPHDB_URL = secrets["graphdb"]["url"]
 
@@ -267,7 +267,7 @@ with Flow('census_csv_to_rdf') as flow:
     load_turtles(graph_files, rdf_repo_url)
 
 
-if __name__ == '__main__':
+def main():
     if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
         flow.register(project_name='sep')
     else:
