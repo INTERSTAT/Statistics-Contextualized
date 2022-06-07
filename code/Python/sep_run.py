@@ -1,3 +1,3 @@
-from sep.sep_aq import main
+from sep.sep_census import main
 
 main()
