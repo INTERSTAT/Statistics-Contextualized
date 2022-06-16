@@ -1,4 +1,4 @@
-# Deliverable: Milestone 6
+# Deliverable Milestone 6: Report on pilots’ development and deployment
 
 ## Introduction
 
@@ -14,40 +14,30 @@ The document starts with a short recap about the different pilots and the techni
 - Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
 - School for You (S4Y): This pilot allows users such as citizens and political decision-makers to discover aggregated data resulting from the integration of several sources about school attendance and the distribution of students in Italy and France.
 
-## Reminder on the production environment
+## Services’ environment
 
---> ENG
-[add short description of the environment]
-
-The client applications developed are one for each pilot service; they are web applications that consume and display SPARQL data.
-This section briefly describes the information relating to the production environment, the programming language used for the implementation and the type of repository used to collect the data.
+The client applications developed are one for each pilot service; they are web applications that consume and display data using SPARQL language. This section briefly describes the information relating to the production environment, the programming language used for the implementation and the type of repository used to collect the data.
 
 ### Programming language adopted for development: ReactJS
 
-React is a JavaScript library for building user interfaces.
-The key features are mainly two: the first, is the concept of UI components. The React code is composed of entities called components that are reusable; this means that it is necessary to simply define a component only once, and it can be used multiple times. This makes it much quicker, convenient, and easier to handle the production of a large-scale website. This allows the ability to breakdown complex UI and allow to work on individual components.
+React is a JavaScript library for building user interfaces. The key features are mainly two: the first one, is the concept of UI components. The React code is composed of entities called components that are reusable; this means that it is necessary to simply define a component only once, and it can be used multiple times. This makes it much quicker, convenient, and easier to handle the production of a large-scale website. This allows the ability to breakdown complex UI and allows to work on individual components.
 
-The other key feature is that React finds out what changes have been made, and changes only what needs to be changed.
-It creates an in-memory data-structure cache, computes the resulting differences, and then updates the browser's displayed DOM (Document Object Model) efficiently. This selective rendering provides a major performance boost. It saves the effort of recalculating the CSS style, layout for the page and rendering for the entire page.
+The other key feature is that React finds out what changes have been made, and modifies only what needs to be changed. It creates an in-memory data-structure cache, computes the resulting differences, and then updates the browser's displayed DOM (Document Object Model) efficiently. This selective rendering provides a major performance boost. It saves the effort of recalculating the CSS style, the layout for the page and the rendering for the entire page.
 
-### Type of repository to collect data: GraphDB
+### Data repository: GraphDB
 
-GraphDB is a highly efficient and robust graph database with RDF and SPARQL support. In particular, it is an enterprise ready Semantic Graph Database, compliant with W3C Standards. Semantic graph databases (also called RDF triplestores) provide the core infrastructure for solutions where modeling agility, data integration, relationship exploration and cross-enterprise data publishing and consumption are important.
+GraphDB is a highly efficient and robust graph database with RDF and SPARQL support. In particular, it is an enterprise ready Semantic Graph Database, compliant with W3C Standards. Semantic graph databases (also called RDF triplestores) provide the core infrastructure for solutions where modelling agility, data integration, relationship exploration and cross-enterprise data publishing and consumption are important.
 
-This scalable RDF database, streamlines the load and use of linked data cloud datasets, as well as the own resources. For easy use and compatibility with the industry standards, GraphDB implements the RDF4J framework interfaces, the W3C SPARQL Protocol specification, and supports all RDF serialization formats.
-It is one of the few triplestores that can perform semantic inferencing at scale, allowing users to derive new semantic facts from existing facts. It handles massive loads, queries, and inferencing in real time.
+This scalable RDF database streamlines the load and use of linked data cloud datasets, as well as the own resources. For easy use and compatibility with the industry standards, GraphDB implements the RDF4J framework interfaces, the W3C SPARQL Protocol specification, and supports all RDF serialization formats. It is one of the few triplestores that can perform semantic inferencing at scale, allowing users to derive new semantic facts from existing facts. It handles massive loads, queries, and inferencing in real time.
 
-In GraphDB data is organized in repositories; once the one of interest has been selected, the data is extracted through the SPARQL query language.
-GraphDB also supports SPARQL Federated Query which is an extension of the basic Query Language. Using it, it is possibile to combine a query on a repository in the current instance with a remote call to a different SPARQL endpoint.
-
-The strength of GraphDB is that it is also an HTTP service endpoint that can receive requests and can process SPARQL queries; this service is queried directly by client applications and the requests results are displayed in them.
+In GraphDB, data is organized in repositories; once the one of interest has been selected, the data is extracted through the SPARQL query language. GraphDB also supports SPARQL Federated Query which is an extension of the basic Query Language. Using it, it is possible to combine a query on a repository in the current instance with a remote call to a different SPARQL endpoint.
+The strength of GraphDB is that it is also an HTTP service endpoint that can receive requests and can process SPARQL queries; this service is queried directly by client applications and the requests results are displayed in them
 
 ### Sharing and exchange of project files: SFTP server
 
-As part of the INTERSTAT project, within the different project activities, an SFTP (SSH File Transfer Protocol) server was used to exchange data, transfer, share and manage files produced by the intermediate stages of the development pipeline. Transferring files through an SFTP server is a secure way to transmit data; the data to establish the connection and finalize the authentication and also the data transmitted are encrypted. With an SSH FTP server, it was possible to transfer files securely over an encrypted SSH connection.
-The SFTP server of the project contains both the files used as input to some phases of the pipeline, and also the output files resulting from the activities.
+As part of the INTERSTAT project, within the different project activities, an SFTP [5] (SSH File Transfer Protocol) server was used to exchange data, transfer, share and manage files produced by the intermediate stages of the development pipeline. Transferring files through an SFTP server is a secure way to transmit data, as the data to establish the connection and finalize the authentication, as well as the data transmitted are encrypted. With an SSH FTP server, it is possible to transfer files securely over an encrypted SSH connection. The SFTP server of the project contains both the files used as input to some phases of the pipeline, and the output files resulting from the activities also.
 
-## Pilot development
+## Pilots architecture
 
 In this section, we decribe how the pilot services were created, with a specific focus on the development of the data pipelines and on the client applications.
 
@@ -115,10 +105,10 @@ The unique pipeline, designed for both pilots and based on Ontology, is describe
    5.1. Queries are provided at design time by the designer when using this endpoint.
    5.2. Resultset must be converted into a specified format JSON NGSI-LD through a dedicated converter module.
 
-Computing Management and Optimization
-Tasks can be managed and executed either physically or virtually, to balance the resources for data processing. While physical elaboration is quicker but static, the virtualization is more dynamic but more complex. One example is the conversion of the Geo coordinates in Administrative Units (LAU).
-If Virtualization is chosen, GEO SPARQL queries can be integrated into the Ontological framework, and the corresponding LAU can be derived virtually, but this is rather heavy on the reasoner because it must be calculated on the fly at each query. So, one can just statically convert the coordinates through a dedicated service and create a materialized new variable to store LAU and then virtualize it without the need to reference GEO SPARQL.
-The main differences between the two approaches concern the different tools used for data harmonization and the methodology applied to obtain and convert integrated data in rdf format. More in detail, in the first approach ETL procedures have been developed in Python, while in the second approach in SqL. In relation to data integration through ontologies, the first approach generates RDF triples from a CSV dataset through Python procedures, while the second approach uses relational DB and Monolith. In addition, while the first approach uses metaontologies (e. g.: SKOS, Data Cube vocabulary), the second approach is based on domain ontologies and then links the concepts of the domain ontology to metaontologies concepts.
+### Comparison of approaches
+
+The main differences between the two approaches (ETL and Domain knowledge) concern the different tools used for data harmonization and the methodology applied to obtain and convert integrated data in RDF format. More in detail, in the first approach ETL procedures have been developed in Python, while in the second approach in SQL. In relation to data integration through ontologies, the first approach generates RDF triples from a CSV dataset through Python procedures, while the second approach uses relational DB and Monolith. In addition, while the first approach uses meta-ontologies (e. g.: SKOS, Data Cube vocabulary), the second approach is based on domain ontologies and then links the concepts of the domain ontology to meta-ontologies concepts. The two approaches have converged in the dissemination step. In both cases, RDF triples, generated through the different pipelines have been uploaded on GraphDB repository, as well as the metadata already modelled according to SKOS meta-ontology (air pollutants code list, geographic code lists). RDF triples related to different domains, (e.g.: census and air pollution observations) have linked through SPARQL queries.
+Computing Management and Optimization Tasks can be managed and executed either physically or virtually, to balance the resources for data processing. While physical elaboration is quicker but static, the virtualization is more dynamic but more complex. One example is the conversion of the Geo coordinates in Administrative Units (LAU). If Virtualization is chosen, GeoSPARQL queries can be integrated into the Ontological framework, and the corresponding LAU can be derived virtually, but this is rather heavy on the reasoner because it must be calculated on the fly at each query. So, one can just statically convert the coordinates through a dedicated service and create a materialized new variable to store LAU and then virtualize it without the need to reference GeoSPARQL.
 
 ### Client applications
 
@@ -131,25 +121,39 @@ The description of the exposed services will be inserted into tables in which, i
 
 A service can also be both cross-border and cross-domain.
 
-## Details by pilot
+## Use cases development
 
 ### Supporting environment policies (SEP)
 
 #### Business case
 
-Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#support-for-environment-policies-sep
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#support-for-environment-policies-sep
+
+One of the main goals of this use case is to enrich air quality information, produced to support local public authorities responsible for environmental policies. More in detail, several decision makers could get insights from the combination of:
+
+- Sensor data, measuring the concentration of air pollutants
+- Statistical data, describing the structure and the main characteristics of the resident population.
+  Linking air quality indicators and demographic data could allow decision makers to prioritize target areas of intervention. As an example of data integration benefits, a set of focused actions could be planned according to:
+- The resident population living in areas where air pollutants exceed air quality thresholds
+- The assessment of the effects of air pollution on vulnerable population groups.
 
 #### Models
 
-The target data model for census and air quality data, exported in OWL format, combines several existing vocabularies, such as SOSA for sensor description and AQD model for Air pollution. An overview of the ontology structure of census and air quality data is depicted in the following figure:
+The target data model for census and air quality data, exported in Web Ontology Language (OWL format), combines several existing vocabularies, such as SOSA for sensor description and AQD model for Air pollution. An overview of the ontology structure of census and air quality data is depicted in the following figure:
 
-ONTOLOGY FIGURE
+<span><img title="SEP Ontology" alt="SEP_ontology.jpg" src="./img/SEP_ontology.jpg" style="width:100%;"></span>
+
+The following figure shows the subset of SKOS concepts integrated into the SEP domain ontology.
+
+<span><img title="SKOS Ontology" alt="SKOS_ontology.jpg" src="./img/SKOS_ontology.jpg" style="width:100%;"></span>
 
 In the modelled ontology, the information objects are colour-coded as follows:
 
 <span><img title="AQ ontologies" alt="AQ ontologies" src="./img/ontologiesAQ_istat.png" style="width:40%; margin-left:20%"></span>
 
-The updated version of the ontology will contain to some metamodels, such as Data Cube Vocabulary and SKOS.
+The updated version of the ontology contains some metamodels, such as Data Cube Vocabulary and SKOS.
+In the near future, the ontology will be further completed through the addition of the concepts related to Dimensions and Data Structure Definition and the definition of their instances.
+Concerning the metadata, the air quality level will be modelled according to the SKOS ontology, while the country concept showed in Figure 4, will be replaced by the level 0 of the NUTS classification.
 
 #### Data
 
@@ -178,7 +182,7 @@ For France, the data is taken from [here](https://www.insee.fr/fr/statistiques/5
 
 ##### Italian Air pollution data
 
-The data related to air pollutants have been extracted from the annual reports published by ISPRA, the reference authority for monitoring and assessing air quality in Italy. More in detail, [here](https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/TABELLA%201_PM10_2019_rev.xlsx) is the endpoint to extract data concerning PM10 pollutant.
+The data related to air pollutants have been extracted from the annual reports published by ISPRA, the reference authority for monitoring and assessing air quality in Italy. More in detail, [here](https://annuario.isprambiente.it/sites/default/files/sys_ind_files/indicatori_ada/448/TABELLA%201_PM10_2019_rev.xlsx) is available the endpoint to extract data concerning PM10 pollutant.
 
 The subset of fields extracted from the original data source are described below.
 
@@ -217,25 +221,19 @@ The code lists used for Air quality data are documented in the Eionet Data Dicti
 
 #### Process
 
-The main steps of the data pipeline of the SEP pilot are:
-
 _**Step 1: Data acquisition**_
 
-Italian and French Air quality data have been extracted from the websites mentioned above. The extracted datasets were uploaded to the FTP area of the project.
+Italian and French Air quality data have been extracted from the websites mentioned above. The extracted datasets were uploaded to the SFTP area of the project.
 
 _**Step2: Data processing**_
 
 **Census data**
 
-Italian census data have been transformed according to the requested Data Structure through a script in R language, available [here](https://github.com/INTERSTAT/Statistics-Contextualized/files/7539489/Pilot.A.-.census.data.processing.txt). More in detail, data have been filtered and NUTS3 variable has been added using data LAUs codes published on Eurostat website.
-Concerning French census data, an R script allows to obtain the CSV file directly from the data published on Insee's web site. The script uses auxiliary CSV files containing reference data about age groups (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/age-groups.csv)) and French LAU/NUTS (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/nuts3-fr.csv)) which are also described in the CSVW metadata, available [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/sep/sep-census.csv-metadata.json).
+Italian census data have been transformed according to the requested Data Structure through a script in R language available [here](https://github.com/INTERSTAT/Statistics-Contextualized/files/7539489/Pilot.A.-.census.data.processing.txt). More in detail, data have been filtered and NUTS3 variable (Third level of NUTS classification) has been added using a dataset with LAUs codes published on Eurostat website. Concerning French census data, an R script allows to obtain the CSV file directly from the data published on Insee's web site. The script uses auxiliary CSV files containing reference data about age groups (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/age-groups.csv)) and French LAU/NUTS (defined [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/resources/nuts3-fr.csv)) which are also described in the CSVW metadata available [here](https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/sep/sep-census.csv-metadata.json).
 
 **Air quality data**
 
-The Data transformation phase was applied only to the dataset related to the PM10 pollutant.
-The French dataset about the PM10 taken from the European Environmental Agency and uploaded to the FTP server, in its initial version contains the geographic coordinates; it has been enriched with the Municipality codes through a script in java using the specific service/API.
-NUTS3 codes have been added to classify both Italian and French territories, while metadata regarding pollutant type, data reference time and aggregation type have been added in the Italian dataset. Transformation script in R language: processing_ETL_AIR.R.txt
-Input files have been uploaded from ftp source as is. Harmonization has been done via SQL union queries wrapped in a single view.
+The Data transformation phase was applied only to the dataset related to the PM10 pollutant. The French dataset about the PM10 taken from the European Environmental Agency and uploaded to the SFTP server, in its initial version contains the geographic coordinates; it has been enriched with the Municipality codes through a script in java using the specific service/API. NUTS3 codes have been added to classify both Italian and French territories, while metadata regarding pollutant type, data reference time and aggregation type have been added in the Italian dataset. Data transformation has been implemented in R language. Once input files have been uploaded, data harmonization has been done via SQL union queries wrapped in a single view.
 
 _**Step3: Conceptual integration**_
 
@@ -243,22 +241,24 @@ Data integration is realized on a conceptual level through an Ontology Base Data
 
 _**Step4: Direct dissemination**_
 
-The tool Monolith can export the queries based on the ontology concepts in XML format. The SPARQL resultset can be formatted in csv, json and rdf and sent to the subsequent stages of the pipeline. RDF triples can be uploaded to INTERSTAT GraphDB for data querying through the client application.
+The tool Monolith can export the queries based on the ontology concepts in XML format. The SPARQL result set can be formatted in CSV, JSON and RDF and sent to the subsequent stages of the pipeline. RDF triples can be uploaded to INTERSTAT GraphDB for data querying through the client application.
 
-#### SEP Client application (--> ENG)
+#### SEP Client application
 
-One of the main goals of this pilot is to enrich air quality information, produced to support local public authorities responsible for environmental policies. More in detail, several decision makers could get insights from the combination of:
+One of the main goals of this pilot application (available [here](https://interstat.eng.it/SEP-pilot-client/)) is to enrich air quality information, produced to support local public authorities responsible for environmental policies. More in detail, several decision makers could get insights from the combination of:
 
 - _Sensor data_ measuring the concentration of air pollutants;
 - _Statistical data_ describing the structure and the main characteristics of the resident population.
 
 Linking air quality indicators and demographic data could allow decision makers to prioritize target areas of intervention.
 
-| **Service Name**                                                                          | **Description**                                                                                                                                                                                                                                                                                                                                                                 | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | **Cross-border service** | **Cross-domain service** |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------ |
-| **Resident population in the most polluted areas**                                        | Through this service the user can obtain the resident population value living in areas where air pollutants exceed the air quality thresholds.                                                                                                                                                                                                                                  | The user will be able to have a map view in which the Municipalities affected by the exceeding of the PM10 limit value will be highlighted. The map is interactive: when the user passes the mouse over the stations concerned, it shows data such as the municipality name in which the station is located and the specific value of the pollutant measured. Additionally, in a table view, the user will be able to view the following specific values: the NUT3 Region involved, the age groups, the population value in each specific NUTS3 region and age group, the Municipalities present in each NUTS3 region in which the overruns were recorded, the relative PM10 value. Thanks to this analysis, efforts to reduce pollution in those areas where the population density is higher can be directed. This service links the Census data with the Air Pollution data and will allow to view the French and Italian data separately.                            | **X**                    | **✔**                    |
-| **Evaluation of the pollution effects on specific population groups in Italy and France** | Through this service it will be possible to evaluate the effects of pollution on specific population groups (for example on more vulnerable population groups) by comparing specific areas of Italy and France (for example Rome and Paris).                                                                                                                                    | Through this service, the user has the possibility to select some parameters: a specific NUTS region and/or a specific municipality within it, both Italian and French;a specific age group (for example from 80 to 85 years) to display only the value of the population of that specific age group. The user will have a map in which the selected municipalities will be highlighted. Inside it, the different pollutant registration stations are highlighted. The is interactive: when the user hovers the cursor on the Municipality of interest, the name of the NUTS3 region and the population value of the specific group selected is shown. Furthermore, in a tabular view, the user will be able to view and compare French and Italian data relating to the population and air pollution related to PM10. With this service it is possible to observe, for example, in which regions the most vulnerable population groups are most at risk from pollution. | **✔**                    | **✔**                    |
-| **Evaluation of areas with specific values of pollutants in Italy and France**            | Through this service it will be possible to evaluate the presence, or not, of the following pollutants on the French and Italian territory: _PM 10_, _PM 2.5_, _NO2_, _O3_. The user can choose the value of interest for these pollutants. The service allows to compare the number of areas in Italy and France where this presence occurs and the population of these areas. | The user can select a threshold value for each pollutant whose presence he wants to check in areas of the Italian and French territory. Within a map, the NUTS3s (o the Municipalities) containing the stations that have checked the presence of the pollutant values entered by the user, will be highlighted. The map will allow the user to move the cursor over the regions of interest and view the population of the region and the name of the NUTS. In the tabular view, the user can view in detail the pollutants values to which station and region they refer and compare the Italian and French data.                                                                                                                                                                                                                                                                                                                                                      | **✔**                    | **✔**                    |
+| **Service Name**                                                                                                      | **Description**                                                                                                                                                                                                                                                                                                                                                                                                             | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | **Cross-border service** | **Cross-domain service** |
+| --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
+| **Resident population in the most polluted areas**                                                                    | Through this service the user can obtain the resident population value living in areas where air pollutants exceed the air quality thresholds and also the most populated municipalities, in relation with the air quality data.                                                                                                                                                                                            | The user can select a specific Country, between Italy and France, to be analysed. It is possible to view two different types of information: the first one allows to highlight the Municipalities with higher pollution level, based on the average value measured by all the stations in the selected municipality. This service linking pollution and census data highlights the value of the resident population in the Municipality grouped by age and gender. In addition, specific information related to the PM10 pollutant considered in the analysis, is reported. The second table allows, instead, to obtain the Municipalities with higher resident population and also the age group and gender whose value is greater, in relation to the pollution data in the selected Municipality. In this service, which represents a specific cross-domain analysis for the selected Country, the areas with the highest or the lowest levels of air pollution, are highlighted. It is also possible to do an analysis on the resident population in those areas. | **X**                    | **✔**                    |
+| **Evaluation of the pollution effects (considering PM10) on specific population groups in Italy and France**          | Through this service it will be possible to evaluate the effects of pollution on specific population groups (for example on more vulnerable population groups) by comparing specific areas of Italy and France (for example Rome and Paris) and visualize specific details about the pollutant values (detection station, unit of measurement of the pollutant, aggregation type and information about the source dataset). | The user can select a specific NUTS region and a Municipality related to it (both Italian and French) and a specific age group (for example from 80 to 85 years). For each of the selected Municipalities, the different pollutant registration stations are highlighted with the detailed information and the value registered by the station. In the tabular view, it is possible to view and compare French and Italian data air pollution data (considering PM10) relating to the resident population value of the selected age group. With this service it is possible to observe, for example, in which municipalities the most vulnerable population groups are most at risk from pollution.                                                                                                                                                                                                                                                                                                                                                                   | **✔**                    | **✔**                    |
+| **Evaluation of the pollution effects (considering PM2.5 and NO2) on specific population groups in Italy and France** | Through this service it is possible to obtain the values of the PM2.5 and NO2 pollutants and specific details (detection station, unit of measurement of the pollutant, aggregation type and information about the source dataset).                                                                                                                                                                                         | The user can select a specific NUTS region and a related Municipality, both Italian and French. Is than possible to highlight the different pollutant registration stations considering PM 2.5 (Particulate matter <2.5 µm) and NO2 (Nitrogen dioxide). In the tabular view, it is possible to obtain and compare French and Italian air pollution data and information about the stations in the selected Municipalities, in relation with the two considered pollutants.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | **✔**                    | **✔**                    |
+
+<span><img title="SEP client" alt="SEP_client" src="./img/SEP_client.png" style="width:100%;"></span>
 
 ### Geolocalized facilities (GF)
 
@@ -270,67 +270,163 @@ The main objective of this pilot is to disseminate information about facilities 
 
 Two specific user stories are defined for the GF pilot:
 
-- In the “visitor” case, we consider a user visiting a place she does not know and wondering where the nearest facilities of different types are located. She also would like to know what events are programmed in the nearby stadiums, theatres of cultural venues. From the description of locations or events, it should be simple to navigate on the web for further detail (e.g. on artists or sport teams, history of places, links to the locations’ web sites, etc.).
+- In the “visitor” case, we consider a user visiting a place she does not know and wondering where the nearest facilities of different types are located. She also would like to know what events are programmed in the nearby stadiums, theatres of cultural venues. From the description of locations or events, it should be simple to navigate on the web for further detail (e.g. history of places, links to the locations’ web sites, etc.).
 
 - The “local decider” story is about a person in charge of an investment decision at a local level. It can be the manager of a bus company wondering if he should replace an old vehicle, an employee of an educational public service assessing the creation of a new class in a community school, or a young couple thinking of moving to a rural place, etc. He needs information about the level and capacity of the equipment in the neighbourhood, linked with data on the demographic evolution at a fine level. He will probably need to combine that information with other sources more specifically relevant to his specific problem.
 
 #### Models
 
-Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#model
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#model
+
+The target model for the data on facilities is expressed in OWL (see also WebVOWL visualization). The overall structure of the ontology is represented in the following figure:
+
+<span><img title="Target_data_model_of_GF.png" alt="Target_data_model_of_GF.png" src="./img/Target_data_model_of_GF.png" style="width:100%;"></span>
+
+The facility coordinates are represented using the GeoSPARQL ontology. In the BPE, the quality of the geocoding is documented according to a 3-star-like system. This is rendered in RDF using quality annotations defined in the DQV vocabulary. The articulation of these different elements is shown in the following figure.
+
+<span><img title="BPE_facility_coordinates.png" alt="BPE_facility_coordinates.png" src="./img/BPE_facility_coordinates.png" style="width:80%;"></span>
 
 #### Data
 
-Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#data
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#data
+
+_**French Data**_
+
+The central source of French data for this pilot is the Permanent database of facilities (BPE in French) published by Insee. For a working example, we extract a list of columns from the CSV file containing the data from the 2020 edition of the database.
+BPE data and metadata are available in CSV formats from the BPE. More specifically, the example uses an extract of the following geocoded facilities:
+
+- Dataset 1: Exposition venues and heritage, the file is available.
+- Dataset 2: Education, file available.
+  The extraction is performed directly from the online CSV files by a Python script.
+  The list of columns extracted is given in the following Table.
+
+| Field name    | Description                                                                        | Data type            | Data availability |
+| ------------- | ---------------------------------------------------------------------------------- | -------------------- | ----------------- |
+| Facility_ID   | Facility identifier                                                                | String               | Datasets 1 & 2    |
+| Year          | Reference year                                                                     | Year (always '2020') | Datasets 1 & 2    |
+| LAU           | Municipality                                                                       | Code list            | Datasets 1 & 2    |
+| Coord_X       | Latitude                                                                           | Float                | Datasets 1 & 2    |
+| Coord_Y       | Longitude                                                                          | Float                | Datasets 1 & 2    |
+| Quality_XY    | Quality of geocoding                                                               | Code list            | Datasets 1 & 2    |
+| Facility_Type | Type of facility                                                                   | Code list            | Datasets 1 & 2    |
+| CL_PELEM      | Presence or absence of a pre-elementary class in primary schools                   | Code list            | Dataset 2         |
+| CL_PGE        | Presence or absence of a preparatory class for the high schools in upper secondary | Code list            | Dataset 2         |
+| EP            | Membership or not in a priority education scheme                                   | Code list            | Dataset 2         |
+| Sector        | Membership of the public or private education sector                               | Code list            | Dataset 2         |
+
+French geographic coordinates are expressed using the Lambert 93 coordinate system.
+
+_**Italian Data**_
+
+**Museums**
+
+The data on Italian museums is extracted from the MiBACT web site published by the Ministero della Cultura, and more precisely from the SPARQL endpoint available [here](https://dati.cultura.gov.it/sparql). The columns extracted are:
+
+Fields extracted from the Italian Ministry of Culture - Museums TABLE
+
+| Field name         | Description        | Data type | Property path                                              |
+| ------------------ | ------------------ | --------- | ---------------------------------------------------------- |
+| subject            | Museum             | URI       | (a cis:CulturalInstituteOrSite)                            |
+| Nome_Istituzionale | Institutional name | String    | cis:institutionalCISName                                   |
+| Descrizione        | Description        | String    | lo:description                                             |
+| Latitudine         | Latitude           | String    | geo:lat                                                    |
+| Longitudine        | Longitude          | String    | geo:long                                                   |
+| Disciplina         | Discipline         | String    | cis:hasDiscipline/l0:name                                  |
+| Indirizzo          | Address            | String    | cis:hasSite/cis:siteAddress/clvapit:fullAddress            |
+| Codice_postale     | Postal code        | String    | cis:hasSite/cis:siteAddress/clvapit:postCode               |
+| Comune             | Municipality name  | String    | cis:hasSite/cis:siteAddress/clvapit:hasCity/rdfs:label     |
+| Provincia          | Province name      | String    | cis:hasSite/cis:siteAddress/clvapit:hasProvince/rdfs:label |
+| WebSite            | Web site           | String    | smapit:hasOnlineContactPoint/smapit:hasWebSite/smapit:URL  |
+
+The "Property path" column refers to the RDF property or path of properties giving the field value in reference to the Cultural-ON ontology and the vocabularies it relies on. There are some adjustments made, for example institutionalCISName instead of institutionalName. An example of RDF data provides additional detail, along with the namespaces associated to the prefixes used in the table.
+
+**Events**
+
+The data on Italian cultural events is also extracted by a query on the MiBACT SPARQL endpoint available [here](https://dati.cultura.gov.it/sparql). The columns extracted are:
+
+Fields extracted from the Italian Ministry of Culture - Events TABLE
+
+| Field name         | Description                | Data type               |
+| ------------------ | -------------------------- | ----------------------- |
+| EVENTO             | Event identifier           | URI                     |
+| NOME               | Name of the event          | String                  |
+| DATA_INIZIO_EVENTO | Starting date of the event | Datetime                |
+| DATA_FINE_EVENTO   | Ending date of the event   | Datetime                |
+| CATEGORIA          | Type of event              | Code list               |
+| SITO_WEB           | Web site                   | HTTP URI or domain name |
+| EMAIL              | Email address              | Mailto URI              |
+| VIA                | Street name                | String                  |
+| NUMERO_CIVICO      | Number in the street       | String                  |
+| CAP                | Postal code                | String (5 digits)       |
+| COMUNE             | Municipality name          | String                  |
+| PROVINCIA          | Province name              | String                  |
+| REGIONE            | Region name                | String                  |
+
+There again, the source RDF data is conformant to the Cultura-Ontology ontology, and thus is actually more structured and expressive than the flat transformed format described in the table above. In consequence, it could be interesting for the client application to test the option of distributed SPARQL queries on both the INTERSTAT and "Dati cultura" endpoints.
+
+**Schools**
+
+Data concerning Italian schools are described in the S4Y Pilot.
 
 #### Metadata
 
-Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#metadata
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#metadata
+
+Apart from the ontology describing the data, metadata about the data is available in different forms:
+
+- The CSV data extracted from the BPE is described using the CSV on the web (CSVW) vocabulary. CSV is a notoriously sloppy standard, and CSVW is a powerful way to describe tabular data available online so that they can be understood easily by humans and machines, thus dramatically improving its usability. A CSV on the web description of the CSV distribution of GF data is produced semi-automatically by the ETL pipeline.
+- The Cross-Domain Integration model is a development of the DDI Alliance aiming at improving coherence and interoperability of metadata. In particular, DDI-CDI allows the description of a wide range of data structures. In DDI-CDI terms, the BPE data corresponds to a "wide" data structure. A tentative DDI-CDI description of the BPE file is provided with the GF data.
+- Finally, descriptive metadata using the DCAT standard are provided for the source data.
 
 #### Process
 
-Copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#process
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/pilots/gf/test-case-gf.md#process
 
-#### GF client application (--> ENG)
+The ETL process of the Geolocalized Facilities pilot is described in detail and is available [here](https://app.diagrams.net/#HINTERSTAT%2FStatistics-Contextualized%2Fmain%2Fimg%2Fgf-flow.drawio). The process is organized according to the usual steps:
 
-The main objective of this pilot is to set up a mechanism for the dissemination and use of information about facilities or equipment, so that the information is contextualized in space and can be integrated with other sources of data.
-The _facilities_ are understood as points of services which are accessible to the public and operate in domains like education, health, social services, transport, sports, leisure, culture, or tourism.
-Two specific user stories are defined for the GF pilot:
+- Extraction is performed on data which are all available online, in various formats: CSV for French facilities and Italian schools, and RDF for Italian museums (MIBACT data available via SPARQL). Note that the latter also contains information about cultural events for Italy: those are not extracted, but they might be queried directly from the client application.
+- The main transformation steps are made on French metadata in order to transform them into CSV on the Web. Regarding data, the main steps are conversion of the coordinates from Lambert 93 to WGS 84 for the French facilities. For Italian schools, addresses are geocoded using the Nominatim API provided by OpenStreetMap (with application of the usage policy). Both sources are then converted to RDF and merged.
+- CSV files are finally uploaded to the INTERSTAT SFTP server and the RDF/Turtle files to the GraphDB triple store. Note that uploading the French facilities to SFTP is not useful for the pipeline itself, but it gives the possibility to describe two different distributions in the DCAT metadata.
 
-- In the _visitor_ case, we consider a user visiting a place he does not know and wondering where the nearest facilities of different types are located. She also would like to know what events are programmed in the nearby stadiums, theaters of cultural venues.
-- The _local decider_ case is about a person in charge of an investment decision at a local level. He needs information about the level and capacity of the equipment in the neighborhood, linked with data on the demographic evolution at a fine level.
+It should be noted that the data part of the process is fully automated and reproducible at will. Regarding the metadata, the part concerning structural metadata (specifically code lists) is also automated, but some aspects of the production of descriptive metadata still require manual intervention.
 
-| **Service Name**                                                         | **Description**                                                                                                                                                                                                                                                                              | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | **Cross-border service** | **Cross-domain service** |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
-| **A visitor wondering the nearest cultural facilities and events**       | The user is visiting an unknown place, Italian or French, and needs to know the nearest facilities what events are programmed within them. From the description of locations or events, he can browse the web for further detail starting from URLs returned by the application.             | By entering their current position in terms of address and city, users will be able to view the cultural facilities nearby on the map. They are divided according to the type of place and the user can select a certain type of places to be displayed on the map. The first view is therefore the one through the map in which the user can decide to select the place of interest. By selecting a place on the map, the service allows the user to view which events are scheduled for a specific day, chosen by him. The general information of the event is shown.                                                                                                                                                                                 | **X**                    | **✔**                    |
-| **Analysis and evaluation of a specific area to finalize an investment** | This service is useful for a user who intends to invest in a certain area (Italian or French). To do this, he may need to know how the territory has evolved in recent years, the trend of the resident population, as well as the number and type of schools present in terms of education. | This service concerns a local decider, a person in charge of an investment decision at a local level. This figure, having to choose a place to make an investment, needs to know the trend or how certain parameters have evolved in recent years. These parameters also concern the demographic evolution at a fine level. Therefore, the service is cross-domain as it combines data of a different nature and it is also cross-border as it allows the user to select two different areas (in Italy and France) to obtain a comparison and to finalize an international business. Therefore, this service does not just show data but also provides analysis tools to support these investors: histograms and graphs are made available to the user. | **✔**                    | **✔**                    |
+#### GF client application
+
+The main objective of this pilot application, available [here](https://interstat.eng.it/GF-pilot-client/) is to set up a mechanism for the dissemination and use of information about facilities or equipment, so that the information is contextualized in space and can be integrated with other sources of data. The facilities are understood as points of services which are accessible to the public and operate in domains like education, health, social services, transport, sports, leisure, culture, or tourism. The following table contains the service developed for this client application. This service satisfies the user stories defined in the paragraph 3.2.1 of the document.
+
+| **Service Name**                                                   | **Description**                                                                                                                            | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | **Cross-border service** | **Cross-domain service** |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
+| **A citizen wondering the nearest cultural facilities and events** | The user is visiting an unknown place, Italian or French, and needs to know the nearest facilities what events are programmed within them. | The user, by entering his position in terms of Country, NUTS3 Region and Municipality, can view the nearby cultural and educational facilities on the map. Regarding the French territory, it is possible to obtain the facilities as points of interest on the map and divided into various specific categories. With regard to the Italian territory, in addition to viewing the facilities on the map, it is also possible to obtain additional information on schools and cultural points and also the events that are scheduled in them. Finally, it is always possible to obtain territorial and resident population data based on the selected Municipality. | **X**                    | **✔**                    |
+
+<span><img title="GF_client.png" alt="GF_client.png" src="./img/GF_client.png" style="width:100%;"></span>
 
 ### The school for you (S4Y)
 
---> Istat
-
 #### Business case
 
-Suggest to copy/paste from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#the-school-for-you-s4y
+Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/main/test-case.md#the-school-for-you-s4y
+
+One of the main objectives of this use case is to respond to the need of citizens and political decision-makers to know the distribution of students or potential students in the territory and the services addressed to them, especially the distribution of schools by educational level and for structural characteristics. Parents who must choose the school for their children need to know not only the location, but also the educational services that a specific area offers. Finally, the comparison with the main aspects of the resident population could provide useful information to ensure adequate investments in educational services.
 
 #### Models
 
-The domain concepts about school attendance and school units, are reported in the following ontology, exported as owl and as image.
+The domain concepts about school attendance and school units are reported in the following ontology, exported as owl and as image.
 
 <span><img title="Ontology sfy" alt="Ontology sfy" src="./img/ontology_s4y.png" style="width:80%;"></span>
 
-This ontology contains the class V_group_attendance as istance of metaclass View. An ontological view on the domain allows to aggregate data about the domain for the following measures: number of students, number of schools and by the following dimensions: Isced school level, Scholastic year, Public school, Municipality (Lau).
+This ontology contains the class V_group_attendance as istance of metaclass View. An ontological view on the domain allows to aggregate data about the domain for the following measures: number of students, number of schools and by the following dimensions: ISCED school level, Scholastic year, Public school, Municipality (LAU). In the first version of the pilot, only a subset of the concepts have been mapped over the data.
 
 #### Data
 
-The following paragraph provides an overview of Italian and French data sources linked to test cross-border and cross-domain interoperability. Data extracted for the pilot focus mainly on students enrollment and school location.
+The following paragraph provides also an overview of Italian and French data sources linked to test cross-border and cross-domain interoperability. Data extracted for the pilot focus mainly on students’ enrollment and school location.
 
 ##### Italian School data
 
-The Italian data used for the pilot belong to the [MIUR (The Ministry for Education) catalogue](https://dati.istruzione.it/opendata/). The datasets, extracted in RDF format and concerning both public and private schools, provide the following information:
+The Italian data used for the pilot belong to the [MIUR (The Ministry for Education) catalogue](https://dati.istruzione.it/opendata/). The datasets, available also extracted in RDF format and concerning both public and private schools, provide the following information:
 
 - [Registry information on schools](https://dati.istruzione.it/opendata/ricerca/?searchinput=SCUANAGRAFE&lg=%24lang) (Informazioni anagrafiche scuole statali, Informazioni anagrafiche scuole paritarie);
 - [Students by course year and age group](https://dati.istruzione.it/opendata/ricerca/?searchinput=ALUCORSOETA&lg=%24lang) (Studenti per anno di corso e fascia di eta'. Scuola statale, Studenti per anno di corso e fascia di età. Scuola paritaria);
-  The reference dataset for the list and location of schools of all levels is available [here](https://dati.istruzione.it/opendata/ricerca/?searchinput=EDIANAGRAFESTA&lg=) and is also considered for the GF pilot. The coordinates of the schools have been added to this dataset and the output file is present in the [FTP area of the project](https://interstat.eng.it/files/gf/).
+  The reference dataset for the list and location of schools of all levels is available [here](https://dati.istruzione.it/opendata/ricerca/?searchinput=EDIANAGRAFESTA&lg=) and is also considered for the GF pilot. The coordinates of the schools have been added to this dataset and the output file is present in the [SFTP area of the project](https://interstat.eng.it/files/gf/).
 
 The following table reports the subset of fields extracted from the [Registry information on schools](https://dati.istruzione.it/opendata/ricerca/?searchinput=SCUANAGRAFE&lg=%24lang).
 
@@ -366,7 +462,7 @@ The number of students for the three last scholastic year (2019, 2020 and 2021) 
 - [Number of students by grade, gender, most frequent modern languages 1 and 2, by upper secondary school](https://data.education.gouv.fr/explore/dataset/fr-en-lycee_gt-effectifs-niveau-sexe-lv/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_lycee&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur) (school of general and technological education).
 - [Number of students by grade, gender, most frequent modern languages 1 and 2, by upper secondary school](https://data.education.gouv.fr/explore/dataset/fr-en-lycee_pro-effectifs-niveau-sexe-lv/table/?disjunctive.rentree_scolaire&disjunctive.region_academique&disjunctive.academie&disjunctive.departement&disjunctive.commune&disjunctive.numero_lycee&disjunctive.denomination_principale&disjunctive.patronyme&disjunctive.secteur) (vocational school).
 
-Data extraction is performed based CSV files directly available online. Variables finally extracted are:
+Data extraction is performed based on CSV files directly available online. Variables finally extracted are:
 
 | Field name       | Description                                      | Data type                                                     | Comment                                                                                         |
 | ---------------- | ------------------------------------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -406,7 +502,7 @@ _Low education_
 
 Institution type { public = 1, private = 0 }
 
-Metadata and harmonization outline are provided in the excel file [S4Y-SchoolRegistry.meta.xlsx](https://github.com/INTERSTAT/Statistics-Contextualized/files/8471721/S4Y-SchoolRegistry.meta.xlsx).
+Metadata and harmonization outline are provided in the specific Excel file available [here](https://github.com/INTERSTAT/Statistics-Contextualized/files/8471721/S4Y-SchoolRegistry.meta.xlsx).
 
 #### Process
 
@@ -458,38 +554,114 @@ _**Step4: Direct dissemination**_
 
 See the description of SEP data pipeline.
 
-#### SFY client application (--> ENG)
+#### SFY client application
 
-This pilot allows users such as citizens and political decision-makers to discover aggregated data resulting from the integration of several sources about school attendance and the distribution of students in Italy and France.
+This pilot, available [here](https://interstat.eng.it/S4Y-pilot-client/), allows users such as citizens and political decision-makers to discover aggregated data resulting from the integration of several sources about school attendance and the distribution of students in Italy and France.
 
-| **Service Name**                                                                                  | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                    | **Cross-border service** | **Cross-domain service** |
-| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
-| **Analysis of resident population and schools in a specific Municipality**                        | This service allows to explore the number of schools and students in a selected area, according to the main level of educational attainment. This analysis may enhance the coverage of scholar services in a selected municipality and the relationship between school attendance and the population structure resulting from census data. This Analysis may support policy makers to improve access to education trainings and facilities in specific areas.                                                                                                                                               | The user can select a Municipality, an Educational Level (ISCED) and a School Year (it can be selected among many years but for now there is only 2020). The number of Schools, the number of Students and the resident population (divided by age group) are obtained, in tabular form. The locations of the schools in the selected Municipality are displayed on the map.                                                                                                      | **X**                    | **✔**                    |
-| **Distribution of public and private schools: comparison between Italian and French territories** | The main goal of this service is to compare the distribution of private and public schools in selected Municipalities in France and Italy. This service allows to explore the number of public and private schools, comparing two specific municipalities, an Italian and a French one. This analysis may enhance the coverage of public and private scholar services in a selected area in relation also with the population resident resulting from census data. The aim is also to provide the ratio between public and private schools in those specific areas in the form of a percentage composition. | The user can select an Italian and a French Municipality and a School year. The number of public schools, private schools and the value of the resident population in the specific areas are obtained. Public and private schools are geolocated on the map in the specific selected municipalities, also associating the resident population. Finally, the percentage composition of public and private schools is displayed, among the totals, in both selected municipalities. | **✔**                    | **✔**                    |
+| **Service Name**                                                                                  | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                               | **Type of data visualization**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | **Cross-border service** | **Cross-domain service** |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
+| **Analysis of resident population and schools in a specific municipality**                        | This service allows to explore the number of schools and students in a selected area, according to the main level of educational attainment. This analysis may enhance the coverage of scholar services in a selected municipality and the relationship between school attendance and the population structure resulting from census data. This Analysis may support policy makers to improve access to education trainings and facilities in specific areas. | This service allows to explore the number of schools and students in a selected area, according to the main level of educational attainment. This analysis may enhance the coverage of scholar services in a selected municipality and the relationship between school attendance and the population structure resulting from census data. The result of data integration may support policy makers to improve access to education trainings and facilities in specific areas. The user can select a municipality, an Educational Level (ISCED) and a School Year. The number of schools, the number of students and the resident population (divided by age group) are obtained, in tabular form. Furthermore, the total number of schools present in the selected Municipality is displayed, considering schools of all types and grades. | **X**                    | **✔**                    |
+| **Distribution of public and private schools: comparison between Italian and French territories** | This analysis may enhance the coverage of public and private scholar services in a selected area in relation also with the population resident resulting from census data. The aim is also to provide the comparison between public and private schools in those specific areas in terms of number of schools.                                                                                                                                                | The main goal of this service is to compare the distribution of private and public schools in selected municipalities in France and Italy, in terms of number of students, type, grade and number of schools. This analysis may enhance the coverage of public and private scholar services in a selected area in relation with the resident population resulting from census data. The user can select an Italian and a French municipality and a school year. The number of public and private schools and the value of the resident population in the specific areas are obtained. The analysis also makes it possible to link census data to school data, associating the ISCED code to the appropriate age group that falls within the school grade.                                                                                   | **✔**                    | **✔**                    |
+
+<span><img title="S4Y_client.png" alt="S4Y_client.png" src="./img/S4Y_client.png" style="width:100%;"></span>
+
+## SDMX to ETSI NGSI-LD
+
+FIWARE Context Broker is designed to provide Context Information Management based on different timestamp. It means that different measurements of an entity (e.g., a sensor) has are differentiated by the different timestamp of those measurements. In case of statistical information, we have a complete dataset, in which we can have or not a timestamp associated to the acquisition of the data.
+It creates a challenge in the design of a solution to cover this statistical information, with only three possible implementations and the consequences of architectural design of the solutions:
+
+1. Put all the data into a simple entity (e.g., Dataset). It resolves the problem of the timestamp of the data but on the other size it is only limited to small-medium size datasets due to the limitation of 2MB data into an Entity. Besides, the ETSI NGSI-LD queries over the data are not possible.
+2. We deal each of the row of a data set in separate entities all of them with a pseudo manage timestamp to guarantee that all of them are created at the same time. It facilitates the management of the data due to it is possible that the Entities’ size is less than 2MB. On the other side, the searching process around the data is very complex or almost impossible with a medium or large sized datasets to realize using the ETSI NGSI-LD API.
+3. We manage the metadata information of the dataset into a specific data model and we make reference to an external source in which we can find the complete information. This approach resolves the issue of the Entity Size as well as delegate the management of the data to the corresponding tools.
+
+The third option is the selected one to be implemented due to facilitate the metadata sharing and therefore, allowing finding similar datasets and eventually connect them. Additionally, the publication of the metadata involves the data value creation around the statistical data in which future services can be developed using the information about how to access the data.
+Once that we selected the best approach for our solution, we need to develop the corresponding data models to represent this metadata information in JSON-LD format, in order to be used by the FIWARE Context Broker. In this point, we will adopt the DCAT-AP specification and the specific application profile developed based on it, StatDACAT-AP, to define the metadata information of any statistical dataset.
+Next sections describe the data models created within the Smart Data Models initiative both in DCAT-AP and StatDCAT-AP as well as the grammar that we have developed in order to parse any RDF Turtle file to translate into JSON-LD compatible with ETSI NGSI-LD API.
+
+### DCAT-AP data models
+
+This is the basic for the corresponding translation of the metadata information into the JSON-LD that will be controlled by the FIWARE Context Broker (in this case Orion-LD). Metadata are descriptors of the data sources (or services), including for example Last Update, Creator, Creation date, or Size of the dataset. Besides, sharing metadata allows finding similar datasets and, eventually, connect them.
+We adopt Data Catalog Vocabulaty (DCAT) Application Profile (AP) as the source of our data model definition because it is used at the EU open data portal with around 1.2M datasets. DCAT-AP was created at Joinup Initiative at EU commission as a result of an agreement on a common format for data exchange to support the sharing of public sector information with the intention to discover them and re-use of this data for developing services. The DCAT Application Profile data models, defined in this document, are mapped from version 2.0.1 of the DCAT-AP standard. It is based on the specification of the Data Catalog Vocabulary (DCAT) of 16 January 2014, and the Data Catalog Vocabulary (DCAT) - Version 2, W3C Recommendation 04 February 2020.
+The list of data models created can be found in dataModel.DCAT-AP repository inside the Smart data Models organization in GitHub and involves the definition of the corresponding Entity Types. Entity Types (Classes) are divided into mandatory, recommended, and optionals. Not all the DCAT-AP classes have been mapped, only those that are relevant for the ongoing requirements:
+
+- **Dataset**. A conceptual entity that represents the information published. This is a mandatory class. Dataset Schema meeting DCAT-AP 2.0 specification.
+- **CatalogueDCAT-AP**. A catalogue or repository that hosts the Datasets being described. This is a mandatory class. Catalogue of datasets compliant with DCAT-AP specification.
+- **AgentDCAT-AP**. An entity that is associated with Catalogues and/or Datasets. This is a mandatory class. Agent Schema meeting DCAT-AP 2.0 specification.
+- **DistributionDCAT-AP**. A physical embodiment of the Dataset in a particular format. This is a recommended class. This is a distribution belonging to a dataset according to the DCAT-AP standard 2.0.1.
+- **CatalogueRecordDCAT-AP**. description of a Dataset’s entry in the Catalogue. This is an optional class. This is a Catalogue Record belonging to a dataset according to the DCAT-AP standard 2.0.1.
+- **DataServiceDCAT-AP**. A collection of operations that provides access to one or more datasets or data processing functions. This is an optional class. Data Service is adapted from DCAT-AP 2.0 specification, but extended with additional properties and compatible with ETSI NGSI-LD standard.
+
+<span><img title="DCAT-AP_schematic_data_model.png" alt="DCAT-AP_schematic_data_model.png" src="./img/DCAT-AP_schematic_data_model.png" style="width:100%;"></span>
+
+The reason of using “DCAT-AP” in the name of some Classes or Entity Types is because we need to resolve the ambiguity with other Entities defined in the Smart Data Models initiative (e.g., DatasetDCAT-AP and DatasetSTAT-DCAT-AP).
+Nevertheless, there are a set of limitations in this specification that we need to address like the impossibility to describe the structure of a dataset as well as the normalized license used on them. For this purpose, we decide to move forward and adopt the StatDCAT Application Profile to provide this information in our statistical data models.
+
+### StatDCAT-AP data models
+
+DCAT Application Profile for description of statistical datasets (StatDCAT-AP) is the extension of the DCAT Application Profile, version 1.1, for data portals in Europe for describing statistical datasets, dataset series and services, with a common agreed vocabulary for statistical open data. Basically, StatDCAT-AP model defines a set of additions to the DCAT-AP model to describe datasets in any format, for example in statistical data and metadata Exchange (SDMX). The idea behind was to know which elements in statistical data standards can be manage by DCAT-AP and extends it in order to help in the discovery and use of statistical datasets.
+The StatDCAT-AP data model includes four classes that are already available in DCAT-AP (Catalogue, Catalogue Record, Dataset, and Distribution). Basically, the Smart Data Models initiative has worked in the extension of the corresponding **Dataset** data model in order to include the following properties:
+
+- **stat:attribute**: This property links to a component used to qualify and interpret observed values, e.g., units of measure, any scaling factors, and metadata such as the status of the observation (e.g., estimated, provisional). Attribute is a conceptual entity that applies to all distribution formats, e.g., in case a dataset is provided both in SDMX and in Data Cube.
+- **stat:dimension**: This property links to a component that identifies observations, e.g., the time to which the observation applies, or a geographic region which the observation covers. Dimension is a conceptual entity that applies to all distribution formats, e.g., in case a dataset is provided both in SDMX and in Data Cube.
+- **stat:statUnitMeasure**: This property links to a unit of measurement of the observations, for example Euro, square kilometre, purchasing power standard (PPS), full- time equivalent, percentage. Unit of measurement is a conceptual entity that applies to all distribution formats, e.g., in the case when a dataset is provided both in SDMX and in Data Cube.
+
+<span><img title="StatDCAT-AP_schematic_data_model.png" alt="StatDCAT-AP_schematic_data_model.png" src="./img/StatDCAT-AP_schematic_data_model.png" style="width:100%;"></span>
+
+The rest of properties (**stat.numSeries**) and relations (**dqv:hasQualityAnnotation** and **dct:type** from Distribution class) are not created.
+
+### Mapping SDMX information model to StatDCAT-AP
+
+The scope of this subsection is to explain how we can map from SDMX content to StatDCAT-AP. This allows us to know which metadata information have to be translated into the corresponding DCAT-AP classes and/or properties. For this purpose, the StatDCAT-AP defines a schematic operation of the high level classes in the SDMX Information Model and how they are translated into the StatDCAT-AP.
+
+<span><img title="Schematic_map_of_StatDCAT-AP_classes_to_SDMX.png" alt="Schematic_map_of_StatDCAT-AP_classes_to_SDMX.png" src="./img/Schematic_map_of_StatDCAT-AP_classes_to_SDMX.png" style="width:100%;"></span>
+
+A narrative explanation of the previous schematic figure is the following:
+
+1. A SDMX Category Schema is mapped to the DCAT Catalogue. Categorisation allows us to link both structural metadata object in SDMX with Dataflows in StatDCAT Dataset as well link to the topic themes used in the SDMX Dataflow.
+2. The SDMX Dataflow and the corresponding SDMX Data Structure (DataStructureDefinition) are mapped into StatDCAT Dataset.
+3. Dimension and Attribute in the SDMX Data Structure are mapped into the DimensionProperty and AttributeProperty classes in StatDCAT-AP.
+4. The SDMX Category Scheme is mapped to the DCAT Category Scheme. The Categories in this Category Scheme are the topics that categorise the data type. Therefore, Categories are linked to Dataflows which are relevant for the topic of a Categorisation.
+5. The SDMX Provision Agreement is mapped to the DCAT Distribution.
+6. The SDMX Agency, the Maintenance Agency for the metadata, is mapped to the DCAT Agent and is maintained in a different scheme from the Data Provider. We need to keep in mind that the SDMX Agency is not the same entity as SDMX the Data Provider, even although they can get the same id.
+
+Finally, we have created a EBNF LALR(1) grammar to facilitate the transformation mechanism from a RDF Turtle representation of the SDMX into our JSON-LD models based on StatDCAT-AP and publish it to the FIWARE Context Broker (Orion-LD). This grammar is based on the RDF 1.1 Turtle specification. Some notes have to be considered in this specification:
+
+- 1. When tokenizing the input and choosing grammar rules, the longest match is chosen.
+- 2. The Turtle grammar is LL(1) and LALR(1) when the rules with uppercased names are used as terminals.
+- 3. The entry point into the grammar is start.
+- 4. The WS token allows any number of white spaces.
+- 5. The COMMENT token allows disregard comments in text.
+- 6. The token LCASE_LETTER allows us identifying any lowercase character. The token UCASE_LETTER allows us identifying any uppercase character. The token LETTER represents any character either in lowercase or in uppercase.
+- 7. The DIGIT token allows to identify any number between 0 and 9.
+- 8. The token HEXDIGIT allows to identify any hexadecimal number where characters can be uppercase or lowercase.
+- 9. The token ESCAPED_STRING allows us identifying any strings between double quotes.
+- 10. The strings '@prefix' match the pattern for LANGTAG, though "prefix" is registered language subtags. This specification does not define whether a quoted literal followed by either of these tokens (e.g., "A"@prefix) is in the Turtle language.
+
+<span><img title="EBNF_LALR_grammar.png" alt="EBNF_LALR_grammar.png" src="./img/EBNF_LALR_grammar.png" style="width:100%;"></span>
 
 ## Conclusions
 
 ### Lessons learned
 
-It is common to say that data harvesting and cleaning is the biggest part of the job when building data pipelines. Estimates of the effort spent on these preliminary phases typically vary between 50% and 80%, or even more. The work carried out on the Interstat pilots can only confirm this fact, and it appears that we are rather at the top of the range. Several comments can be made about this:
+It is common to say that data harvesting and cleaning is the biggest part of the job when building data pipelines. Estimates of the effort spent on these preliminary phases typically vary between 50% and 80%, or even more. The work carried out on the INTERSTAT pilots can only confirm this fact, and it appears that we are rather at the top of the range. Several comments can be made about this:
 
-* Some important data are still not easily accessible. For example, a manual action is still required to obtain the results of the Italian census, and it is probably the case in other countries as well. This means of course that it is not possible to fully automate processes using these data: for each update, a human intervention is necessary. This also means that traceability and reproducibility of the processes are greatly impaired.
+- Some important data are still not easily accessible. For example, a manual action is still required to obtain the results of the Italian census, and it is probably the case in other countries as well. This means of course that it is not possible to fully automate processes using these data: for each update, a human intervention is necessary. This also means that traceability and reproducibility of the processes are greatly impaired.
 
-* When available online, data are published in a great variety of formats: different versions of Excel, different flavours of CSV, XML, etc. It is rare to find data at the four- or five-star level of the [Berners-Lee scheme](https://5stardata.info/en/). Even at the two-star level, data structures are ad hoc, poorly documented and, non-interoperable. A blatant example is provided by the air quality measures from Ispra, which use a different Excel structure for each pollutant (see [details](https://github.com/INTERSTAT/Statistics-Contextualized/issues/17#issuecomment-1029201619)), whereas the European Environment Agency does a great job of harmonizing and lifting the data to RDF.
+- When available online, data are published in a great variety of formats: different versions of Excel, different flavours of CSV, XML, etc. It is rare to find data at the four- or five-star level of the [Berners-Lee scheme](https://5stardata.info/en/). Even at the two-star level, data structures are ad hoc, poorly documented and, non-interoperable. A blatant example is provided by the air quality measures from Ispra, which use a different Excel structure for each pollutant (see [details](https://github.com/INTERSTAT/Statistics-Contextualized/issues/17#issuecomment-1029201619)), whereas the European Environment Agency does a great job of harmonizing and lifting the data to RDF.
 
-* Even at the very lowest level, technical standardization is not assured: it is really deplorable to see that some data publishers still use local character sets instead of UTF-8.
+- Even at the very lowest level, technical standardization is not assured: it is really deplorable to see that some data publishers still use local character sets instead of UTF-8.
 
-* It is still extremely rare to see usage licenses attached to data, not to mention standard or machine-understandable licenses.
+- It is still extremely rare to see usage licenses attached to data, not to mention standard or machine-understandable licenses.
 
-* The cross-border dimension of the Interstat pilots adds of course to the complexity. Whereas in some domains like the population census, interoperability exist up to the semantic or even legal level, it is not the case for others. For example, a lot of exchanges between Istat and Insee were needed in order to come up with a common content for the data on schools. In view of this observation, we can only hope for a rapid deployment of the strategy proposed by the European Commission in terms of open data, and in particular with regard to high value datasets. It should be remembered, however, that even at the best level of automatable access, the data will remain unusable until interoperable, accessible and coherent metadata are linked to them.
+- The cross-border dimension of the Interstat pilots adds of course to the complexity. Whereas in some domains like the population census, interoperability exist up to the semantic or even legal level, it is not the case for others. For example, a lot of exchanges between Istat and Insee were needed in order to come up with a common content for the data on schools. In view of this observation, we can only hope for a rapid deployment of the strategy proposed by the European Commission in terms of open data, and in particular with regard to high value datasets. It should be remembered, however, that even at the best level of automatable access, the data will remain unusable until interoperable, accessible and coherent metadata are linked to them.
 
 In comparison to the creation of the data pipelines, the development of client applications greatly benefited from previous investments made by certain members of the consortium and went rather smoothly.
-
 
 ### Next steps
 
 The work will continue in Activity 3 until the end of the project, along several axes:
 
-* Continuous improvement of the pilots: enhancement of the documentation, better automation, continued effort on metadata harmonization and standardization, etc. The integration of new data in some pilots will also be studied, for example [income and poverty indicators](https://www.insee.fr/fr/statistiques/4507225) for the SEP pilot. Development of the client applications will also be pursued.
-* The bulk of the work will now shift to the assessment framework, which constitutes the next milestone. This will in particular give the opportunity to compare the two approaches used for the development of the pilots, which are based on different technical paradigms and also different guiding principles.
-* Finally more resources will be dedicated to a better integration of the Context Broker in the pilots, especially at the model level with more effort on achieving interoperability between the SDMX and NGSI-LD data and metadata models.
+- Continuous improvement of the pilots: enhancement of the documentation, better automation, continued effort on metadata harmonization and standardization, etc. The integration of new data in some pilots will also be studied, for example [income and poverty indicators](https://www.insee.fr/fr/statistiques/4507225) for the SEP pilot. Development of the client applications will also be pursued.
+- The bulk of the work will now shift to the assessment framework, which constitutes the next milestone. This will in particular give the opportunity to compare the two approaches used for the development of the pilots, which are based on different technical paradigms and also different guiding principles.
+- Finally more resources will be dedicated to a better integration of the Context Broker in the pilots, especially at the model level with more effort on achieving interoperability between the SDMX and NGSI-LD data and metadata models.
+- Dissemination of the pilots’ datasets via open data catalogues to be harvestable by the European Data Portal. This will be done by the usage of Idra platform and its interoperability with the Context Broker that will be able to provide the dataset metadata in DCAT-AP/ StatDCAT-AP models.
