@@ -145,7 +145,7 @@ The target data model for census and air quality data, exported in Web Ontology 
 
 The following figure shows the subset of SKOS concepts integrated into the SEP domain ontology.
 
-<span><img title="SKOS Ontology" alt="SKOS_ontology.jpg" src="./img/SKOS_ontology.jpg" style="width:100%;"></span>
+<span><img title="SKOS Ontology" alt="SKOS_ontology.jpg" src="./img/SKOS_ontology.jpg" style="width:80%; margin-left:10%"></span>
 
 In the modelled ontology, the information objects are colour-coded as follows:
 
@@ -258,7 +258,7 @@ Linking air quality indicators and demographic data could allow decision makers 
 | **Evaluation of the pollution effects (considering PM10) on specific population groups in Italy and France**          | Through this service it will be possible to evaluate the effects of pollution on specific population groups (for example on more vulnerable population groups) by comparing specific areas of Italy and France (for example Rome and Paris) and visualize specific details about the pollutant values (detection station, unit of measurement of the pollutant, aggregation type and information about the source dataset). | The user can select a specific NUTS region and a Municipality related to it (both Italian and French) and a specific age group (for example from 80 to 85 years). For each of the selected Municipalities, the different pollutant registration stations are highlighted with the detailed information and the value registered by the station. In the tabular view, it is possible to view and compare French and Italian data air pollution data (considering PM10) relating to the resident population value of the selected age group. With this service it is possible to observe, for example, in which municipalities the most vulnerable population groups are most at risk from pollution.                                                                                                                                                                                                                                                                                                                                                                   | **✔**                    | **✔**                    |
 | **Evaluation of the pollution effects (considering PM2.5 and NO2) on specific population groups in Italy and France** | Through this service it is possible to obtain the values of the PM2.5 and NO2 pollutants and specific details (detection station, unit of measurement of the pollutant, aggregation type and information about the source dataset).                                                                                                                                                                                         | The user can select a specific NUTS region and a related Municipality, both Italian and French. Is than possible to highlight the different pollutant registration stations considering PM 2.5 (Particulate matter <2.5 µm) and NO2 (Nitrogen dioxide). In the tabular view, it is possible to obtain and compare French and Italian air pollution data and information about the stations in the selected Municipalities, in relation with the two considered pollutants.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | **✔**                    | **✔**                    |
 
-<span><img title="SEP client" alt="SEP_client" src="./img/SEP_client.png" style="width:100%;"></span>
+<span><img title="SEP client" alt="SEP_client" src="./img/SEP_client.png" style="width:100%; border: 2px solid #555"></span>
 
 ### Geolocalized facilities (GF)
 
@@ -280,11 +280,11 @@ Copy/adapted from https://github.com/INTERSTAT/Statistics-Contextualized/blob/ma
 
 The target model for the data on facilities is expressed in OWL (see also WebVOWL visualization). The overall structure of the ontology is represented in the following figure:
 
-<span><img title="Target_data_model_of_GF.png" alt="Target_data_model_of_GF.png" src="./img/Target_data_model_of_GF.png" style="width:100%;"></span>
+<span><img title="Target_data_model_of_GF.png" alt="Target_data_model_of_GF.png" src="./img/Target_data_model_of_GF.png" style="width:80%; margin-left:10%;"></span>
 
 The facility coordinates are represented using the GeoSPARQL ontology. In the BPE, the quality of the geocoding is documented according to a 3-star-like system. This is rendered in RDF using quality annotations defined in the DQV vocabulary. The articulation of these different elements is shown in the following figure.
 
-<span><img title="BPE_facility_coordinates.png" alt="BPE_facility_coordinates.png" src="./img/BPE_facility_coordinates.png" style="width:80%;"></span>
+<span><img title="BPE_facility_coordinates.png" alt="BPE_facility_coordinates.png" src="./img/BPE_facility_coordinates.png" style="width:70%; margin-left:10%"></span>
 
 #### Data
 
@@ -398,7 +398,7 @@ The main objective of this pilot application, available [here](https://interstat
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------ |
 | **A citizen wondering the nearest cultural facilities and events** | The user is visiting an unknown place, Italian or French, and needs to know the nearest facilities what events are programmed within them. | The user, by entering his position in terms of Country, NUTS3 Region and Municipality, can view the nearby cultural and educational facilities on the map. Regarding the French territory, it is possible to obtain the facilities as points of interest on the map and divided into various specific categories. With regard to the Italian territory, in addition to viewing the facilities on the map, it is also possible to obtain additional information on schools and cultural points and also the events that are scheduled in them. Finally, it is always possible to obtain territorial and resident population data based on the selected Municipality. | **X**                    | **✔**                    |
 
-<span><img title="GF_client.png" alt="GF_client.png" src="./img/GF_client.png" style="width:100%;"></span>
+<span><img title="GF_client.png" alt="GF_client.png" src="./img/GF_client.png" style="width:100%; border: 2px solid #555"></span>
 
 ### The school for you (S4Y)
 
@@ -563,7 +563,7 @@ This pilot, available [here](https://interstat.eng.it/S4Y-pilot-client/), allows
 | **Analysis of resident population and schools in a specific municipality**                        | This service allows to explore the number of schools and students in a selected area, according to the main level of educational attainment. This analysis may enhance the coverage of scholar services in a selected municipality and the relationship between school attendance and the population structure resulting from census data. This Analysis may support policy makers to improve access to education trainings and facilities in specific areas. | This service allows to explore the number of schools and students in a selected area, according to the main level of educational attainment. This analysis may enhance the coverage of scholar services in a selected municipality and the relationship between school attendance and the population structure resulting from census data. The result of data integration may support policy makers to improve access to education trainings and facilities in specific areas. The user can select a municipality, an Educational Level (ISCED) and a School Year. The number of schools, the number of students and the resident population (divided by age group) are obtained, in tabular form. Furthermore, the total number of schools present in the selected Municipality is displayed, considering schools of all types and grades. | **X**                    | **✔**                    |
 | **Distribution of public and private schools: comparison between Italian and French territories** | This analysis may enhance the coverage of public and private scholar services in a selected area in relation also with the population resident resulting from census data. The aim is also to provide the comparison between public and private schools in those specific areas in terms of number of schools.                                                                                                                                                | The main goal of this service is to compare the distribution of private and public schools in selected municipalities in France and Italy, in terms of number of students, type, grade and number of schools. This analysis may enhance the coverage of public and private scholar services in a selected area in relation with the resident population resulting from census data. The user can select an Italian and a French municipality and a school year. The number of public and private schools and the value of the resident population in the specific areas are obtained. The analysis also makes it possible to link census data to school data, associating the ISCED code to the appropriate age group that falls within the school grade.                                                                                   | **✔**                    | **✔**                    |
 
-<span><img title="S4Y_client.png" alt="S4Y_client.png" src="./img/S4Y_client.png" style="width:100%;"></span>
+<span><img title="S4Y_client.png" alt="S4Y_client.png" src="./img/S4Y_client.png" style="width:100%; border: 2px solid #555"></span>
 
 ## SDMX to ETSI NGSI-LD
 
@@ -591,7 +591,7 @@ The list of data models created can be found in dataModel.DCAT-AP repository ins
 - **CatalogueRecordDCAT-AP**. description of a Dataset’s entry in the Catalogue. This is an optional class. This is a Catalogue Record belonging to a dataset according to the DCAT-AP standard 2.0.1.
 - **DataServiceDCAT-AP**. A collection of operations that provides access to one or more datasets or data processing functions. This is an optional class. Data Service is adapted from DCAT-AP 2.0 specification, but extended with additional properties and compatible with ETSI NGSI-LD standard.
 
-<span><img title="DCAT-AP_schematic_data_model.png" alt="DCAT-AP_schematic_data_model.png" src="./img/DCAT-AP_schematic_data_model.png" style="width:100%;"></span>
+<span><img title="DCAT-AP_schematic_data_model.png" alt="DCAT-AP_schematic_data_model.png" src="./img/DCAT-AP_schematic_data_model.png" style="width:80%;"></span>
 
 The reason of using “DCAT-AP” in the name of some Classes or Entity Types is because we need to resolve the ambiguity with other Entities defined in the Smart Data Models initiative (e.g., DatasetDCAT-AP and DatasetSTAT-DCAT-AP).
 Nevertheless, there are a set of limitations in this specification that we need to address like the impossibility to describe the structure of a dataset as well as the normalized license used on them. For this purpose, we decide to move forward and adopt the StatDCAT Application Profile to provide this information in our statistical data models.
@@ -605,7 +605,7 @@ The StatDCAT-AP data model includes four classes that are already available in D
 - **stat:dimension**: This property links to a component that identifies observations, e.g., the time to which the observation applies, or a geographic region which the observation covers. Dimension is a conceptual entity that applies to all distribution formats, e.g., in case a dataset is provided both in SDMX and in Data Cube.
 - **stat:statUnitMeasure**: This property links to a unit of measurement of the observations, for example Euro, square kilometre, purchasing power standard (PPS), full- time equivalent, percentage. Unit of measurement is a conceptual entity that applies to all distribution formats, e.g., in the case when a dataset is provided both in SDMX and in Data Cube.
 
-<span><img title="StatDCAT-AP_schematic_data_model.png" alt="StatDCAT-AP_schematic_data_model.png" src="./img/StatDCAT-AP_schematic_data_model.png" style="width:100%;"></span>
+<span><img title="StatDCAT-AP_schematic_data_model.png" alt="StatDCAT-AP_schematic_data_model.png" src="./img/StatDCAT-AP_schematic_data_model.png" style="width:80%;"></span>
 
 The rest of properties (**stat.numSeries**) and relations (**dqv:hasQualityAnnotation** and **dct:type** from Distribution class) are not created.
 
@@ -637,7 +637,7 @@ Finally, we have created a EBNF LALR(1) grammar to facilitate the transformation
 - 9. The token ESCAPED_STRING allows us identifying any strings between double quotes.
 - 10. The strings '@prefix' match the pattern for LANGTAG, though "prefix" is registered language subtags. This specification does not define whether a quoted literal followed by either of these tokens (e.g., "A"@prefix) is in the Turtle language.
 
-<span><img title="EBNF_LALR_grammar.png" alt="EBNF_LALR_grammar.png" src="./img/EBNF_LALR_grammar.png" style="width:100%;"></span>
+<span><img title="EBNF_LALR_grammar.png" alt="EBNF_LALR_grammar.png" src="./img/EBNF_LALR_grammar.png" style="width:80%;"></span>
 
 ## Conclusions
 
