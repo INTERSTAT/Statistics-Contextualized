@@ -15,9 +15,9 @@ import csv
 import pathlib
 import os
 import logging
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from gf.gf_conf import conf
-from common.geo_base import convert_coordinates_fn
+from common.geo_base import convert_coordinates_fn, lambert_to_gps
 from common.apis import get_italian_cultural_data, load_turtle
 from common.rdf import (
     gen_rdf_facility,
@@ -54,7 +54,7 @@ DATA_FILE_NAME = "gf_data_fr.csv"
 
 def flow_parameters(conf):
     return {
-        "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+        "bpe_zip_url1": get_working_directory() + "bpe20_sport_Loisir_xy.zip",
         "bpe_metadata_url1": get_working_directory() + "bpe-cultural-places-variables.csv",
         "types1": {
             "AN": str,
@@ -73,7 +73,7 @@ def flow_parameters(conf):
             "TYPEQU": "Facility_Type",
         },
         "facilities_filter": ("F309",),
-        "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+        "bpe_zip_url2": get_working_directory() + "bpe20_enseignement_xy.zip",
         "bpe_metadata_url2": get_working_directory() + "bpe-education-variables.csv",
         "types2": {
             "AN": str,
@@ -168,7 +168,18 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
         The data extracted
     """
 
-    archive = ZipFile(BytesIO(requests.get(url).content))
+    logger = prefect.context.get("logger")
+
+    scheme = urlparse(url)
+
+    # If the `url` parameter is not a valid url we treat it as a local file path
+    if scheme != "http" or scheme != "https":
+        logger.info(f"Extracting data from a local file:  {url}")
+        archive = ZipFile(url)
+    else:
+        logger.info(f"Extracting data from URL: {url}")
+        archive = ZipFile(BytesIO(requests.get(url).content))
+    
     data_zip = [name for name in archive.namelist() if not name.startswith("varmod")][0]
     # if types is not specified, take all the variables
     if not types:
@@ -297,8 +308,8 @@ def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
         if len(data) > 0:
             address_found = True
         if address_found:
-            df_sample.loc[index, "Coord_X"] = data[0]["lat"]
-            df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
+            df_sample.loc[index, "Coord_X"] = data[0]["lon"]
+            df_sample.loc[index, "Coord_Y"] = data[0]["lat"]
             df_sample.loc[index, "Quality_XY"] = "GOOD"
         else:
             df_sample.loc[index, "Coord_X"] = np.nan
@@ -351,7 +362,7 @@ def concat_datasets(ds1, ds2, id_prefix=None):
 
 @task(name="Transform French coordinates")
 def transform_french_coordinates(df):
-    tdf = convert_coordinates_fn(df, "Coord_Y", "Coord_X", "epsg:2154", "epsg:4326")
+    tdf = lambert_to_gps(df, "Coord_X", "Coord_Y")
     return tdf
 
 
