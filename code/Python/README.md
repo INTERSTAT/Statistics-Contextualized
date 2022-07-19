@@ -38,8 +38,8 @@ Each package is a module on its own, discovered via the `setup.py` program.
 
 In order to run a specific pipeline:
 
-- be sure you have activated the conda environment
 - place your favorite terminal at the root directory for Statistics-Contextualized
+- be sure you have activated the conda environment (see §Create virtual environment)
 - run the chosen launch script
   - for example, the Global Facilities use case: `python .\code\Python\gf_run.py`
   - in some execution, you might want to pay attention to the launch directory
