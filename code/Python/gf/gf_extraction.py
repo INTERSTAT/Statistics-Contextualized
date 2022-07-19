@@ -530,10 +530,28 @@ def extract_italian_cultural_facilities():
             "LAU",
             "Sector",
             "Quality_XY",
+            "Comune"
         ]
     ].drop_duplicates("Facility_ID")
     return final_df
 
+@task(name="Transform italian cultural facilities")
+def transform_italian_cultural_facilities(df):
+    url = (
+        get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    )
+
+    # Dropping the existing LAU column
+    df.drop("LAU", axis=1, inplace=True)
+
+    df_lau = pd.read_excel(
+        url, dtype=str, usecols=[4, 5], names=["LAU", "NAME"]
+    )
+    df_merged = df.merge(
+        df_lau, left_on="Comune", right_on="NAME", how="left"
+    )
+
+    return df_merged
 
 @task(name="Extract italian cultural events")
 def extract_italian_cultural_events():
@@ -705,14 +723,17 @@ def build_flow(conf):
         italian_cultural_facilities = extract_italian_cultural_facilities()
         # italian_cultural_events = extract_italian_cultural_events()
 
+        italian_cultural_facilities_transformed = transform_italian_cultural_facilities(italian_cultural_facilities)
+
         italian_data = concat_datasets(
-            italian_educational_data_transformed, italian_cultural_facilities
-        )
+            italian_educational_data_transformed, italian_cultural_facilities_transformed
+        )   
 
         french_rdf_data = build_rdf_data(french_data)
         it_rdf_data = build_rdf_data(italian_data)
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
+        
 
         """ This task doesn't work on some networks
         load_files_to_ftp(
@@ -726,14 +747,21 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        tx = [841092.05, 830000.00]
-        ty = [6545270.87, 6545270.87]
-        points = pd.DataFrame({
-            "X": [randint(830000, 840000) for x in range(10000)],
-            "Y": [randint(6500000, 6550000) for x in range(10000)]
-        })
-        transformed = convert_coordinates_fn(points, "X", "Y", "epsg:2154", "epsg:4326")
-        print(transformed)
+        url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+        df = pd.read_excel(
+            url, 
+            dtype=str, 
+            usecols=[0, 2, 3, 4, 5], 
+            names=["REGION", "CITY_PREFIX", "PROVINCE_CODE", "CITY_CODE", "NAME"]
+        )
+
+        dups = df[df.duplicated(keep=False)]
+        dups_name = df[df.duplicated(["NAME"], keep=False)]
+        
+        print(f"dups rows → {dups.shape[0]}")
+        print(f"dups name rows → {dups_name.shape[0]}")
+        print(dups)
+        print(dups_name)
     return flow
 
 
