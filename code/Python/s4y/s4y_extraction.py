@@ -49,7 +49,6 @@ def extract_students_data(url, types):
     DataFrame
         The data extracted
     """
-    print("URL", url)
     if not types:
         df_students_data = pd.read_csv(url, sep=";", thousands=" ")
     else:
@@ -58,7 +57,6 @@ def extract_students_data(url, types):
     # TODO: Improve renaming. Here the order of the columns in the file is kept and not in the order of types.keys()
     df_students_data.columns.values[0] = "scholastic_year"
     df_students_data.columns.values[1] = "school_id"
-    print("COURSE_YEAR", conf["course_year"])
     if not conf["course_year"]:
         df_students_data.columns.values[2] = "students_number"
     return df_students_data
@@ -81,11 +79,24 @@ def transform_schools_data(df_schools_data):
     """
     # Recoding type of institution
     df_schools_data["institution_type"] = df_schools_data["institution_type"].map({"Public": "PU", "Privé": "PR"})
+    # Define list of French municipal districts for Lyon, Marseille and Paris
+    arm_paris = ["75101", "75102", "75103", "75104", "75105", "75106", "75107", "75108", "75109", "75110", "75111",
+                 "75112", "75113", "75114", "75115", "75116", "75117", "75118", "75119", "75120"]
+    arm_lyon = ["69381", "69382", "69383", "69384", "69385", "69386", "69387", "69388", "69389"]
+    arm_marseille = ["13201", "13202", "13203", "13204", "13205", "13206", "13207", "13208", "13209", "13210", "13211",
+                     "13212", "13213", "13214", "13215", "13216"]
+    # Add French municipal district in a column if relevant
+    df_schools_data["arm"] = df_schools_data["lau"]
+    df_schools_data.loc[~df_schools_data["lau"].isin(arm_paris+arm_lyon+arm_paris), "arm"] = ""
+
+    # Switch municipal district for Lyon, Marseille and Paris to Lau code
+    df_schools_data.loc[df_schools_data["lau"].isin(arm_paris), "lau"] = "75056"
+    df_schools_data.loc[df_schools_data["lau"].isin(arm_lyon), "lau"] = "69123"
+    df_schools_data.loc[df_schools_data["lau"].isin(arm_marseille), "lau"] = "13055"
     # Add Isced code
     url = get_working_directory() + "school-registry-mapping-nature-isced.csv"
-    df_mappping_nature_isced = pd.read_csv(url, sep=",", usecols=["code_nature", "ISCED_level"])
-    df_merged = df_schools_data.merge(df_mappping_nature_isced, left_on="code_nature", right_on="code_nature", how="left")
-    # TODO: Add nuts3 variable based on lau variable?
+    df_mapping_nature_isced = pd.read_csv(url, sep=",", usecols=["code_nature", "ISCED_level"])
+    df_merged = df_schools_data.merge(df_mapping_nature_isced, left_on="code_nature", right_on="code_nature", how="left")
     return df_merged
 
 
@@ -171,7 +182,7 @@ def load_file_to_ftp():
 
 # Build flow
 def build_flow():
-    with Flow("GF-EF") as flow:
+    with Flow("s4y_api_to_csv") as flow:
         french_schools = extract_schools_data()
         french_schools_transformed = transform_schools_data(french_schools)
         students_data_url1 = Parameter(name="students_data_url1", required=True)
