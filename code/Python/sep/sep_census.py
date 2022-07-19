@@ -50,7 +50,7 @@ def raw_italian_to_standard(df, age_classes, nuts3):
     df_reduced = df[['ITTER107', 'SEXISTAT1', 'ETA1', 'Value']]
 
     # SEXISTAT1 & ETA1 variables includes subtotal, we only have to keep ventilated data
-    df_filtered = df_reduced.loc[(df_reduced['SEXISTAT1'] != 'T') | (df_reduced['ETA1'] != 'TOTAL') | (df_reduced['ITTER107'].str.strip().str[0:1] != 'IT')]
+    df_filtered = df_reduced.loc[~((df_reduced['SEXISTAT1'] == 'T') | (df_reduced['ETA1'] == 'TOTAL') | (df_reduced['ITTER107'].str.strip().str[0:2] == 'IT'))]
 
     # Age & sex range have to be recoded to be mapped with the reference code list
     df_filtered['ETA1'] = df_filtered['ETA1'].replace('Y_UN4', 'Y_LT5')
@@ -238,7 +238,7 @@ with Flow('census_csv_to_rdf') as flow:
         secrets = json.load(sf)
         GRAPHDB_URL = secrets["graphdb"]["url"]
 
-    rdf_repo_url = Parameter('rdf_repo_url', default=GRAPHDB_URL + "repositories/sep-test/statements?context=<http://www.interstat.org/graphs/sep>")
+    rdf_repo_url = Parameter('rdf_repo_url', default=GRAPHDB_URL + "repositories/sep-staging/statements?context=<http://www.interstat.org/graphs/sep>")
 
     delete_graph(rdf_repo_url)
 
