@@ -351,7 +351,7 @@ def concat_datasets(ds1, ds2, id_prefix=None):
 
 @task(name="Transform French coordinates")
 def transform_french_coordinates(df):
-    tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
+    tdf = convert_coordinates_fn(df, "Coord_Y", "Coord_X", "epsg:2154", "epsg:4326")
     return tdf
 
 
