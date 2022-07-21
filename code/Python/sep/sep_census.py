@@ -71,6 +71,11 @@ def import_dsd():
     g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/sep/sep-dsd-1.ttl", format="turtle")
     return g.serialize(format="turtle", encoding='utf-8')
 
+@task(name='Import TTL')
+def import_ttl(url):
+    g = Graph()
+    g.parse(url, format="turtle")
+    return g.serialize(format="turtle", encoding='utf-8')
 
 @task(name='Retrieve age groups')
 def get_age_class_data(url):
@@ -84,7 +89,7 @@ def get_age_class_data(url):
 def get_nuts3_fr(url):
     resp = get(url)
     data = BytesIO(resp.content)
-    df = pd.read_csv(data)    
+    df = pd.read_csv(data)   
     return df
 
 
@@ -238,12 +243,32 @@ with Flow('census_csv_to_rdf') as flow:
         secrets = json.load(sf)
         GRAPHDB_URL = secrets["graphdb"]["url"]
 
-    rdf_repo_url = Parameter('rdf_repo_url', default=GRAPHDB_URL + "repositories/sep-staging/statements?context=<http://www.interstat.org/graphs/sep>")
+    sep_repository = 'sep-staging'
+    metadata_graph_url = 'http://rdf.interstat.eng.it/graphs/sep/metadata'
+    data_graph_url = 'http://rdf.interstat.eng.it/graphs/sep'
 
-    delete_graph(rdf_repo_url)
+    metadata_rdf_repo_url = Parameter('metadata_rdf_repo_url', default=GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + metadata_graph_url + ">")
+    data_rdf_repo_url = Parameter('data_rdf_repo_url', default=GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + data_graph_url + ">")
+
+    delete_graph(metadata_rdf_repo_url)
+    delete_graph(data_rdf_repo_url)
 
     dsd_rdf = import_dsd()
-    load_turtle(dsd_rdf, rdf_repo_url)
+    load_turtle(dsd_rdf, metadata_rdf_repo_url)
+
+    # START: Produced externally
+    lau_fr_2020_data_url = Parameter('lau_fr_2020_data_url', default='https://interstat.eng.it/files/sep/input/lau-fr-2020.ttl')
+    lau_fr_2020_rdf = import_ttl(lau_fr_2020_data_url)
+    load_turtle(lau_fr_2020_rdf, metadata_rdf_repo_url)
+
+    lau_it_2020_data_url = Parameter('lau_it_2020_data_url', default='https://interstat.eng.it/files/sep/input/lau-it-2020.ttl')
+    lau_it_2020_rdf = import_ttl(lau_it_2020_data_url)
+    load_turtle(lau_it_2020_rdf, metadata_rdf_repo_url)
+
+    nuts3_2016_data_url = Parameter('nuts3_2016_data_url', default='https://interstat.eng.it/files/sep/input/nuts3-2016.ttl')
+    nuts3_2016_rdf = import_ttl(nuts3_2016_data_url)
+    load_turtle(nuts3_2016_rdf, metadata_rdf_repo_url)
+    # END 
 
     age_class_url = Parameter('age_class_url', default="https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/age-groups.csv")
     age_classes = get_age_class_data(age_class_url)
@@ -264,7 +289,7 @@ with Flow('census_csv_to_rdf') as flow:
 
     graph_files = build_rdf_data(df_fr_it)
 
-    load_turtles(graph_files, rdf_repo_url)
+    load_turtles(graph_files, data_rdf_repo_url)
 
 
 def main():
