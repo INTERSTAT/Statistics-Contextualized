@@ -69,7 +69,7 @@ Regarding the tooling, the following choices were made:
 - use of [Python 3](https://www.python.org/) as a programming language
 - use of [Prefect](https://www.prefect.io/) as a build, run, and monitor framework
 
-Prefect allows for good modularity and readability of the code, and provides process visualisation tools for the conception and execution stages (see the [example](https://github.com/INTERSTAT/Statistics-Contextualized/raw/main/img/gf-flow-design.png) of the "Geolocalized Facilities" pilot). Prefect pipelines can be executed locally, for example for test purposes, or on a [cloud platform](https://www.prefect.io/cloud/) (which can be installed on premises).
+Prefect allows for good modularity and readability of the code, and provides process visualisation tools for the conception and execution stages (see this [example](https://github.com/INTERSTAT/Statistics-Contextualized/raw/main/img/gf-flow-design.png) corresponding to the "Geolocalized Facilities" pilot). Prefect pipelines can be executed locally, for example for test purposes, or on a [cloud platform](https://www.prefect.io/cloud/) (which can be installed on premises). Prefect Cloud provides user-friendly tools to visualize pipeline executions (see this [example](https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/img/gf-flow-run-prefect.jpg) corresponding to the SEP pilot).
 
 More details on the technical environment for the ETL Python implementation is available [here](https://interstat.github.io/Statistics-Contextualized/code/Python/).
 

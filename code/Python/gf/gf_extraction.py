@@ -15,9 +15,9 @@ import csv
 import pathlib
 import os
 import logging
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from gf.gf_conf import conf
-from common.geo_base import convert_coordinates_fn
+from common.geo_base import convert_coordinates_fn, lambert_to_gps
 from common.apis import get_italian_cultural_data, load_turtle
 from common.rdf import (
     gen_rdf_facility,
@@ -54,7 +54,7 @@ DATA_FILE_NAME = "gf_data_fr.csv"
 
 def flow_parameters(conf):
     return {
-        "bpe_zip_url1": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_sport_Loisir_xy_csv.zip",
+        "bpe_zip_url1": get_working_directory() + "bpe20_sport_Loisir_xy.zip",
         "bpe_metadata_url1": get_working_directory() + "bpe-cultural-places-variables.csv",
         "types1": {
             "AN": str,
@@ -73,7 +73,7 @@ def flow_parameters(conf):
             "TYPEQU": "Facility_Type",
         },
         "facilities_filter": ("F309",),
-        "bpe_zip_url2": "https://www.insee.fr/fr/statistiques/fichier/3568638/bpe20_enseignement_xy_csv.zip",
+        "bpe_zip_url2": get_working_directory() + "bpe20_enseignement_xy.zip",
         "bpe_metadata_url2": get_working_directory() + "bpe-education-variables.csv",
         "types2": {
             "AN": str,
@@ -168,7 +168,18 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
         The data extracted
     """
 
-    archive = ZipFile(BytesIO(requests.get(url).content))
+    logger = prefect.context.get("logger")
+
+    scheme = urlparse(url)
+
+    # If the `url` parameter is not a valid url we treat it as a local file path
+    if scheme != "http" or scheme != "https":
+        logger.info(f"Extracting data from a local file:  {url}")
+        archive = ZipFile(url)
+    else:
+        logger.info(f"Extracting data from URL: {url}")
+        archive = ZipFile(BytesIO(requests.get(url).content))
+    
     data_zip = [name for name in archive.namelist() if not name.startswith("varmod")][0]
     # if types is not specified, take all the variables
     if not types:
@@ -297,8 +308,8 @@ def add_coordinates_italian_educational_facilities(df) -> pd.DataFrame:
         if len(data) > 0:
             address_found = True
         if address_found:
-            df_sample.loc[index, "Coord_X"] = data[0]["lat"]
-            df_sample.loc[index, "Coord_Y"] = data[0]["lon"]
+            df_sample.loc[index, "Coord_X"] = data[0]["lon"]
+            df_sample.loc[index, "Coord_Y"] = data[0]["lat"]
             df_sample.loc[index, "Quality_XY"] = "GOOD"
         else:
             df_sample.loc[index, "Coord_X"] = np.nan
@@ -351,7 +362,7 @@ def concat_datasets(ds1, ds2, id_prefix=None):
 
 @task(name="Transform French coordinates")
 def transform_french_coordinates(df):
-    tdf = convert_coordinates_fn(df, "Coord_X", "Coord_Y", "epsg:2154", "epsg:4326")
+    tdf = lambert_to_gps(df, "Coord_X", "Coord_Y")
     return tdf
 
 
@@ -505,7 +516,7 @@ def extract_italian_cultural_facilities():
     df["Facility_Type"] = "F3"
     df["LAU"] = np.nan
     df["Sector"] = np.nan
-    df.rename(columns={"Latitudine": "Coord_X", "Longitudine": "Coord_Y"}, inplace=True)
+    df.rename(columns={"Latitudine": "Coord_Y", "Longitudine": "Coord_X"}, inplace=True)
     df["Coord_X"] = df["Coord_X"].astype(float)
     df["Coord_Y"] = df["Coord_Y"].astype(float)
     df['Quality_XY'] = ["NOT_GEOLOCALIZED" if pd.isna(c) else "GOOD" for c in df["Coord_X"]]
@@ -519,10 +530,28 @@ def extract_italian_cultural_facilities():
             "LAU",
             "Sector",
             "Quality_XY",
+            "Comune"
         ]
     ].drop_duplicates("Facility_ID")
     return final_df
 
+@task(name="Transform italian cultural facilities")
+def transform_italian_cultural_facilities(df):
+    url = (
+        get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    )
+
+    # Dropping the existing LAU column
+    df.drop("LAU", axis=1, inplace=True)
+
+    df_lau = pd.read_excel(
+        url, dtype=str, usecols=[4, 5], names=["LAU", "NAME"]
+    )
+    df_merged = df.merge(
+        df_lau, left_on="Comune", right_on="NAME", how="left"
+    )
+
+    return df_merged
 
 @task(name="Extract italian cultural events")
 def extract_italian_cultural_events():
@@ -694,14 +723,17 @@ def build_flow(conf):
         italian_cultural_facilities = extract_italian_cultural_facilities()
         # italian_cultural_events = extract_italian_cultural_events()
 
+        italian_cultural_facilities_transformed = transform_italian_cultural_facilities(italian_cultural_facilities)
+
         italian_data = concat_datasets(
-            italian_educational_data_transformed, italian_cultural_facilities
-        )
+            italian_educational_data_transformed, italian_cultural_facilities_transformed
+        )   
 
         french_rdf_data = build_rdf_data(french_data)
         it_rdf_data = build_rdf_data(italian_data)
         rdf_data = concat_rdf_data(french_rdf_data, it_rdf_data)
         upload_rdf_data(rdf_data)
+        
 
         """ This task doesn't work on some networks
         load_files_to_ftp(
@@ -715,14 +747,21 @@ def build_flow(conf):
 
 def build_test_flow():
     with Flow("gf-test") as flow:
-        tx = [841092.05, 830000.00]
-        ty = [6545270.87, 6545270.87]
-        points = pd.DataFrame({
-            "X": [randint(830000, 840000) for x in range(10000)],
-            "Y": [randint(6500000, 6550000) for x in range(10000)]
-        })
-        transformed = convert_coordinates_fn(points, "X", "Y", "epsg:2154", "epsg:4326")
-        print(transformed)
+        url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+        df = pd.read_excel(
+            url, 
+            dtype=str, 
+            usecols=[0, 2, 3, 4, 5], 
+            names=["REGION", "CITY_PREFIX", "PROVINCE_CODE", "CITY_CODE", "NAME"]
+        )
+
+        dups = df[df.duplicated(keep=False)]
+        dups_name = df[df.duplicated(["NAME"], keep=False)]
+        
+        print(f"dups rows → {dups.shape[0]}")
+        print(f"dups name rows → {dups_name.shape[0]}")
+        print(dups)
+        print(dups_name)
     return flow
 
 

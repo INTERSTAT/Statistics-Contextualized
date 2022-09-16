@@ -103,6 +103,24 @@ def convert_coordinates_fn(
 
     return frame
 
+def lambert_to_gps(
+    frame: pd.DataFrame,
+    lat_column: str,
+    lon_column: str, 
+    keep_original: bool = False,
+    ) -> pd.DataFrame:
+    """
+    Wrapper around `convert_coordinates_fn` parameterized for a Lambert 93 to WGS 84 transformation.
+    """
+    trans_frame = convert_coordinates_fn(
+        frame, 
+        lat_column, 
+        lon_column, 
+        crs_from="epsg:2154", 
+        crs_to="epsg:4326", 
+        keep_original=keep_original
+    )    
+    return trans_frame
 
 @task(name="Add NUTS3 from coordinates")
 def add_nuts3_from_coordinates(
@@ -276,6 +294,7 @@ def get_lau_nuts_it(url):
 
 
 # Flow and main ----
+# FIXME delete probably
 with Flow("geo_flow") as flow:
 
     df = pd.DataFrame(

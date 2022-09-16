@@ -35,7 +35,6 @@ def get_french_schools_data() -> pd.DataFrame:
         f"{base_url}/{dataset_id}/exports/csv?select={cols_request}&limit={str(row_limit)}&refine"
         f".etat_etablissement={filter_school_state}&offset=0&timezone=UTC "
     )
-    print(target)
     df = pd.read_csv(target, sep=";")
     return df
 
