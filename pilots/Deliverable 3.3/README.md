@@ -15,13 +15,14 @@ task will perform the assessment of the impact of the outcomes of the Action, co
 analysing the measurements related to the KPIs identified for each validation dimension.
 The activity will have the following output(s):
 
-- Report containing a detailed description of the use cases to demonstrate the cross-border
-  benefits of the proposed solution.
+- Report containing a detailed description of the use cases to demonstrate the cross-border benefits of the proposed solution.
 - Pilot services deployed and working in real environments.
 - Pilot technical report.
 - Impact assessment methodology and report.
 
 #### 1.1.1 Overview of the Interstat framework
+
+#### 1.1.2 Overview of the implemented pilots
 
 - Support for Environmental Policies (SEP): One of the main goals of this use case is to enrich air quality data with demographic analysis, to support local public authorities responsible for environmental policies.
 - Geolocalized facilities (GF): dissemination of information about facilities and integration with related sources
@@ -31,24 +32,27 @@ The activity will have the following output(s):
 
 #### 1.2.1 Methodology for the impact assessment
 
-Definition of three main areas for impact assessment
-Back-end (tools shareability, service reuse, reproducibility….)
-Front-end (user friendly interface, metadata, relevance of the selected topics)
-Compliance with MQA
+**Definition of three main areas for impact assessment:**
+
+**Data pipeline** : to assess Interstat framework tools: Back-end (tools shareability, service reuse, reproducibility….)
+
+**Compliance with MQA**
+
+**Use cases assessment**: to assess pilots architecture, mainly the Client applications and the implemented Front-end (user friendly interface, metadata, relevance of the selected topics).
 
 #### 1.2.2 KPIs for the impact assessment
 
 #### 1.2.3 Stakeholders involvement
 
-## 2 Assessment of Pilots architecture
+## 2 Assessment of Interstat framework
 
 In this section, we describe how the pilot services were assessed, with a specific focus on the development of the data pipelines and on the client applications.
 
 ### 2.1 Data pipelines
 
-### 2.2 Client applications
+Two different approaches were used for the implementation of the data pipelines: a classical ETL (Extract, transform, load) pattern for the GF pilot, and an approach based on domain knowledge for SEP and S4Y.
 
-### 2.3 Compliance with MQA
+### 2.2 Compliance with MQA
 
 ## 3 Use cases assessment
 
