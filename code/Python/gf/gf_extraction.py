@@ -5,7 +5,7 @@ import time
 import numpy as np
 import requests
 import pandas as pd
-from prefect import task, Flow, Parameter
+from prefect import task, flow, get_run_logger
 import prefect
 from zipfile import ZipFile
 from io import BytesIO
@@ -168,7 +168,7 @@ def extract_french_data(url, types={}, facilities_filter=(), rename={}):
         The data extracted
     """
 
-    logger = prefect.context.get("logger")
+    logger = get_run_logger()
 
     scheme = urlparse(url)
 
@@ -447,7 +447,7 @@ def transform_metadata_to_csvw(bpe_metadata):
     json_file_name = get_working_directory() + DATA_FILE_NAME + "-metadata.json"
     with open(json_file_name, "w", encoding="utf-8") as csvw_file:
         json.dump(csvw, csvw_file, ensure_ascii=False, indent=4)
-    return csvw_file
+    return csvw_file.name
 
 
 @task(name="Transform French metadata to code list files")
@@ -494,13 +494,13 @@ def transform_metadata_to_code_lists(bpe_metadata):
             writer.writerow(header_list)
             for y in x["mod"]:
                 writer.writerow(y)
-        files.append(file)
+        files.append(file.name)
     return files
 
 
 @task(name="Extract italian cultural facilities")
 def extract_italian_cultural_facilities():
-    logger = prefect.context.get("logger")
+    logger = get_run_logger()
     # Building the query
     query = conf["sparql"]["italianCulturalFacilities"]
     limit = conf["thresholds"]["italianCulturalFacilities"]
@@ -555,7 +555,7 @@ def transform_italian_cultural_facilities(df):
 
 @task(name="Extract italian cultural events")
 def extract_italian_cultural_events():
-    logger = prefect.context.get("logger")
+    logger = get_run_logger()
     # FIXME duplicated code → apis module?
     query = conf["sparql"]["italianCulturalEvents"]
     limit = conf["thresholds"]["italianCulturalEvents"]
@@ -573,7 +573,7 @@ def extract_italian_cultural_events():
 @task(name="Create RDF data")
 def build_rdf_data(df):
 
-    logger = prefect.context.get("logger")
+    logger = get_run_logger()
     logger.info("Building a RDF file from the input data frame.")
 
     if all(col in df.columns for col in ["CL_PGE", "CL_PELEM", "EP"]):
@@ -654,9 +654,9 @@ def load_files_to_ftp(csvw, code_lists):
         sftp.makedirs(remote_path)  # Create remote path if needed
         with sftp.cd(remote_path):
             sftp.put(get_working_directory() + DATA_FILE_NAME)
-            sftp.put(csvw.name)
+            sftp.put(csvw)
             for f in code_lists:
-                sftp.put(f.name)
+                sftp.put(f)
 
 
 @task(name="Concatenate RDF data")
@@ -666,7 +666,7 @@ def concat_rdf_data(french_rdf: str, it_rdf: str):
 
 @task(name="Upload RDF data")
 def upload_rdf_data(rdf_data):
-    logger = prefect.context.get("logger")
+    logger = get_run_logger()
     local_rdf_file = f"{get_working_directory()}gf.ttl"
     with open(local_rdf_file, "w") as gf:
         logger.info(f"Writing RDF data to disk at: {local_rdf_file}")   
@@ -679,9 +679,10 @@ def upload_rdf_data(rdf_data):
 
 
 # Build flow
-def build_flow(conf):
-    with Flow("GF-EF") as flow:
+@flow(name="GF-EF")
+def gf_flow():
         # Flow parameters
+        '''
         bpe_zip_url1 = Parameter(name="bpe_zip_url1", required=True)
         bpe_metadata_url1 = Parameter(name="bpe_metadata_url1", required=True)
         types1 = Parameter(name="types1", required=False)
@@ -694,27 +695,28 @@ def build_flow(conf):
         italian_educational_data_url = Parameter(
             name="italian_educational_data_url", required=True
         )
-
+        '''
+        params = flow_parameters(conf)
         # Flow tasks
         french_data1 = extract_french_data(
-            bpe_zip_url1, types1, facilities_filter, rename1
+            params["bpe_zip_url1"], params["types1"], params["facilities_filter"], params["rename1"]
         )
-        french_data2 = extract_french_data(bpe_zip_url2, types2, rename=rename2)
+        french_data2 = extract_french_data(params["bpe_zip_url2"], params["types2"], rename=params["rename2"])
         french_data = concat_datasets(french_data1, french_data2, id_prefix="fr")
 
         # WIP - Transform Lambert to WGS84 
         french_data = transform_french_coordinates(french_data)
 
         french_metadata1 = extract_french_metadata(
-            bpe_metadata_url1, rename1, facilities_filter
+            params["bpe_metadata_url1"], params["rename1"], params["facilities_filter"]
         )
-        french_metadata2 = extract_french_metadata(bpe_metadata_url2, rename2)
+        french_metadata2 = extract_french_metadata(params["bpe_metadata_url2"], rename=params["rename2"])
         french_metadata = concat_metadatasets(french_metadata1, french_metadata2)
         csvw = transform_metadata_to_csvw(french_metadata)
         code_lists = transform_metadata_to_code_lists(french_metadata)
 
         italian_educational_data = extract_italian_educational_facilities(
-            italian_educational_data_url
+            params["italian_educational_data_url"]
         )
 
         italian_educational_data_transformed = transform_italian_educational_facilities(
@@ -742,27 +744,26 @@ def build_flow(conf):
             upstream_tasks=[transform_data_to_csv(french_data)],
         )
         """
-    return flow
 
 
-def build_test_flow():
-    with Flow("gf-test") as flow:
-        url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
-        df = pd.read_excel(
-            url, 
-            dtype=str, 
-            usecols=[0, 2, 3, 4, 5], 
-            names=["REGION", "CITY_PREFIX", "PROVINCE_CODE", "CITY_CODE", "NAME"]
-        )
+@flow(name="gf-test")
+def gf_test_flow():
+    params = test_flow_parameters()
+    url = get_working_directory() + "Codici-statistici-e-denominazioni-al-31_12_2020.xls"
+    df = pd.read_excel(
+        url,
+        dtype=str,
+        usecols=[0, 2, 3, 4, 5],
+        names=["REGION", "CITY_PREFIX", "PROVINCE_CODE", "CITY_CODE", "NAME"]
+    )
 
-        dups = df[df.duplicated(keep=False)]
-        dups_name = df[df.duplicated(["NAME"], keep=False)]
+    dups = df[df.duplicated(keep=False)]
+    dups_name = df[df.duplicated(["NAME"], keep=False)]
         
-        print(f"dups rows → {dups.shape[0]}")
-        print(f"dups name rows → {dups_name.shape[0]}")
-        print(dups)
-        print(dups_name)
-    return flow
+    print(f"dups rows → {dups.shape[0]}")
+    print(f"dups name rows → {dups_name.shape[0]}")
+    print(dups)
+    print(dups_name)
 
 
 def main():
@@ -770,16 +771,10 @@ def main():
     Main entry point for the GF pipeline.
     """
     if conf["flags"]["flow"]["testing"]:
-        flow = build_test_flow()
-        params = test_flow_parameters()
-    else:
-        flow = build_flow(conf)
-        params = flow_parameters(conf)
-
-    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name="gf")
-    else:
-        flow.run(parameters=params)
-
+        gf_test_flow()
+    if not conf["flags"]["prefect"]["pushToCloudDashboard"]:
+        gf_flow()
+'''
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
+'''

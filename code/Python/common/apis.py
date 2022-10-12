@@ -5,8 +5,6 @@ import gzip
 import pandas as pd
 from urllib.parse import quote
 from requests import get, post, delete, codes
-from prefect.engine import signals
-
 
 def get_french_schools_data() -> pd.DataFrame:
     """
