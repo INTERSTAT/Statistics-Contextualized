@@ -4,7 +4,7 @@ import time
 
 import pandas as pd
 import requests
-from prefect import Flow, Parameter, task
+from prefect import flow, task
 from pyproj import Proj, transform, Transformer
 from common.utils import get_working_directory, get_resources_directory
 from common.common_conf import conf
@@ -295,7 +295,8 @@ def get_lau_nuts_it(url):
 
 # Flow and main ----
 # FIXME delete probably
-with Flow("geo_flow") as flow:
+@flow(name="geo_flow")
+def geo_flow():
 
     df = pd.DataFrame(
         [
