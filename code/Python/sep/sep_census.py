@@ -1,5 +1,5 @@
-from prefect import task, Flow, Parameter
-from prefect.engine.state import Failed, Success
+from prefect import task, flow
+from prefect.states import Completed, Crashed
 from requests import get, post, delete
 from zipfile import ZipFile
 from io import BytesIO
@@ -194,9 +194,9 @@ def delete_graph(url):
     res_delete = delete(url)
 
     if res_delete.status_code != 204:
-        return Failed(f"Delete graph failed: {str(res_delete.status_code)}")
+        return Crashed(f"Delete graph failed: {str(res_delete.status_code)}")
     else: 
-        return Success("Graph deleted")
+        return Completed("Graph deleted")
 
 
 @task(name='Load RDF graph in triple store')
@@ -206,9 +206,9 @@ def load_turtle(ttl, url):
     res_post = post(url, data=ttl, headers=headers)
 
     if res_post.status_code != 204:
-        return Failed(f"Post graph failed: {str(res_post.status_code)}")
+        return Crashed(f"Post graph failed: {str(res_post.status_code)}")
     else:
-        return Success(f"Graph loaded")
+        return Completed(f"Graph loaded")
 
 
 @task(name='Load list of RDF files in triple store')
@@ -237,8 +237,8 @@ def write_csv_on_ftp(df):
             sftp.put('census_fr_it.csv')
     
 
-with Flow('census_csv_to_rdf') as flow:
-
+@flow(name='census_csv_to_rdf')
+def sep_census_flow():
     with open("./code/Python/secrets.json") as sf:
         secrets = json.load(sf)
         GRAPHDB_URL = secrets["graphdb"]["url"]
@@ -247,8 +247,8 @@ with Flow('census_csv_to_rdf') as flow:
     metadata_graph_url = 'http://rdf.interstat.eng.it/graphs/sep/metadata'
     data_graph_url = 'http://rdf.interstat.eng.it/graphs/sep'
 
-    metadata_rdf_repo_url = Parameter('metadata_rdf_repo_url', default=GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + metadata_graph_url + ">")
-    data_rdf_repo_url = Parameter('data_rdf_repo_url', default=GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + data_graph_url + ">")
+    metadata_rdf_repo_url = GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + metadata_graph_url + ">"
+    data_rdf_repo_url = GRAPHDB_URL + "repositories/" + sep_repository + "/statements?context=<" + data_graph_url + ">"
 
     delete_graph(metadata_rdf_repo_url)
     delete_graph(data_rdf_repo_url)
@@ -257,30 +257,30 @@ with Flow('census_csv_to_rdf') as flow:
     load_turtle(dsd_rdf, metadata_rdf_repo_url)
 
     # START: Produced externally
-    lau_fr_2020_data_url = Parameter('lau_fr_2020_data_url', default='https://interstat.eng.it/files/sep/input/lau-fr-2020.ttl')
+    lau_fr_2020_data_url = 'https://interstat.eng.it/files/sep/input/lau-fr-2020.ttl'
     lau_fr_2020_rdf = import_ttl(lau_fr_2020_data_url)
     load_turtle(lau_fr_2020_rdf, metadata_rdf_repo_url)
 
-    lau_it_2020_data_url = Parameter('lau_it_2020_data_url', default='https://interstat.eng.it/files/sep/input/lau-it-2020.ttl')
+    lau_it_2020_data_url = 'https://interstat.eng.it/files/sep/input/lau-it-2020.ttl'
     lau_it_2020_rdf = import_ttl(lau_it_2020_data_url)
     load_turtle(lau_it_2020_rdf, metadata_rdf_repo_url)
 
-    nuts3_2016_data_url = Parameter('nuts3_2016_data_url', default='https://interstat.eng.it/files/sep/input/nuts3-2016.ttl')
+    nuts3_2016_data_url = 'https://interstat.eng.it/files/sep/input/nuts3-2016.ttl'
     nuts3_2016_rdf = import_ttl(nuts3_2016_data_url)
     load_turtle(nuts3_2016_rdf, metadata_rdf_repo_url)
     # END 
 
-    age_class_url = Parameter('age_class_url', default="https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/age-groups.csv")
+    age_class_url = "https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/age-groups.csv"
     age_classes = get_age_class_data(age_class_url)
     
-    nuts3_fr_url = Parameter('nuts3_fr_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/dep-nuts3-fr.csv')
+    nuts3_fr_url = 'https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/dep-nuts3-fr.csv'
     nuts3_fr = get_nuts3_fr(nuts3_fr_url)
-    french_census_data_url = Parameter('fr_url', default='https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip')
+    french_census_data_url = 'https://www.insee.fr/fr/statistiques/fichier/5395878/BTT_TD_POP1B_2018.zip'
     french_census = extract_french_census(french_census_data_url, age_classes, nuts3_fr)
 
-    nuts3_it_url = Parameter('nuts3_it_url', default='https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_lau-it.zip')
+    nuts3_it_url = 'https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/resources/nuts3_lau-it.zip'
     nuts3_it = get_nuts3_it(nuts3_it_url)
-    italian_census_data_url = Parameter('it_url', default='https://interstat.eng.it/files/sep/input/census-it-2018.zip')
+    italian_census_data_url = 'https://interstat.eng.it/files/sep/input/census-it-2018.zip'
     italian_census = extract_italian_census(italian_census_data_url, age_classes, nuts3_it)
     
     df_fr_it = concat_datasets(french_census, italian_census)
@@ -293,7 +293,4 @@ with Flow('census_csv_to_rdf') as flow:
 
 
 def main():
-    if PUSH_TO_PREFECT_CLOUD_DASHBOARD:
-        flow.register(project_name='sep')
-    else:
-        flow.run()
+    sep_census_flow()

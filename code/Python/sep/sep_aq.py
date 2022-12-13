@@ -1,5 +1,5 @@
 import urllib
-from prefect import task, Flow, Parameter
+from prefect import task, flow
 import pandas as pd
 import logging
 from sep.sep_conf import conf
@@ -226,8 +226,8 @@ def load_to_graphdb():
 
 
 # Flow and main ----
-with Flow('aq_csv_to_rdf') as flow:
-
+@flow(name="aq_csv_to_rdf")
+def sep_aq_flow():
     # working_dir = Parameter(name="working_dir", default=get_working_directory(), required=True)
     logging.basicConfig(filename=get_working_directory() + 'sep-aq.log', encoding='utf-8', level=logging.DEBUG)
     french_aq = sample_aq_data(extract_french_aq(local=True))
@@ -241,11 +241,6 @@ def main():
     """
     pd.set_option('display.max_columns', 20)
     pd.set_option('display.width', None)
-
-    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name='sep-aq')
-    else:
-        flow.run()
-
+    sep_aq_flow()
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
