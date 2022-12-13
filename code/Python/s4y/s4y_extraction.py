@@ -16,7 +16,7 @@ DATA_FILE_NAME = get_working_directory() + "s4y_data_fr.csv"
 # TODO table étudiants
 # TODO concat
 
-@task
+@task(name="Extract schools data")
 def extract_schools_data():
     """
     Extract schools information
@@ -33,7 +33,7 @@ def extract_schools_data():
     return df
 
 
-@task
+@task(name="Extract students data")
 def extract_students_data(url, types):
     """
     Extract data about number of students.
@@ -62,7 +62,7 @@ def extract_students_data(url, types):
     return df_students_data
 
 
-@task
+@task(name="Transform schools data")
 def transform_schools_data(df_schools_data):
     """
     Transforms data about schools extracted.
@@ -100,7 +100,7 @@ def transform_schools_data(df_schools_data):
     return df_merged
 
 
-@task
+@task(name="Transform students data to df")
 def transform_students_data_to_df(df_students_data, mapping):
     """
     Transforms data about number of students extracted to dataframe compliant with the target structure.
@@ -135,23 +135,23 @@ def transform_students_data_to_df(df_students_data, mapping):
         return df_students_data[["school_id", "scholastic_year", "students_number"]]
 
 
-@task
+@task(name="Concatenate datasets")
 def concat_datasets(dss):
     # TODO: check for duplication
     return pd.concat(dss, ignore_index=True)
 
 
-@task
+@task(name="Transform data to CSV")
 def transform_data_to_csv(df):
     return df.to_csv(DATA_FILE_NAME, index=False, header=True)
 
 
-@task
+@task(name="Merge datasets")
 def merge_datasets(school_ds, students_ds):
     return school_ds.merge(students_ds, left_on="school_id", right_on="school_id", how="left")
 
 
-@task
+@task(name="Load file to ftp")
 def load_file_to_ftp():
     """
     Loads all files created to FTP
