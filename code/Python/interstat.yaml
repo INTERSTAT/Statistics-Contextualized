@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - pandas=1.5.0
-  - prefect=2.4.0 
+  - prefect=2.7.11
   - pyproj=3.4.0
   - pysftp=0.2.9
   - rdflib=6.2.0
