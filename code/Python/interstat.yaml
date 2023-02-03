@@ -1,4 +1,4 @@
-name: interstat2
+name: interstat
 channels:
   - conda-forge
   - defaults
