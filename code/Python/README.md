@@ -9,24 +9,14 @@
 
 ### Create virtual environment
 
- - Launch the Anaconda Prompt
- - Optionally, update conda to the latest version: `conda update conda`
- - Create a dedicated virtual environment: `conda create --name interstat`
- - Activate the new environment: `conda activate interstat`
+Since we are using Anaconda, we'll take advantage on the `conda` command line. To create the environment (in you favorite terminal):
 
-### Install packages
-
- - Install [Prefect](https://docs.prefect.io/core/getting_started/install.html): `conda install -c conda-forge prefect`
- - Install [flow visualization tools](https://docs.prefect.io/core/advanced_tutorials/visualization.html): `pip install "prefect[viz]"`
- - Install [pandas](https://pandas.pydata.org/docs/getting_started/install.html): `conda install -c conda-forge pandas`
- - Install [pysftp](https://pypi.org/project/pysftp/): `conda install -c conda-forge pysftp`
- - Install [RDFLib](https://rdflib.readthedocs.io/en/stable/): `pip install rdflib`
- - Install [pyproj](https://github.com/pyproj4/pyproj): `conda install -c conda-forge pyproj`
- - Install [xlrd](https://pypi.org/project/xlrd/): `conda install -c conda-forge xlrd`
-
-Notes:
- - the flow visualization tools rely on [Graphviz](https://graphviz.org/)
- - installing RDFLib with conda fails because RDFLib requires Python version to be strictly below 3.10, which is the version installed when conda installs Prefect.
+```
+$ cd [project dir]
+$ conda env create -f ./code/Python/interstat.yaml
+[...]
+$ conda activate interstat
+```
 
 ### Configure credentials
 

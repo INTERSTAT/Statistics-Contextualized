@@ -1,5 +1,5 @@
 import pandas as pd
-from prefect import task, Flow, Parameter
+from prefect import task, flow
 import pysftp
 import json
 from s4y.s4y_conf import conf
@@ -181,56 +181,40 @@ def load_file_to_ftp():
 
 
 # Build flow
-def build_flow():
-    with Flow("s4y_api_to_csv") as flow:
-        french_schools = extract_schools_data()
-        french_schools_transformed = transform_schools_data(french_schools)
-        students_data_url1 = Parameter(name="students_data_url1", required=True)
-        types_students_data1 = Parameter(name="types_students_data1", required=True)
-        mapping_course_year1 = Parameter(name="mapping_course_year1", required=True)
-        french_data_extracted1 = extract_students_data(students_data_url1, types_students_data1)
-        french_data1 = transform_students_data_to_df(french_data_extracted1, mapping_course_year1)
-        students_data_url2 = Parameter(name="students_data_url2", required=True)
-        types_students_data2 = Parameter(name="types_students_data2", required=True)
-        mapping_course_year2 = Parameter(name="mapping_course_year2", required=True)
-        french_data_extracted2 = extract_students_data(students_data_url2, types_students_data2)
-        french_data2 = transform_students_data_to_df(french_data_extracted2, mapping_course_year2)
-        students_data_url3 = Parameter(name="students_data_url3", required=True)
-        types_students_data3 = Parameter(name="types_students_data3", required=True)
-        mapping_course_year3 = Parameter(name="mapping_course_year3", required=True)
-        french_data_extracted3 = extract_students_data(students_data_url3, types_students_data3)
-        french_data3 = transform_students_data_to_df(french_data_extracted3, mapping_course_year3)
-        students_data_url4 = Parameter(name="students_data_url4", required=True)
-        types_students_data4 = Parameter(name="types_students_data4", required=True)
-        mapping_course_year4 = Parameter(name="mapping_course_year4", required=True)
-        french_data_extracted4 = extract_students_data(students_data_url4, types_students_data4)
-        french_data4 = transform_students_data_to_df(french_data_extracted4, mapping_course_year4)
-        students_data = concat_datasets([french_data1, french_data2, french_data3, french_data4])
-        french_data = merge_datasets(french_schools_transformed, students_data)
-        load_file_to_ftp(upstream_tasks=[transform_data_to_csv(french_data)])
-    return flow
+@flow(name="s4y_api_to_csv")
+def s4y_flow():
+
+    french_schools = extract_schools_data()
+    french_schools_transformed = transform_schools_data(french_schools)
+    students_data_url1 = conf["students_datasets"][0]["csv_url"]
+    types_students_data1 = conf["students_datasets"][0]["types"]
+    mapping_course_year1 = conf["students_datasets"][0]["mapping_course_year"]
+    french_data_extracted1 = extract_students_data(students_data_url1, types_students_data1)
+    french_data1 = transform_students_data_to_df(french_data_extracted1, mapping_course_year1)
+    students_data_url2 = conf["students_datasets"][1]["csv_url"]
+    types_students_data2 = conf["students_datasets"][1]["types"]
+    mapping_course_year2 = conf["students_datasets"][1]["mapping_course_year"]
+    french_data_extracted2 = extract_students_data(students_data_url2, types_students_data2)
+    french_data2 = transform_students_data_to_df(french_data_extracted2, mapping_course_year2)
+    students_data_url3 = conf["students_datasets"][2]["csv_url"]
+    types_students_data3 = conf["students_datasets"][2]["types"]
+    mapping_course_year3 = conf["students_datasets"][2]["mapping_course_year"]
+    french_data_extracted3 = extract_students_data(students_data_url3, types_students_data3)
+    french_data3 = transform_students_data_to_df(french_data_extracted3, mapping_course_year3)
+    students_data_url4 = conf["students_datasets"][3]["csv_url"]
+    types_students_data4 = conf["students_datasets"][3]["types"]
+    mapping_course_year4 = conf["students_datasets"][3]["mapping_course_year"]
+    french_data_extracted4 = extract_students_data(students_data_url4, types_students_data4)
+    french_data4 = transform_students_data_to_df(french_data_extracted4, mapping_course_year4)
+    students_data = concat_datasets([french_data1, french_data2, french_data3, french_data4])
+    french_data = merge_datasets(french_schools_transformed, students_data)
+    load_file_to_ftp(wait_for=[transform_data_to_csv(french_data)])
 
 
 def main():
     """
     Main entry point for the S4Y pipeline.
     """
-    flow = build_flow()
-    if conf["flags"]["prefect"]["pushToCloudDashboard"]:
-        flow.register(project_name="s4y")
-    else:
-        flow.run(parameters={
-            "students_data_url1": conf["students_datasets"][0]["csv_url"],
-            "types_students_data1": conf["students_datasets"][0]["types"],
-            "mapping_course_year1": conf["students_datasets"][0]["mapping_course_year"],
-            "students_data_url2": conf["students_datasets"][1]["csv_url"],
-            "types_students_data2": conf["students_datasets"][1]["types"],
-            "mapping_course_year2": conf["students_datasets"][1]["mapping_course_year"],
-            "students_data_url3": conf["students_datasets"][2]["csv_url"],
-            "types_students_data3": conf["students_datasets"][2]["types"],
-            "mapping_course_year3": conf["students_datasets"][2]["mapping_course_year"],
-            "students_data_url4": conf["students_datasets"][3]["csv_url"],
-            "types_students_data4": conf["students_datasets"][3]["types"],
-            "mapping_course_year4": conf["students_datasets"][3]["mapping_course_year"]})
+    s4y_flow()
     if conf["flags"]["prefect"]["displayGraphviz"]:
         flow.visualize()
