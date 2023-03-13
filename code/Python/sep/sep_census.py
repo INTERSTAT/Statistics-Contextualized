@@ -194,9 +194,9 @@ def delete_graph(url):
     res_delete = delete(url)
 
     if res_delete.status_code != 204:
-        return Crashed(f"Delete graph failed: {str(res_delete.status_code)}")
+        return Crashed
     else: 
-        return Completed("Graph deleted")
+        return Completed
 
 
 @task(name='Load RDF graph in triple store')
@@ -206,9 +206,9 @@ def load_turtle(ttl, url):
     res_post = post(url, data=ttl, headers=headers)
 
     if res_post.status_code != 204:
-        return Crashed(f"Post graph failed: {str(res_post.status_code)}")
+        return Crashed
     else:
-        return Completed(f"Graph loaded")
+        return Completed
 
 
 @task(name='Load list of RDF files in triple store')
@@ -239,11 +239,11 @@ def write_csv_on_ftp(df):
 
 @flow(name='census_csv_to_rdf')
 def sep_census_flow():
-    with open("./code/Python/secrets.json") as sf:
-        secrets = json.load(sf)
-        GRAPHDB_URL = secrets["graphdb"]["url"]
-
-    sep_repository = 'sep-staging'
+    # with open("./code/Python/secrets.json") as sf:
+    #    secrets = json.load(sf)
+    #    GRAPHDB_URL = secrets["graphdb"]["url"]
+    GRAPHDB_URL = "https://interstat.eng.it/graphdb/"
+    sep_repository = 'sep-test'
     metadata_graph_url = 'http://rdf.interstat.eng.it/graphs/sep/metadata'
     data_graph_url = 'http://rdf.interstat.eng.it/graphs/sep'
 
@@ -285,7 +285,7 @@ def sep_census_flow():
     
     df_fr_it = concat_datasets(french_census, italian_census)
 
-    write_csv_on_ftp(df_fr_it)
+    # write_csv_on_ftp(df_fr_it)
 
     graph_files = build_rdf_data(df_fr_it)
 
