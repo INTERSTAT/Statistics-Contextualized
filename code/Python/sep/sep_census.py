@@ -3,6 +3,7 @@ from prefect.states import Completed, Crashed
 from requests import get, post, delete
 from zipfile import ZipFile
 from io import BytesIO
+from sep.sep_conf import conf
 import pandas as pd
 from rdflib import Graph, Literal, URIRef, Namespace  # Basic RDF handling
 from rdflib.namespace import RDF, RDFS, XSD, QB  # Most common namespaces
@@ -188,6 +189,13 @@ def build_rdf_data(df):
             g = Graph()
     return files
 
+@task(name="Convert DSD to NGSI-LD")
+def convert_ngsild(dsd_rdf):
+    pass
+
+@task(name="Post to context broker")
+def post_to_context_broker():
+    pass
 
 @task(name='Delete RDF graph')
 def delete_graph(url):
@@ -291,6 +299,16 @@ def sep_census_flow():
 
     load_turtles(graph_files, data_rdf_repo_url)
 
+@flow(name='Metadata (DSD) to context broker')
+def sep_census_dsd_to_cb_flow():
+    dsd_rdf = import_dsd()
+    ngsi_ld = convert_ngsild(dsd_rdf)
+    post_to_context_broker()
+
+
 
 def main():
-    sep_census_flow()
+    if conf["flags"]["flow"]["testing"]:
+        sep_census_dsd_to_cb_flow()
+    else:
+        sep_census_flow()
