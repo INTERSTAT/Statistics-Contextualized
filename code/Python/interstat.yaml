@@ -10,3 +10,6 @@ dependencies:
   - rdflib=6.2.0
   - xlrd=2.0.1
   - openssl=1.1.1 # Forced due to SSL troubles
+  - pip
+  - pip:
+    - sdmx2json-ld==0.5.1
