@@ -2,13 +2,15 @@ from prefect import task, flow
 from prefect.states import Completed, Crashed
 from requests import get, post, delete
 from zipfile import ZipFile
-from io import BytesIO
+from io import BytesIO, StringIO
 from sep.sep_conf import conf
 import pandas as pd
 from rdflib import Graph, Literal, URIRef, Namespace  # Basic RDF handling
 from rdflib.namespace import RDF, RDFS, XSD, QB  # Most common namespaces
 import pysftp
 import json
+from sdmx2jsonld.transform.parser import Parser
+from sdmx2jsonld.exceptions import UnexpectedEOF, UnexpectedInput, UnexpectedToken
 
 # Constants ----
 PUSH_TO_PREFECT_CLOUD_DASHBOARD = False
@@ -70,7 +72,8 @@ def raw_italian_to_standard(df, age_classes, nuts3):
 def import_dsd():
     g = Graph()
     g.parse("https://raw.githubusercontent.com/INTERSTAT/Statistics-Contextualized/main/pilots/sep/sep-dsd-1.ttl", format="turtle")
-    return g.serialize(format="turtle", encoding='utf-8')
+    res = g.serialize(format="turtle", encoding='utf-8')    
+    return res
 
 @task(name='Import TTL')
 def import_ttl(url):
@@ -191,7 +194,26 @@ def build_rdf_data(df):
 
 @task(name="Convert DSD to NGSI-LD")
 def convert_ngsild(dsd_rdf):
-    pass
+    """
+    WIP
+    Error when converting, error is
+
+    ```
+    lark.exceptions.VisitError: Error trying to process rule "triples":
+    'dct:language'
+    ```
+    """
+    rdf_string: str = dsd_rdf.decode("utf-8")
+    parser = Parser()
+    try:
+        parser.parsing(content=StringIO(rdf_string), out=False)
+    except UnexpectedToken as e:
+        print(e)
+    except UnexpectedInput as e:
+        print(e)
+    except UnexpectedEOF as e:
+        print(e)
+    
 
 @task(name="Post to context broker")
 def post_to_context_broker():
