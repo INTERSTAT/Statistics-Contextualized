@@ -115,3 +115,35 @@ def gen_rdf_quality(id, quality):
     """
     else:
         return ""
+
+def sep_ttl(uri, age, sex, lau, nuts, population) -> str:
+    """ Produce all triples for a specific observation in the SEP data frame """
+
+    return f"""
+    {uri} rdf:type qb:Observation ;
+        qb:Dataset isc:ds1 ;
+        sdmx-measure:obsValue {population}^^xsd:float ;
+        isc:att-nuts3 isc:nuts3-{nuts} ;
+        isc:dim-age isc:age-{age} ;
+        isc:dim-lau isc:lau-{lau} ;
+        isc:dim-sex isc:sex-{sex} .
+    """
+
+def sep_df_to_ttl(df) -> str:
+    """ Produce the Turtle text from the SEP dataframe """
+
+    namespaces = """
+    @prefix qb: <http://purl.org/linked-data/cube#>
+    @prefix isc: <http://id.cef-interstat.eu/sc/>
+    @prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure>
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns>
+    """
+
+    df["obsURI"] = [f"isc:obs-{age}-{sex}-{lau}" for (age, sex, lau) in zip(df["age"], df["sex"], df["lau"])]
+
+    df["TTL"] = [
+        sep_ttl(uri, age, sex, lau, nuts, population) 
+        for (uri, age, sex, lau, nuts, population) 
+        in zip(df["obsURI"], df["age"], df["sex"], df["lau"], df["nuts3"], df["population"])
+        ]
+    return f"{namespaces}\n".join(df["TTL"])
